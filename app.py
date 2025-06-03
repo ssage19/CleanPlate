@@ -39,22 +39,41 @@ initialize_database()
 
 def main():
     
+    # Add restaurant atmosphere background as HTML element
+    st.markdown("""
+    <div id="restaurant-atmosphere" style="
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        width: 100vw; 
+        height: 100vh; 
+        z-index: -1000;
+        background: 
+            linear-gradient(45deg, rgba(18, 22, 26, 0.95) 0%, rgba(25, 30, 35, 0.9) 25%, rgba(32, 38, 44, 0.85) 75%, rgba(40, 46, 52, 0.9) 100%),
+            radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(212, 175, 55, 0.08) 0%, transparent 30%),
+            linear-gradient(135deg, #121619 0%, #1a1e23 25%, #252a30 50%, #2d3339 75%, #1a1e23 100%);
+        background-size: cover, 600px 400px, 400px 300px, 100% 100%;
+        background-position: center, 20% 30%, 80% 70%, center;
+        background-attachment: fixed;
+        pointer-events: none;
+    "></div>
+    """, unsafe_allow_html=True)
+    
     # Consolidated CleanPlate Theme - Professional Restaurant Atmosphere
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
         
-        /* Main App Background - Sophisticated Restaurant Atmosphere */
+        /* Main App Styling with Transparency */
+        html, body, #root {
+            background: transparent !important;
+        }
+        
         .stApp, [data-testid="stAppViewContainer"], .main, .block-container {
-            background: 
-                linear-gradient(45deg, rgba(18, 22, 26, 0.95) 0%, rgba(25, 30, 35, 0.9) 25%, rgba(32, 38, 44, 0.85) 75%, rgba(40, 46, 52, 0.9) 100%),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080"><defs><radialGradient id="spotlight1" cx="0.2" cy="0.3" r="0.4"><stop offset="0%" stop-color="%23d4af37" stop-opacity="0.15"/><stop offset="100%" stop-color="transparent"/></radialGradient><radialGradient id="spotlight2" cx="0.8" cy="0.7" r="0.3"><stop offset="0%" stop-color="%23d4af37" stop-opacity="0.08"/><stop offset="100%" stop-color="transparent"/></radialGradient><pattern id="fine-texture" width="120" height="120" patternUnits="userSpaceOnUse"><circle cx="30" cy="30" r="1" fill="%23ffffff" fill-opacity="0.02"/><circle cx="90" cy="90" r="0.8" fill="%23d4af37" fill-opacity="0.03"/><circle cx="60" cy="15" r="0.5" fill="%23ffffff" fill-opacity="0.015"/><circle cx="15" cy="75" r="0.6" fill="%23d4af37" fill-opacity="0.025"/><rect x="45" y="45" width="30" height="30" fill="none" stroke="%23ffffff" stroke-width="0.1" stroke-opacity="0.01" rx="2"/></pattern></defs><rect width="1920" height="1080" fill="%23121619"/><rect width="1920" height="1080" fill="url(%23fine-texture)"/><ellipse cx="384" cy="324" rx="300" ry="200" fill="url(%23spotlight1)"/><ellipse cx="1536" cy="756" rx="240" ry="160" fill="url(%23spotlight2)"/><polygon points="0,1080 500,1040 1000,1060 1500,1020 1920,1050 1920,1080" fill="%231a1e23" opacity="0.8"/><polygon points="0,980 400,950 800,970 1200,930 1600,950 1920,920 1920,1080 0,1080" fill="%23252a30" opacity="0.6"/><polygon points="0,880 300,860 600,880 900,850 1200,870 1500,840 1800,860 1920,840 1920,1080 0,1080" fill="%232d3339" opacity="0.4"/></svg>') !important;
-            background-size: cover !important;
-            background-attachment: fixed !important;
-            background-position: center !important;
+            background: transparent !important;
             color: #e8eaed !important;
             font-family: 'Inter', sans-serif !important;
-            min-height: 100vh !important;
         }
         
         /* Header Section */
