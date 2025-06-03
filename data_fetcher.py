@@ -121,7 +121,7 @@ class HealthInspectionAPI:
                 }
             },
             "Los Angeles": {
-                "base_url": "https://data.lacity.org/resource/384s-wygj.json",
+                "base_url": "https://data.lacounty.gov/resource/pr5k-tm6s.json",
                 "name": "Los Angeles, CA",
                 "location_field": "zip_code",
                 "grade_field": "grade",
@@ -698,8 +698,18 @@ class HealthInspectionAPI:
             return []
     
     def _get_losangeles_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
-        """Fetch Los Angeles restaurant inspection data"""
-        params = {'$limit': min(limit, 500)}
+        """Fetch Los Angeles County restaurant inspection data"""
+        import os
+        
+        # Use LA County API with authentication
+        api_key = os.getenv('LA_COUNTY_API_KEY')
+        if not api_key:
+            return []
+            
+        params = {
+            '$limit': min(limit, 500),
+            '$$app_token': api_key
+        }
         
         # Add search filters
         where_conditions = []
