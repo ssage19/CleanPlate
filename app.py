@@ -209,7 +209,7 @@ def main():
     st.markdown("""
     <div class="main-header">
         <h1>
-            <span style="font-size: 48px; vertical-align: middle; margin-right: 16px;">🍽️</span>
+            <span style="font-size: 72px; vertical-align: middle; margin-right: 16px;">🍽️</span>
             CleanPlate
         </h1>
         <p>Peeking behind the kitchen door, so you can dine without doubt. We dish out health inspection scores, making informed choices deliciously easy.</p>
