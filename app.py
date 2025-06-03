@@ -229,7 +229,14 @@ def main():
     
     with col_juris:
         jurisdictions = st.session_state.api_client.get_available_jurisdictions()
-        jurisdiction_names = {"NYC": "New York City", "Chicago": "Chicago, IL"}
+        jurisdiction_names = {
+            "NYC": "New York City", 
+            "Chicago": "Chicago, IL",
+            "Boston": "Boston, MA",
+            "Austin": "Austin, TX", 
+            "Seattle": "Seattle, WA",
+            "San Diego": "San Diego, CA"
+        }
         jurisdiction_options = [jurisdiction_names.get(j, j) for j in jurisdictions]
         
         selected_jurisdiction_display = st.selectbox(
