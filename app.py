@@ -134,14 +134,31 @@ def main():
     
     # Main content area
     try:
-        # Fetch restaurant data silently
-        restaurants_df = st.session_state.api_client.get_restaurants(
-            location=selected_location if selected_location != "All" else None,
-            grades=selected_grades,
-            cuisines=selected_cuisines,
-            search_term=search_term,
-            date_range=date_range
-        )
+        # Show loading progress when user has entered search criteria
+        if search_term or selected_location != "All":
+            with st.spinner("Loading results..."):
+                progress_bar = st.progress(0)
+                progress_bar.progress(25)
+                
+                restaurants_df = st.session_state.api_client.get_restaurants(
+                    location=selected_location if selected_location != "All" else None,
+                    grades=selected_grades,
+                    cuisines=selected_cuisines,
+                    search_term=search_term,
+                    date_range=date_range
+                )
+                
+                progress_bar.progress(100)
+                progress_bar.empty()
+        else:
+            # Load default data without progress bar
+            restaurants_df = st.session_state.api_client.get_restaurants(
+                location=None,
+                grades=selected_grades,
+                cuisines=selected_cuisines,
+                search_term=None,
+                date_range=date_range
+            )
         
         # Handle empty results quietly
         if restaurants_df.empty:
