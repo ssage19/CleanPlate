@@ -264,28 +264,13 @@ def display_simple_restaurant_card(restaurant):
         col1, col2 = st.columns([3, 1])
         
         with col1:
-            # Restaurant header section
-            st.markdown(f"""
-            <div style="border-bottom: 1px solid #4CAF50; padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 style="color: #4CAF50; margin: 0;">{restaurant['name']}</h3>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Location information block
-            st.markdown("""
-            <div style="background: rgba(76, 175, 80, 0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem; border-left: 4px solid #4CAF50;">
-            """, unsafe_allow_html=True)
+            st.markdown(f"### {restaurant['name']}")
             st.write(f"**📍 Address:** {restaurant.get('address', 'N/A')}")
             st.write(f"**🍽️ Cuisine:** {restaurant.get('cuisine_type', 'Not specified')}")
             st.write(f"**🏙️ Borough:** {restaurant.get('boro', 'N/A')}")
-            st.markdown("</div>", unsafe_allow_html=True)
         
         with col2:
-            # Health grade section
-            st.markdown("""
-            <div style="background: rgba(76, 175, 80, 0.1); padding: 1rem; border-radius: 10px; text-align: center; border: 2px solid #4CAF50;">
-            """, unsafe_allow_html=True)
-            
+            # Health grade badge
             grade = restaurant.get('grade', 'Not Yet Graded')
             if grade == 'A':
                 st.success(f"Grade: {grade}")
@@ -299,14 +284,8 @@ def display_simple_restaurant_card(restaurant):
             # Inspection score
             if 'score' in restaurant and pd.notna(restaurant['score']):
                 st.metric("Score", f"{restaurant['score']}", help="Lower is better")
-            
-            st.markdown("</div>", unsafe_allow_html=True)
         
-        # Violations section with clear visual block
-        st.markdown("""
-        <div style="background: rgba(76, 175, 80, 0.05); padding: 1.5rem; border-radius: 10px; margin-top: 1rem; border: 1px solid #4CAF50;">
-        """, unsafe_allow_html=True)
-        
+        # Violations section
         if 'violations' in restaurant and restaurant['violations']:
             violations = [v for v in restaurant['violations'] if v != "No violations recorded"]
             if violations:
@@ -323,15 +302,9 @@ def display_simple_restaurant_card(restaurant):
         else:
             st.success("✅ No violations recorded")
         
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-        # Inspection date in footer block
+        # Inspection date
         if restaurant.get('inspection_date') and restaurant['inspection_date'] != 'N/A':
-            st.markdown(f"""
-            <div style="text-align: center; padding: 1rem; margin-top: 1rem; border-top: 1px solid #4CAF50; opacity: 0.8;">
-                <small>Last inspected: {restaurant['inspection_date']}</small>
-            </div>
-            """, unsafe_allow_html=True)
+            st.caption(f"Last inspected: {restaurant['inspection_date']}")
         
         # Close the main restaurant block
         st.markdown('</div>', unsafe_allow_html=True)
