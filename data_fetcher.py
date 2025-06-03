@@ -112,15 +112,15 @@ class HealthInspectionAPI:
                 "grading_system": {
                     "type": "violation_points",
                     "grades": {
-                        "0": {"label": "Excellent", "description": "No Violations (0 points)", "color": "#22c55e", "priority": "low"},
-                        "1-10": {"label": "Good", "description": "Minor Issues (1-10 points)", "color": "#22c55e", "priority": "low"},
-                        "11-25": {"label": "Fair", "description": "Some Concerns (11-25 points)", "color": "#f59e0b", "priority": "medium"},
-                        "26-50": {"label": "Poor", "description": "Multiple Issues (26-50 points)", "color": "#ef4444", "priority": "high"},
-                        "51+": {"label": "Critical", "description": "Serious Violations (51+ points)", "color": "#dc2626", "priority": "high"},
-                        "Ungraded": {"label": "Pending", "description": "Not Yet Inspected", "color": "#6b7280", "priority": "medium"}
+                        "0": {"label": "Excellent", "description": "Perfect - No health code violations found during inspection", "color": "#22c55e", "priority": "low"},
+                        "1-10": {"label": "Good", "description": "Very Good - Minor infractions with minimal food safety impact", "color": "#22c55e", "priority": "low"},
+                        "11-25": {"label": "Fair", "description": "Acceptable - Some violations noted but correctable issues", "color": "#f59e0b", "priority": "medium"},
+                        "26-50": {"label": "Poor", "description": "Concerning - Multiple violations affecting food safety standards", "color": "#ef4444", "priority": "high"},
+                        "51+": {"label": "Critical", "description": "Serious - Major violations requiring immediate corrective action", "color": "#dc2626", "priority": "high"},
+                        "Ungraded": {"label": "Pending", "description": "Awaiting inspection or recently opened establishment", "color": "#6b7280", "priority": "medium"}
                     },
                     "score_system": True,
-                    "score_description": "Violation points (lower is better)"
+                    "score_description": "Violation point system: Points deducted for infractions (0 = perfect, lower scores = better performance)"
                 }
             },
             "Los Angeles": {
@@ -133,12 +133,13 @@ class HealthInspectionAPI:
                 "grading_system": {
                     "type": "letter",
                     "grades": {
-                        "A": {"label": "A", "description": "Grade A", "color": "#22c55e", "priority": "low"},
-                        "B": {"label": "B", "description": "Grade B", "color": "#f59e0b", "priority": "medium"},
-                        "C": {"label": "C", "description": "Grade C", "color": "#ef4444", "priority": "high"}
+                        "A": {"label": "A", "description": "Excellent - Consistently meets all Los Angeles health department standards", "color": "#22c55e", "priority": "low"},
+                        "B": {"label": "B", "description": "Good - Generally compliant with some minor violations noted", "color": "#f59e0b", "priority": "medium"},
+                        "C": {"label": "C", "description": "Needs Improvement - Multiple violations requiring corrective action", "color": "#ef4444", "priority": "high"},
+                        "Not Graded": {"label": "Pending", "description": "Recently inspected or awaiting grade assignment", "color": "#6b7280", "priority": "medium"}
                     },
                     "score_system": True,
-                    "score_description": "Health inspection score and violations"
+                    "score_description": "Letter grade system with numerical scores: Grade reflects overall compliance with LA County health regulations"
                 }
             }
         }
