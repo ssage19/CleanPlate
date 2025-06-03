@@ -297,33 +297,35 @@ def main():
             search_clicked = st.form_submit_button("SEARCH", use_container_width=True)
 
     if search_clicked:
-        try:
-            restaurants_df = st.session_state.api_client.get_restaurants(
-                location=location_filter,
-                search_term=search_term,
-                limit=1000
-            )
-            
-            if restaurants_df.empty:
-                st.warning("No restaurants found matching your criteria. Please adjust your filters.")
-                return
-            
-            # Save to database
-            for _, restaurant in restaurants_df.iterrows():
-                restaurant_data = restaurant.to_dict()
-                violations = restaurant_data.pop('violations', [])
-                save_restaurant_to_db(restaurant_data, violations)
-            
-            st.subheader(f"Showing {len(restaurants_df)} restaurants")
-            
-            # Display restaurants
-            restaurants_df = restaurants_df.sort_values('inspection_date', ascending=False)
-            for _, restaurant in restaurants_df.iterrows():
-                display_restaurant_card(restaurant)
+        # Show loading spinner while searching
+        with st.spinner("🔍 Searching for results..."):
+            try:
+                restaurants_df = st.session_state.api_client.get_restaurants(
+                    location=location_filter,
+                    search_term=search_term,
+                    limit=1000
+                )
                 
-        except Exception as e:
-            st.error(f"Error loading restaurant data: {str(e)}")
-            st.info("Please check your internet connection and try again.")
+                if restaurants_df.empty:
+                    st.warning("No restaurants found matching your criteria. Please adjust your filters.")
+                    return
+                
+                # Save to database
+                for _, restaurant in restaurants_df.iterrows():
+                    restaurant_data = restaurant.to_dict()
+                    violations = restaurant_data.pop('violations', [])
+                    save_restaurant_to_db(restaurant_data, violations)
+                
+                st.subheader(f"Showing {len(restaurants_df)} restaurants")
+                
+                # Display restaurants
+                restaurants_df = restaurants_df.sort_values('inspection_date', ascending=False)
+                for _, restaurant in restaurants_df.iterrows():
+                    display_restaurant_card(restaurant)
+                    
+            except Exception as e:
+                st.error(f"Error loading restaurant data: {str(e)}")
+                st.info("Please check your internet connection and try again.")
 
 def display_restaurant_card(restaurant):
     """Display restaurant card with consolidated styling"""
