@@ -280,11 +280,11 @@ def main():
     </style>
     """, unsafe_allow_html=True)
     
-    # Main header with gradient background
+    # Main header with sophisticated restaurant design
     st.markdown("""
     <div class="main-header">
-        <h1>🍽️ CleanPlate</h1>
-        <p>Discover restaurants with their latest health inspection grades and safety records</p>
+        <h1>CleanPlate</h1>
+        <p>Premium Restaurant Health Inspection Intelligence</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -492,44 +492,45 @@ def main():
         st.info("Please check your internet connection and try again.")
 
 def display_simple_restaurant_card(restaurant):
-    """Display restaurant card with organic farm-to-table theme"""
+    """Display restaurant card with sophisticated dark restaurant theme"""
     
-    # Organic farm-to-table styling for restaurant cards
+    # Professional dark restaurant styling for restaurant cards
     st.markdown("""
     <style>
     .streamlit-expander {
-        background: rgba(248, 250, 247, 0.95) !important;
-        border: 2px solid #c8d5c0 !important;
+        background: rgba(45, 51, 57, 0.95) !important;
+        border: 1px solid rgba(212, 175, 55, 0.2) !important;
         border-radius: 12px !important;
-        margin: 1.5rem 0 !important;
+        margin: 2rem 0 !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 6px 20px rgba(122, 132, 113, 0.15) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px) !important;
     }
     .streamlit-expander:hover {
         transform: translateY(-3px) !important;
-        box-shadow: 0 12px 32px rgba(122, 132, 113, 0.25) !important;
-        border-color: #a8b5a0 !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4) !important;
+        border-color: rgba(212, 175, 55, 0.4) !important;
     }
     .streamlit-expander > div:first-child {
-        background: linear-gradient(135deg, #7a8471 0%, #8b9a7e 100%) !important;
+        background: linear-gradient(135deg, #2d3339 0%, #3a424a 100%) !important;
         border-radius: 12px 12px 0 0 !important;
-        color: #f8faf7 !important;
+        color: #ffffff !important;
         font-weight: 600 !important;
         font-size: 1.1rem !important;
-        padding: 1.25rem 1.5rem !important;
-        border-bottom: 2px solid #a8b5a0 !important;
-        font-family: 'Source Serif Pro', serif !important;
+        padding: 1.5rem 2rem !important;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.3) !important;
+        font-family: 'Playfair Display', serif !important;
     }
     .streamlit-expander > div:last-child {
-        background: rgba(248, 250, 247, 0.9) !important;
+        background: rgba(37, 42, 48, 0.9) !important;
         border-radius: 0 0 12px 12px !important;
-        padding: 1.5rem !important;
+        padding: 2rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
     
     # Use expander with enhanced visual hierarchy
-    with st.expander(f"🍽️ {restaurant['name']}", expanded=True):
+    with st.expander(f"{restaurant['name']}", expanded=True):
         # Restaurant information with dark theme styling
         st.markdown('<div class="info-section">', unsafe_allow_html=True)
         st.markdown('<h4 class="section-header">📍 Location Details</h4>', unsafe_allow_html=True)
