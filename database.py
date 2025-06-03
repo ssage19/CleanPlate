@@ -74,50 +74,81 @@ def get_db_session():
     return SessionLocal()
 
 def save_restaurant_to_db(restaurant_data, violations_data=None):
-    """Save or update restaurant data in database"""
-    session = None
+    """Save or update restaurant data in database using raw SQL for upsert"""
     try:
-        session = get_db_session()
+        # Use raw SQL connection for UPSERT operation
+        import psycopg2
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
         
-        # Check if restaurant exists
-        existing = session.query(Restaurant).filter(Restaurant.id == restaurant_data['id']).first()
+        # Create restaurant table if not exists
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS restaurants (
+                id VARCHAR PRIMARY KEY,
+                name VARCHAR NOT NULL,
+                address TEXT,
+                cuisine_type VARCHAR,
+                grade VARCHAR,
+                score INTEGER,
+                inspection_date VARCHAR,
+                boro VARCHAR,
+                phone VARCHAR,
+                inspection_type VARCHAR,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
         
-        if existing:
-            # Update existing restaurant
-            for key, value in restaurant_data.items():
-                if hasattr(existing, key) and key not in ['updated_at', 'created_at']:
-                    setattr(existing, key, value)
-        else:
-            # Create new restaurant
-            restaurant = Restaurant(**restaurant_data)
-            session.add(restaurant)
+        # Upsert restaurant data
+        cursor.execute("""
+            INSERT INTO restaurants (id, name, address, cuisine_type, grade, score, inspection_date, boro, phone, inspection_type)
+            VALUES (%(id)s, %(name)s, %(address)s, %(cuisine_type)s, %(grade)s, %(score)s, %(inspection_date)s, %(boro)s, %(phone)s, %(inspection_type)s)
+            ON CONFLICT (id) DO UPDATE SET
+                name = EXCLUDED.name,
+                address = EXCLUDED.address,
+                cuisine_type = EXCLUDED.cuisine_type,
+                grade = EXCLUDED.grade,
+                score = EXCLUDED.score,
+                inspection_date = EXCLUDED.inspection_date,
+                boro = EXCLUDED.boro,
+                phone = EXCLUDED.phone,
+                inspection_type = EXCLUDED.inspection_type,
+                updated_at = CURRENT_TIMESTAMP
+        """, restaurant_data)
         
-        # Save violations if provided
+        # Handle violations if provided
         if violations_data:
-            # Remove old violations for this restaurant
-            session.query(Violation).filter(Violation.restaurant_id == restaurant_data['id']).delete()
+            # Create violations table if not exists
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS violations (
+                    id SERIAL PRIMARY KEY,
+                    restaurant_id VARCHAR REFERENCES restaurants(id),
+                    violation_code VARCHAR,
+                    violation_description TEXT,
+                    critical_flag VARCHAR,
+                    inspection_date VARCHAR,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
             
-            # Add new violations
+            # Clear old violations and add new ones
+            cursor.execute("DELETE FROM violations WHERE restaurant_id = %s", (restaurant_data['id'],))
+            
             for violation_text in violations_data:
                 if violation_text and violation_text != "No violations recorded":
-                    violation = Violation(
-                        restaurant_id=restaurant_data['id'],
-                        violation_description=violation_text,
-                        inspection_date=restaurant_data.get('inspection_date')
-                    )
-                    session.add(violation)
+                    cursor.execute("""
+                        INSERT INTO violations (restaurant_id, violation_description, inspection_date)
+                        VALUES (%s, %s, %s)
+                    """, (restaurant_data['id'], violation_text, restaurant_data.get('inspection_date')))
         
-        session.commit()
+        conn.commit()
+        cursor.close()
+        conn.close()
         return True
         
     except Exception as e:
-        if session:
-            session.rollback()
         st.error(f"Failed to save restaurant data: {str(e)}")
         return False
-    finally:
-        if session:
-            session.close()
 
 def get_restaurant_from_db(restaurant_id):
     """Get restaurant data from database"""
@@ -132,38 +163,66 @@ def get_restaurant_from_db(restaurant_id):
 
 def save_user_review(restaurant_id, rating, comment):
     """Save user review to database"""
-    session = None
     try:
-        session = get_db_session()
+        import psycopg2
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
         
-        review = UserReview(
-            restaurant_id=restaurant_id,
-            rating=rating,
-            comment=comment
-        )
+        # Create user_reviews table if not exists
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_reviews (
+                id SERIAL PRIMARY KEY,
+                restaurant_id VARCHAR REFERENCES restaurants(id),
+                rating INTEGER NOT NULL,
+                comment TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
         
-        session.add(review)
-        session.commit()
+        # Insert review
+        cursor.execute("""
+            INSERT INTO user_reviews (restaurant_id, rating, comment)
+            VALUES (%s, %s, %s)
+        """, (restaurant_id, rating, comment))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
         return True
         
     except Exception as e:
-        if session:
-            session.rollback()
         st.error(f"Failed to save review: {str(e)}")
         return False
-    finally:
-        if session:
-            session.close()
 
 def get_restaurant_reviews(restaurant_id):
     """Get all reviews for a restaurant"""
     try:
-        session = get_db_session()
-        reviews = session.query(UserReview).filter(
-            UserReview.restaurant_id == restaurant_id
-        ).order_by(UserReview.created_at.desc()).all()
-        session.close()
-        return reviews
+        import psycopg2
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT rating, comment, created_at 
+            FROM user_reviews 
+            WHERE restaurant_id = %s 
+            ORDER BY created_at DESC
+        """, (restaurant_id,))
+        
+        reviews = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        # Convert to simple objects
+        review_objects = []
+        for rating, comment, created_at in reviews:
+            review_obj = type('Review', (), {
+                'rating': rating,
+                'comment': comment,
+                'created_at': created_at
+            })()
+            review_objects.append(review_obj)
+        
+        return review_objects
     except Exception as e:
         st.error(f"Failed to get reviews: {str(e)}")
         return []
@@ -171,15 +230,21 @@ def get_restaurant_reviews(restaurant_id):
 def calculate_db_average_rating(restaurant_id):
     """Calculate average rating from database"""
     try:
-        session = get_db_session()
-        reviews = session.query(UserReview).filter(UserReview.restaurant_id == restaurant_id).all()
-        session.close()
+        import psycopg2
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
         
-        if not reviews:
-            return 0
+        cursor.execute("""
+            SELECT AVG(rating) FROM user_reviews WHERE restaurant_id = %s
+        """, (restaurant_id,))
         
-        total_rating = sum(review.rating for review in reviews)
-        return total_rating / len(reviews)
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if result and result[0] is not None:
+            return float(result[0])
+        return 0
         
     except Exception as e:
         st.error(f"Failed to calculate average rating: {str(e)}")
@@ -188,12 +253,19 @@ def calculate_db_average_rating(restaurant_id):
 def get_restaurant_violations(restaurant_id):
     """Get violations for a restaurant from database"""
     try:
-        session = get_db_session()
-        violations = session.query(Violation).filter(
-            Violation.restaurant_id == restaurant_id
-        ).all()
-        session.close()
-        return [v.violation_description for v in violations if v.violation_description]
+        import psycopg2
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT violation_description FROM violations WHERE restaurant_id = %s
+        """, (restaurant_id,))
+        
+        violations = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        return [v[0] for v in violations if v[0]]
     except Exception as e:
         st.error(f"Failed to get violations: {str(e)}")
         return []
