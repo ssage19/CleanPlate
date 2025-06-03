@@ -12,7 +12,6 @@ class HealthInspectionAPI:
     def __init__(self):
         # NYC Open Data API endpoint for restaurant inspections
         self.nyc_api_base = "https://data.cityofnewyork.us/resource/43nn-pn8j.json"
-        self.api_key = os.getenv("NYC_OPEN_DATA_API_KEY", None)
         
         # Cache for API responses
         self._location_cache = None
@@ -27,17 +26,7 @@ class HealthInspectionAPI:
                 'User-Agent': 'Restaurant-Health-Inspector/1.0'
             }
             
-            # Only add API key if it exists and is not empty
-            if self.api_key and self.api_key.strip():
-                headers['X-App-Token'] = self.api_key
-            
             response = requests.get(endpoint, params=params, headers=headers, timeout=30)
-            
-            # Handle 403 errors by trying without API key
-            if response.status_code == 403 and 'X-App-Token' in headers:
-                headers.pop('X-App-Token')
-                response = requests.get(endpoint, params=params, headers=headers, timeout=30)
-            
             response.raise_for_status()
             return response.json()
         
@@ -85,14 +74,15 @@ class HealthInspectionAPI:
         Fetch restaurant inspection data with filters
         """
         try:
-            # Build API query parameters
+            # Build API query parameters with more specific filtering
             params = {
                 '$limit': limit,
-                '$order': 'inspection_date DESC'
+                '$order': 'inspection_date DESC',
+                '$where': 'grade IS NOT NULL'  # Only get records with actual grades
             }
             
-            # Build where clause
-            where_conditions = []
+            # Build where clause conditions
+            where_conditions = ['grade IS NOT NULL']
             
             if location and location != "All":
                 where_conditions.append(f"boro='{location.upper()}'")
@@ -109,8 +99,7 @@ class HealthInspectionAPI:
                 end_date = date_range[1].strftime('%Y-%m-%d')
                 where_conditions.append(f"inspection_date >= '{start_date}' AND inspection_date <= '{end_date}'")
             
-            if where_conditions:
-                params['$where'] = ' AND '.join(where_conditions)
+            params['$where'] = ' AND '.join(where_conditions)
             
             # Make API request
             data = self._make_api_request(self.nyc_api_base, params)
