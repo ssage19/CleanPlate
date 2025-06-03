@@ -83,7 +83,7 @@ class HealthInspectionAPI:
                 locations = []
             
             # Add common NYC boroughs if not in data
-            standard_boroughs = ['MANHATTAN', 'BROOKLYN', 'QUEENS', 'BRONX', 'STATEN ISLAND']
+            standard_boroughs = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island']
             for borough in standard_boroughs:
                 if borough not in locations:
                     locations.append(borough)
@@ -93,7 +93,7 @@ class HealthInspectionAPI:
             
         except Exception as e:
             # Return default NYC boroughs if API fails
-            return ['MANHATTAN', 'BROOKLYN', 'QUEENS', 'BRONX', 'STATEN ISLAND']
+            return ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island']
     
     def get_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=1000):
         """
@@ -104,7 +104,8 @@ class HealthInspectionAPI:
             where_conditions = ['grade IS NOT NULL']
             
             if location and location != "All":
-                where_conditions.append(f"boro='{location.upper()}'")
+                # Use proper case for borough names as they appear in the database
+                where_conditions.append(f"boro='{location}'")
             
             if grades:
                 grade_conditions = [f"grade='{grade}'" for grade in grades]
