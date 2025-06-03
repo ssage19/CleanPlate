@@ -209,19 +209,15 @@ def main():
     st.markdown("""
     <div class="main-header">
         <h1>
-            <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align: middle; margin-right: 12px;" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Plate base -->
-                <circle cx="24" cy="24" r="20" fill="#f8f9fa" stroke="#d4af37" stroke-width="2"/>
-                <!-- Inner plate rim -->
-                <circle cx="24" cy="24" r="16" fill="none" stroke="#d4af37" stroke-width="1" opacity="0.6"/>
-                <!-- Checkmark symbol -->
-                <path d="M16 24l4 4 8-8" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                <!-- Utensil elements -->
-                <path d="M14 10v6c0 1 0.5 2 1.5 2s1.5-1 1.5-2v-6" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M15.5 18v8" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M32 10l-2 16" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M30 10h4" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M31 12h2" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"/>
+            <svg width="64" height="64" viewBox="0 0 64 64" style="vertical-align: middle; margin-right: 16px;" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="26" fill="#f8f9fa" stroke="#d4af37" stroke-width="3"/>
+                <circle cx="32" cy="32" r="20" fill="none" stroke="#d4af37" stroke-width="1.5" opacity="0.4"/>
+                <rect x="18" y="36" width="2" height="16" fill="#d4af37" rx="1"/>
+                <rect x="16" y="32" width="1.5" height="8" fill="#d4af37" rx="0.5"/>
+                <rect x="18.25" y="32" width="1.5" height="8" fill="#d4af37" rx="0.5"/>
+                <rect x="20.5" y="32" width="1.5" height="8" fill="#d4af37" rx="0.5"/>
+                <rect x="46" y="36" width="2" height="16" fill="#d4af37" rx="1"/>
+                <path d="M47 32 L47 36 L44 36 L47 32" fill="#d4af37"/>
             </svg>
             CleanPlate
         </h1>
