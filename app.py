@@ -181,89 +181,72 @@ def main():
         st.info("Please check your internet connection and try again.")
 
 def display_simple_restaurant_card(restaurant):
-    """Display a simplified restaurant card with enhanced dark theme styling"""
+    """Display a simplified restaurant card using Streamlit components"""
     
-    # Get grade class for styling
-    grade = restaurant.get('grade', 'Not Yet Graded')
-    grade_class = f"grade-{grade.lower().replace(' ', '-')}" if grade in ['A', 'B', 'C'] else "grade-pending"
-    
-    # Clean and escape restaurant data
-    clean_name = str(restaurant['name']).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
-    clean_address = str(restaurant.get('address', 'N/A')).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
-    clean_cuisine = str(restaurant.get('cuisine_type', 'Not specified')).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
-    clean_boro = str(restaurant.get('boro', 'N/A')).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
-    
-    # Create restaurant card HTML
-    card_html = f"""
-    <div class="restaurant-card">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div style="flex: 1;">
-                <h3 style="color: #fafafa; margin: 0 0 0.5rem 0; font-size: 1.4rem;">{clean_name}</h3>
-                <p style="color: #b0b0b0; margin: 0.2rem 0;"><strong>Address:</strong> {clean_address}</p>
-                <p style="color: #b0b0b0; margin: 0.2rem 0;"><strong>Cuisine:</strong> {clean_cuisine}</p>
-                <p style="color: #b0b0b0; margin: 0.2rem 0;"><strong>Borough:</strong> {clean_boro}</p>
-            </div>
-            <div style="text-align: center; margin-left: 2rem;">
-                <span class="grade-badge {grade_class}">{grade}</span>
-                <div style="margin-top: 0.5rem;">
-                    <span style="color: #fafafa; font-size: 1.2rem; font-weight: bold;">Score: {restaurant.get('score', 'N/A')}</span>
-                    <br><span style="color: #888; font-size: 0.8rem;">(Lower is better)</span>
-                </div>
-            </div>
-        </div>
-    """
-    
-    # Add violations section if available
-    if 'violations' in restaurant and restaurant['violations']:
-        violations = [v for v in restaurant['violations'] if v != "No violations recorded"]
-        if violations:
-            card_html += """
-            <div style="margin-top: 1rem;">
-                <h4 style="color: #ff6b6b; margin-bottom: 0.8rem;">⚠️ Health Violations</h4>
-            """
-            for i, violation in enumerate(violations[:3]):
-                violation_class = "critical-violation" if "critical" in violation.lower() else "non-critical-violation"
-                # Clean and escape violation text
-                clean_violation = str(violation).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
-                card_html += f"""
-                <div class="violation-item {violation_class}">
-                    <span style="color: #fafafa;">{clean_violation}</span>
-                </div>
-                """
-            if len(violations) > 3:
-                card_html += f'<p style="color: #888; font-style: italic; margin-top: 0.5rem;">...and {len(violations) - 3} more violation(s)</p>'
-            card_html += "</div>"
+    # Create a container with custom styling
+    with st.container():
+        # Apply custom CSS for this card
+        st.markdown("""
+        <style>
+        .restaurant-container {
+            background: #262730;
+            border: 1px solid #3d3d3d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Main restaurant info section
+        col1, col2 = st.columns([3, 1])
+        
+        with col1:
+            st.markdown(f"### {restaurant['name']}")
+            st.write(f"**Address:** {restaurant.get('address', 'N/A')}")
+            st.write(f"**Cuisine:** {restaurant.get('cuisine_type', 'Not specified')}")
+            st.write(f"**Borough:** {restaurant.get('boro', 'N/A')}")
+        
+        with col2:
+            # Health grade badge
+            grade = restaurant.get('grade', 'Not Yet Graded')
+            if grade == 'A':
+                st.success(f"Grade: {grade}")
+            elif grade == 'B':
+                st.warning(f"Grade: {grade}")
+            elif grade == 'C':
+                st.error(f"Grade: {grade}")
+            else:
+                st.info(f"Grade: {grade}")
+            
+            # Inspection score
+            if 'score' in restaurant and pd.notna(restaurant['score']):
+                st.metric("Score", f"{restaurant['score']}", help="Lower is better")
+        
+        # Violations section
+        if 'violations' in restaurant and restaurant['violations']:
+            violations = [v for v in restaurant['violations'] if v != "No violations recorded"]
+            if violations:
+                st.markdown("**⚠️ Health Violations:**")
+                for i, violation in enumerate(violations[:3]):
+                    if "critical" in violation.lower():
+                        st.error(f"🔴 {violation}")
+                    else:
+                        st.warning(f"🟡 {violation}")
+                if len(violations) > 3:
+                    st.caption(f"...and {len(violations) - 3} more violation(s)")
+            else:
+                st.success("✅ No violations recorded")
         else:
-            card_html += """
-            <div style="margin-top: 1rem;">
-                <p style="color: #00C851; font-weight: bold;">✅ No violations recorded</p>
-            </div>
-            """
-    else:
-        card_html += """
-        <div style="margin-top: 1rem;">
-            <p style="color: #00C851; font-weight: bold;">✅ No violations recorded</p>
-        </div>
-        """
-    
-    # Close the card div
-    card_html += "</div>"
-    
-    # Add inspection date to card
-    if restaurant.get('inspection_date') and restaurant['inspection_date'] != 'N/A':
-        card_html = card_html[:-6]  # Remove closing </div>
-        card_html += f"""
-        <div style="margin-top: 1rem; border-top: 1px solid #3d3d3d; padding-top: 0.8rem;">
-            <p style="color: #888; font-size: 0.9rem; margin: 0;">Last inspected: {restaurant['inspection_date']}</p>
-        </div>
-        </div>
-        """
-    
-    # Display the card
-    st.markdown(card_html, unsafe_allow_html=True)
-    
-    # Add spacing between cards
-    st.markdown("<br>", unsafe_allow_html=True)
+            st.success("✅ No violations recorded")
+        
+        # Inspection date
+        if restaurant.get('inspection_date') and restaurant['inspection_date'] != 'N/A':
+            st.caption(f"Last inspected: {restaurant['inspection_date']}")
+        
+        # Add divider
+        st.divider()
 
 if __name__ == "__main__":
     main()
