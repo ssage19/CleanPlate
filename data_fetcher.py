@@ -23,11 +23,21 @@ class HealthInspectionAPI:
     def _make_api_request(self, endpoint, params=None):
         """Make API request with error handling"""
         try:
-            headers = {}
-            if self.api_key:
+            headers = {
+                'User-Agent': 'Restaurant-Health-Inspector/1.0'
+            }
+            
+            # Only add API key if it exists and is not empty
+            if self.api_key and self.api_key.strip():
                 headers['X-App-Token'] = self.api_key
             
             response = requests.get(endpoint, params=params, headers=headers, timeout=30)
+            
+            # Handle 403 errors by trying without API key
+            if response.status_code == 403 and 'X-App-Token' in headers:
+                headers.pop('X-App-Token')
+                response = requests.get(endpoint, params=params, headers=headers, timeout=30)
+            
             response.raise_for_status()
             return response.json()
         
