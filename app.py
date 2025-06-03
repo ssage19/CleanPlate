@@ -35,12 +35,6 @@ if 'api_client' not in st.session_state:
 initialize_database()
 
 def main():
-    st.set_page_config(
-        page_title="CleanPlate - Restaurant Health Inspector",
-        page_icon="🍽️",
-        layout="wide",
-        initial_sidebar_state="collapsed"
-    )
     
     # Custom CSS for enhanced dark theme styling
     st.markdown("""
@@ -168,10 +162,10 @@ def main():
             
         # Save restaurants to database
         if not restaurants_df.empty:
-                for _, restaurant in restaurants_df.iterrows():
-                    restaurant_data = restaurant.to_dict()
-                    violations = restaurant_data.pop('violations', [])
-                    save_restaurant_to_db(restaurant_data, violations)
+            for _, restaurant in restaurants_df.iterrows():
+                restaurant_data = restaurant.to_dict()
+                violations = restaurant_data.pop('violations', [])
+                save_restaurant_to_db(restaurant_data, violations)
         
         if restaurants_df.empty:
             st.warning("No restaurants found matching your criteria. Please adjust your filters.")
