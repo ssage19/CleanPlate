@@ -210,14 +210,18 @@ def main():
     <div class="main-header">
         <h1>
             <svg width="64" height="64" viewBox="0 0 64 64" style="vertical-align: middle; margin-right: 16px;" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="32" cy="32" r="26" fill="#f8f9fa" stroke="#d4af37" stroke-width="3"/>
-                <circle cx="32" cy="32" r="20" fill="none" stroke="#d4af37" stroke-width="1.5" opacity="0.4"/>
-                <rect x="18" y="36" width="2" height="16" fill="#d4af37" rx="1"/>
-                <rect x="16" y="32" width="1.5" height="8" fill="#d4af37" rx="0.5"/>
-                <rect x="18.25" y="32" width="1.5" height="8" fill="#d4af37" rx="0.5"/>
-                <rect x="20.5" y="32" width="1.5" height="8" fill="#d4af37" rx="0.5"/>
-                <rect x="46" y="36" width="2" height="16" fill="#d4af37" rx="1"/>
-                <path d="M47 32 L47 36 L44 36 L47 32" fill="#d4af37"/>
+                <circle cx="32" cy="32" r="24" fill="#f8f9fa" stroke="#d4af37" stroke-width="3"/>
+                <circle cx="32" cy="32" r="18" fill="none" stroke="#d4af37" stroke-width="1.5" opacity="0.4"/>
+                
+                <!-- Fork (left side, positioned above plate) -->
+                <rect x="12" y="35" width="2" height="15" fill="#d4af37" rx="1"/>
+                <rect x="10" y="30" width="1.5" height="9" fill="#d4af37" rx="0.5"/>
+                <rect x="12.25" y="30" width="1.5" height="9" fill="#d4af37" rx="0.5"/>
+                <rect x="14.5" y="30" width="1.5" height="9" fill="#d4af37" rx="0.5"/>
+                
+                <!-- Knife (right side, positioned above plate) -->
+                <rect x="50" y="35" width="2" height="15" fill="#d4af37" rx="1"/>
+                <path d="M51 30 L51 35 L48 35 L48 32 Z" fill="#d4af37"/>
             </svg>
             CleanPlate
         </h1>
