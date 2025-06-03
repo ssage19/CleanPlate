@@ -314,23 +314,32 @@ def search_restaurants_in_db(search_term=None, location=None, grades=None, limit
             query = query.filter(Restaurant.grade.in_(grades))
         
         restaurants = query.limit(limit).all()
-        session.close()
         return restaurants
         
     except Exception as e:
-        st.error(f"Failed to search restaurants: {str(e)}")
         return []
+    finally:
+        if session:
+            try:
+                session.close()
+            except:
+                pass
 
 def get_db_statistics():
     """Get database statistics"""
+    session = None
     try:
         session = get_db_session()
+        if not session:
+            return {
+                'total_restaurants': 0,
+                'total_reviews': 0,
+                'grade_a_count': 0
+            }
         
         total_restaurants = session.query(Restaurant).count()
         total_reviews = session.query(UserReview).count()
         grade_a_count = session.query(Restaurant).filter(Restaurant.grade == 'A').count()
-        
-        session.close()
         
         return {
             'total_restaurants': total_restaurants,
@@ -339,9 +348,14 @@ def get_db_statistics():
         }
         
     except Exception as e:
-        st.error(f"Failed to get statistics: {str(e)}")
         return {
             'total_restaurants': 0,
             'total_reviews': 0,
             'grade_a_count': 0
         }
+    finally:
+        if session:
+            try:
+                session.close()
+            except:
+                pass
