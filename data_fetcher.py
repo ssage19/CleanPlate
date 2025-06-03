@@ -127,24 +127,11 @@ class HealthInspectionAPI:
                         locations.append(borough)
                         
             elif self.current_jurisdiction == "Chicago":
-                # Get distinct wards from Chicago data
-                params = {
-                    '$select': 'DISTINCT ward',
-                    '$limit': 50,
-                    '$where': 'ward IS NOT NULL'
-                }
-                
-                data = self._make_api_request(self.current_api["base_url"], params)
-                if data and isinstance(data, list):
-                    # Format ward numbers as "Ward X"
-                    locations = [f"Ward {item['ward']}" for item in data if item.get('ward') and str(item['ward']).isdigit()]
-                    locations = sorted(locations, key=lambda x: int(x.split()[1]))
-                else:
-                    locations = []
-                    
-                # Add some common Chicago wards if none found
-                if not locations:
-                    locations = [f"Ward {i}" for i in range(1, 51)]
+                # Chicago main API doesn't include ward data, use city districts instead
+                locations = [
+                    "North Side", "South Side", "West Side", "Downtown", 
+                    "Loop", "Near North", "Near South", "Far North", "Far South"
+                ]
             else:
                 locations = []
             
@@ -266,9 +253,10 @@ class HealthInspectionAPI:
         # Build where clause conditions
         where_conditions = ['results IS NOT NULL']
         
-        if location and location != "All" and location.startswith("Ward "):
-            ward_num = location.split()[1]
-            where_conditions.append(f"ward='{ward_num}'")
+        # Chicago API doesn't have ward data in main endpoint, so skip location filtering
+        # if location and location != "All" and location.startswith("Ward "):
+        #     ward_num = location.split()[1]
+        #     where_conditions.append(f"ward='{ward_num}'")
         
         if grades:
             # Map NYC grades to Chicago results
@@ -297,12 +285,12 @@ class HealthInspectionAPI:
         
         where_clause = ' AND '.join(where_conditions)
         
-        # API request parameters
+        # API request parameters (Chicago doesn't have violations or ward in main dataset)
         params = {
             '$limit': min(limit, 500),
             '$order': 'inspection_date DESC',
             '$where': where_clause,
-            '$select': 'license_,dba_name,aka_name,facility_type,risk,address,city,state,zip,inspection_date,inspection_type,results,violations,latitude,longitude,ward'
+            '$select': 'license_,dba_name,aka_name,facility_type,risk,address,city,state,zip,inspection_date,inspection_type,results,latitude,longitude'
         }
         
         raw_data = self._make_api_request(self.current_api["base_url"], params)
@@ -342,8 +330,8 @@ class HealthInspectionAPI:
                 'grade': grade,
                 'score': None,  # Chicago doesn't use numeric scores
                 'inspection_date': item.get('inspection_date', '').split('T')[0] if item.get('inspection_date') else 'N/A',
-                'violations': self._extract_chicago_violations(item),
-                'boro': f"Ward {item.get('ward', '')}" if item.get('ward') else '',
+                'violations': ["Violation details not available in Chicago dataset"],
+                'boro': 'Chicago',  # Since ward data isn't available in main endpoint
                 'phone': '',  # Not available in Chicago data
                 'inspection_type': item.get('inspection_type', ''),
                 'risk': item.get('risk', '')

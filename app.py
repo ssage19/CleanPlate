@@ -31,6 +31,9 @@ if 'user_reviews' not in st.session_state:
 if 'api_client' not in st.session_state:
     st.session_state.api_client = HealthInspectionAPI()
 
+if 'current_jurisdiction' not in st.session_state:
+    st.session_state.current_jurisdiction = "NYC"
+
 # Initialize database on startup
 initialize_database()
 
@@ -149,21 +152,43 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Main search interface
-    col1, col2 = st.columns([3, 1])
+    # Jurisdiction selector
+    col_juris, col_search, col_location = st.columns([1, 2, 1])
     
-    with col1:
+    with col_juris:
+        jurisdictions = st.session_state.api_client.get_available_jurisdictions()
+        jurisdiction_names = {"NYC": "New York City", "Chicago": "Chicago, IL"}
+        jurisdiction_options = [jurisdiction_names.get(j, j) for j in jurisdictions]
+        
+        selected_jurisdiction_display = st.selectbox(
+            "City", 
+            jurisdiction_options,
+            index=jurisdiction_options.index(jurisdiction_names[st.session_state.current_jurisdiction])
+        )
+        
+        # Map back to jurisdiction code
+        reverse_map = {v: k for k, v in jurisdiction_names.items()}
+        selected_jurisdiction = reverse_map.get(selected_jurisdiction_display, "NYC")
+        
+        # Update API client if jurisdiction changed
+        if selected_jurisdiction != st.session_state.current_jurisdiction:
+            st.session_state.current_jurisdiction = selected_jurisdiction
+            st.session_state.api_client.set_jurisdiction(selected_jurisdiction)
+            st.rerun()
+    
+    with col_search:
         search_term = st.text_input(
             "Search for a restaurant", 
             placeholder="Enter restaurant name...",
             help="Search by restaurant name to see health inspection results"
         )
     
-    with col2:
+    with col_location:
         # Location filter
         try:
             locations = st.session_state.api_client.get_available_locations()
-            selected_location = st.selectbox("Borough", ["All"] + locations)
+            location_label = "Borough" if selected_jurisdiction == "NYC" else "Ward"
+            selected_location = st.selectbox(location_label, ["All"] + locations)
         except Exception as e:
             st.error(f"Failed to load locations: {str(e)}")
             selected_location = "All"
