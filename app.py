@@ -39,31 +39,33 @@ initialize_database()
 
 def main():
     
-    # Organic farm-to-table theme with sage green and natural textures
+    # Professional restaurant theme with sophisticated dark design
     st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@300;400;600;700&family=Lato:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
         
         .stApp {
             background: 
-                radial-gradient(circle at 20% 80%, rgba(122, 132, 113, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(139, 154, 126, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(161, 176, 150, 0.1) 0%, transparent 50%),
-                linear-gradient(135deg, #f8faf7 0%, #f0f3ed 25%, #e8ebe6 50%, #dde2d6 75%, #d5dac9 100%);
-            background-size: 800px 800px, 600px 600px, 400px 400px, 100% 100%;
+                linear-gradient(rgba(20, 24, 28, 0.85), rgba(30, 35, 41, 0.9)),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><pattern id="restaurant-texture" width="60" height="60" patternUnits="userSpaceOnUse"><circle cx="30" cy="30" r="1" fill="%23ffffff" fill-opacity="0.02"/><circle cx="15" cy="15" r="0.5" fill="%23d4af37" fill-opacity="0.03"/><circle cx="45" cy="45" r="0.8" fill="%23ffffff" fill-opacity="0.01"/></pattern></defs><rect width="1200" height="800" fill="%23141618"/><rect width="1200" height="800" fill="url(%23restaurant-texture)"/><polygon points="0,800 400,750 800,780 1200,720 1200,800" fill="%231a1e23" opacity="0.6"/><polygon points="0,700 300,680 600,710 900,650 1200,680 1200,800 0,800" fill="%23252a30" opacity="0.4"/></svg>');
+            background-size: cover;
             background-attachment: fixed;
-            color: #2c3e2d;
-            font-family: 'Lato', sans-serif;
+            color: #e8eaed;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
         }
         
         .main-header {
-            background: linear-gradient(135deg, #7a8471 0%, #8b9a7e 100%);
-            padding: 3rem 2rem;
-            border-radius: 0 0 20px 20px;
-            margin: -1rem -1rem 2rem -1rem;
+            background: linear-gradient(135deg, #1a1e23 0%, #252a30 50%, #2d3339 100%);
+            padding: 4rem 3rem;
+            border-radius: 0;
+            margin: -1rem -1rem 3rem -1rem;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(122, 132, 113, 0.3);
+            box-shadow: 
+                0 4px 24px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
         }
         
         .main-header::before {
@@ -74,164 +76,167 @@ def main():
             right: 0;
             bottom: 0;
             background: 
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><pattern id="leaf" width="40" height="40" patternUnits="userSpaceOnUse"><ellipse cx="20" cy="15" rx="8" ry="3" fill="%23ffffff" fill-opacity="0.08" transform="rotate(45 20 15)"/><ellipse cx="10" cy="30" rx="6" ry="2" fill="%23ffffff" fill-opacity="0.06" transform="rotate(-30 10 30)"/><path d="M25,25 Q30,20 35,25 Q30,30 25,25" fill="%23ffffff" fill-opacity="0.05"/></pattern></defs><rect width="200" height="200" fill="url(%23leaf)"/></svg>');
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><defs><pattern id="elegant-pattern" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="0.5" fill="%23d4af37" fill-opacity="0.1"/><rect x="18" y="18" width="4" height="4" fill="%23ffffff" fill-opacity="0.03" rx="1"/></pattern></defs><rect width="400" height="200" fill="url(%23elegant-pattern)"/><polygon points="0,180 100,160 200,170 300,150 400,160 400,200 0,200" fill="%23d4af37" opacity="0.05"/></svg>');
             pointer-events: none;
-        }
-        
-        .stApp::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><defs><pattern id="texture" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1" fill="%237a8471" fill-opacity="0.02"/><circle cx="20" cy="20" r="0.5" fill="%238b9a7e" fill-opacity="0.03"/><circle cx="60" cy="60" r="0.8" fill="%23a1b096" fill-opacity="0.02"/></pattern></defs><rect width="400" height="400" fill="url(%23texture)"/></svg>');
-            pointer-events: none;
-            z-index: 0;
         }
         
         .main-header h1 {
-            color: #f8faf7;
-            font-size: 3.5rem;
-            font-weight: 700;
+            color: #ffffff;
+            font-size: 4rem;
+            font-weight: 600;
             margin: 0;
-            font-family: 'Source Serif Pro', serif;
-            letter-spacing: -0.02em;
+            font-family: 'Playfair Display', serif;
+            letter-spacing: -0.03em;
             line-height: 1.1;
             position: relative;
             z-index: 2;
-            text-shadow: 2px 2px 4px rgba(44, 62, 45, 0.4);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
         
         .main-header p {
-            color: #e8ebe6;
-            font-size: 1.25rem;
-            margin: 1rem 0 0 0;
+            color: #b8bcc2;
+            font-size: 1.125rem;
+            margin: 1.5rem 0 0 0;
             font-weight: 400;
-            letter-spacing: 0.01em;
+            letter-spacing: 0.02em;
             position: relative;
             z-index: 2;
-            font-style: italic;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            opacity: 0.8;
         }
         
         .stSelectbox > div > div {
-            background: rgba(248, 250, 247, 0.9) !important;
-            border: 2px solid #a8b5a0 !important;
+            background: rgba(45, 51, 57, 0.9) !important;
+            border: 1px solid rgba(212, 175, 55, 0.3) !important;
             border-radius: 8px !important;
-            color: #2c3e2d !important;
-            box-shadow: 0 2px 8px rgba(122, 132, 113, 0.15) !important;
+            color: #e8eaed !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .stSelectbox > div > div > div {
+            color: #e8eaed !important;
         }
         
         .stTextInput > div > div > input {
-            background: rgba(248, 250, 247, 0.9) !important;
-            border: 2px solid #a8b5a0 !important;
+            background: rgba(45, 51, 57, 0.9) !important;
+            border: 1px solid rgba(212, 175, 55, 0.3) !important;
             border-radius: 8px !important;
-            color: #2c3e2d !important;
-            padding: 12px 16px !important;
-            box-shadow: 0 2px 8px rgba(122, 132, 113, 0.15) !important;
+            color: #e8eaed !important;
+            padding: 14px 18px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+            font-family: 'Inter', sans-serif !important;
         }
         
         .stTextInput > div > div > input:focus {
-            border-color: #7a8471 !important;
-            box-shadow: 0 0 0 3px rgba(122, 132, 113, 0.2) !important;
+            border-color: #d4af37 !important;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2) !important;
         }
         
         .stButton > button {
-            background: linear-gradient(135deg, #7a8471 0%, #8b9a7e 100%) !important;
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%) !important;
             border: none !important;
             border-radius: 8px !important;
-            color: #f8faf7 !important;
+            color: #1a1e23 !important;
             font-weight: 600 !important;
-            padding: 12px 24px !important;
+            padding: 14px 28px !important;
             transition: all 0.3s ease !important;
-            box-shadow: 0 4px 16px rgba(122, 132, 113, 0.3) !important;
-            font-family: 'Lato', sans-serif !important;
+            box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3) !important;
+            font-family: 'Inter', sans-serif !important;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-size: 0.875rem;
         }
         
         .stButton > button:hover {
             transform: translateY(-2px) !important;
-            box-shadow: 0 8px 24px rgba(122, 132, 113, 0.4) !important;
-            background: linear-gradient(135deg, #6d7564 0%, #7a8471 100%) !important;
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4) !important;
+            background: linear-gradient(135deg, #e6c447 0%, #d4af37 100%) !important;
         }
         
         .stExpander {
-            background: rgba(248, 250, 247, 0.95) !important;
-            border: 2px solid #a8b5a0 !important;
+            background: rgba(45, 51, 57, 0.95) !important;
+            border: 1px solid rgba(212, 175, 55, 0.2) !important;
             border-radius: 12px !important;
-            margin: 1.5rem 0 !important;
-            box-shadow: 0 4px 16px rgba(122, 132, 113, 0.15) !important;
+            margin: 2rem 0 !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+            backdrop-filter: blur(10px) !important;
         }
         
         .stExpander > div:first-child {
-            background: linear-gradient(135deg, #7a8471 0%, #8b9a7e 100%) !important;
+            background: linear-gradient(135deg, #2d3339 0%, #3a424a 100%) !important;
             border-radius: 12px 12px 0 0 !important;
-            color: #f8faf7 !important;
+            color: #ffffff !important;
             font-weight: 600 !important;
-            font-family: 'Source Serif Pro', serif !important;
-            border-bottom: 2px solid #a8b5a0 !important;
-            padding: 1rem 1.5rem !important;
+            font-family: 'Playfair Display', serif !important;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3) !important;
+            padding: 1.5rem 2rem !important;
         }
         
         .info-section {
             background: 
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="card-texture" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="0.5" fill="%237a8471" fill-opacity="0.03"/><circle cx="15" cy="15" r="0.3" fill="%238b9a7e" fill-opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23card-texture)"/></svg>'),
-                linear-gradient(135deg, rgba(248, 250, 247, 0.95) 0%, rgba(240, 243, 237, 0.9) 100%);
-            border-radius: 16px;
+                linear-gradient(135deg, rgba(37, 42, 48, 0.95) 0%, rgba(45, 51, 57, 0.9) 100%);
+            border-radius: 12px;
             padding: 24px;
             margin: 20px 0;
-            border: 2px solid #c8d5c0;
+            border: 1px solid rgba(212, 175, 55, 0.2);
             box-shadow: 
-                0 8px 24px rgba(122, 132, 113, 0.12),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+                0 8px 24px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(10px);
         }
         
         .info-section::before {
             content: '';
             position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #7a8471, #8b9a7e, #a1b096, #7a8471);
-            border-radius: 18px;
-            z-index: -1;
-            opacity: 0.6;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><defs><pattern id="luxury-texture" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="0.5" fill="%23d4af37" fill-opacity="0.08"/><rect x="10" y="10" width="10" height="10" fill="none" stroke="%23ffffff" stroke-width="0.2" stroke-opacity="0.02"/></pattern></defs><rect width="60" height="60" fill="url(%23luxury-texture)"/></svg>');
+            pointer-events: none;
+            z-index: 0;
         }
         
         .section-header {
-            color: #4a5a4b;
+            color: #ffffff;
             font-size: 1.2rem;
             font-weight: 600;
-            margin: 0 0 16px 0;
-            letter-spacing: 0.01em;
-            border-bottom: 2px solid #7a8471;
-            padding-bottom: 8px;
-            font-family: 'Source Serif Pro', serif;
+            margin: 0 0 20px 0;
+            letter-spacing: 0.02em;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 12px;
+            font-family: 'Playfair Display', serif;
+            position: relative;
+            z-index: 1;
         }
         
         .detail-text {
-            color: #4a5a4b;
+            color: #b8bcc2;
             font-weight: 400;
             line-height: 1.6;
-            font-family: 'Lato', sans-serif;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            z-index: 1;
         }
         
         .detail-text strong {
-            color: #2c3e2d;
+            color: #e8eaed;
             font-weight: 600;
         }
         
         .stMarkdown {
-            color: #4a5a4b;
-            font-family: 'Lato', sans-serif;
+            color: #b8bcc2;
+            font-family: 'Inter', sans-serif;
         }
         
         .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {
-            color: #2c3e2d;
-            font-family: 'Source Serif Pro', serif;
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
         }
         
         div[data-testid="stToolbar"] {
@@ -241,6 +246,36 @@ def main():
         .main .block-container {
             padding-top: 1rem;
             max-width: 1200px;
+        }
+        
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.3) 20%, rgba(212, 175, 55, 0.6) 50%, rgba(212, 175, 55, 0.3) 80%, transparent 100%);
+            margin: 2rem 0;
+            position: relative;
+        }
+        
+        .divider::before {
+            content: '◆';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(37, 42, 48, 1);
+            color: #d4af37;
+            padding: 0 12px;
+            font-size: 0.8rem;
+        }
+        
+        /* Captions and smaller text */
+        .stCaption {
+            color: #8a8e95 !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        /* Sidebar styling */
+        .css-1d391kg {
+            background: rgba(30, 35, 41, 0.95) !important;
         }
     </style>
     """, unsafe_allow_html=True)
