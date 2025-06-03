@@ -54,7 +54,7 @@ class HealthInspectionAPI:
             }
             
             data = self._make_api_request(self.nyc_api_base, params)
-            locations = [item['boro'] for item in data if item.get('boro')]
+            locations = [item['boro'] for item in data if item.get('boro') and item['boro'].strip() and item['boro'] != '0']
             
             # Add common NYC boroughs if not in data
             standard_boroughs = ['MANHATTAN', 'BROOKLYN', 'QUEENS', 'BRONX', 'STATEN ISLAND']
