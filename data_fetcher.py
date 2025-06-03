@@ -22,14 +22,14 @@ class HealthInspectionAPI:
                 "grading_system": {
                     "type": "letter",
                     "grades": {
-                        "A": {"label": "A", "description": "Grade A", "color": "#22c55e", "priority": "low"},
-                        "B": {"label": "B", "description": "Grade B", "color": "#f59e0b", "priority": "medium"},
-                        "C": {"label": "C", "description": "Grade C", "color": "#ef4444", "priority": "high"},
-                        "Grade Pending": {"label": "Pending", "description": "Grade Pending", "color": "#6b7280", "priority": "medium"},
-                        "Not Yet Graded": {"label": "Not Graded", "description": "Not Yet Graded", "color": "#6b7280", "priority": "medium"}
+                        "A": {"label": "A", "description": "Excellent - Highest safety standards with minimal or no violations", "color": "#22c55e", "priority": "low"},
+                        "B": {"label": "B", "description": "Good - Minor violations that do not pose immediate health risks", "color": "#f59e0b", "priority": "medium"},
+                        "C": {"label": "C", "description": "Needs Improvement - Multiple violations requiring correction", "color": "#ef4444", "priority": "high"},
+                        "Grade Pending": {"label": "Pending", "description": "Inspection completed, grade determination in progress", "color": "#6b7280", "priority": "medium"},
+                        "Not Yet Graded": {"label": "Not Graded", "description": "Recently opened or inspection scheduled", "color": "#6b7280", "priority": "medium"}
                     },
                     "score_system": True,
-                    "score_description": "Lower scores indicate better performance"
+                    "score_description": "Numerical score: 0-13 points (lower is better). Grade A: 0-13, Grade B: 14-27, Grade C: 28+"
                 }
             },
             "Chicago": {
@@ -42,19 +42,20 @@ class HealthInspectionAPI:
                 "grading_system": {
                     "type": "pass_fail",
                     "grades": {
-                        "Pass": {"label": "Pass", "description": "Passed Inspection", "color": "#22c55e", "priority": "low"},
-                        "Pass w/ Conditions": {"label": "Pass*", "description": "Pass with Conditions", "color": "#f59e0b", "priority": "medium"},
-                        "Fail": {"label": "Fail", "description": "Failed Inspection", "color": "#ef4444", "priority": "high"},
-                        "Out of Business": {"label": "Closed", "description": "Out of Business", "color": "#6b7280", "priority": "high"},
-                        "Not Ready": {"label": "Not Ready", "description": "Not Ready for Inspection", "color": "#6b7280", "priority": "medium"}
+                        "Pass": {"label": "Pass", "description": "Excellent - Meets all health and safety requirements without conditions", "color": "#22c55e", "priority": "low"},
+                        "Pass w/ Conditions": {"label": "Pass*", "description": "Good - Minor issues noted but allowed to operate with corrective actions", "color": "#f59e0b", "priority": "medium"},
+                        "Fail": {"label": "Fail", "description": "Critical - Serious violations requiring immediate closure or correction", "color": "#ef4444", "priority": "high"},
+                        "Out of Business": {"label": "Closed", "description": "Establishment permanently closed or no longer operating", "color": "#6b7280", "priority": "high"},
+                        "Not Ready": {"label": "Not Ready", "description": "Inspection scheduled but establishment not prepared for evaluation", "color": "#6b7280", "priority": "medium"}
                     },
                     "score_system": False,
                     "risk_system": True,
                     "risk_levels": {
-                        "Risk 1 (High)": {"label": "High Risk", "description": "High Risk Facility", "color": "#ef4444", "priority": "high"},
-                        "Risk 2 (Medium)": {"label": "Medium Risk", "description": "Medium Risk Facility", "color": "#f59e0b", "priority": "medium"},
-                        "Risk 3 (Low)": {"label": "Low Risk", "description": "Low Risk Facility", "color": "#22c55e", "priority": "low"}
-                    }
+                        "Risk 1 (High)": {"label": "High Risk", "description": "Complex food preparation - requires frequent monitoring", "color": "#ef4444", "priority": "high"},
+                        "Risk 2 (Medium)": {"label": "Medium Risk", "description": "Moderate food handling - standard inspection schedule", "color": "#f59e0b", "priority": "medium"},
+                        "Risk 3 (Low)": {"label": "Low Risk", "description": "Simple operations - minimal food safety concerns", "color": "#22c55e", "priority": "low"}
+                    },
+                    "score_description": "Pass/fail system with risk categorization based on food handling complexity"
                 }
             },
             "Boston": {
@@ -68,17 +69,18 @@ class HealthInspectionAPI:
                 "grading_system": {
                     "type": "pass_fail",
                     "grades": {
-                        "HE_Pass": {"label": "Pass", "description": "Passed Health Inspection", "color": "#22c55e", "priority": "low"},
-                        "HE_Fail": {"label": "Fail", "description": "Failed Health Inspection", "color": "#ef4444", "priority": "high"},
-                        "Conditional": {"label": "Conditional", "description": "Conditional Pass", "color": "#f59e0b", "priority": "medium"}
+                        "HE_Pass": {"label": "Pass", "description": "Excellent - Meets all Boston health standards and regulations", "color": "#22c55e", "priority": "low"},
+                        "HE_Fail": {"label": "Fail", "description": "Critical - Failed inspection due to serious health code violations", "color": "#ef4444", "priority": "high"},
+                        "Conditional": {"label": "Conditional", "description": "Fair - Passed with conditions requiring follow-up corrections", "color": "#f59e0b", "priority": "medium"}
                     },
                     "score_system": False,
                     "violation_system": True,
                     "violation_levels": {
-                        "*": {"label": "Critical", "description": "Critical Violations", "color": "#ef4444"},
-                        "**": {"label": "Serious", "description": "Serious Violations", "color": "#f59e0b"},
-                        "***": {"label": "Minor", "description": "Minor Violations", "color": "#22c55e"}
-                    }
+                        "*": {"label": "Critical", "description": "Immediate health hazards requiring urgent correction", "color": "#ef4444"},
+                        "**": {"label": "Serious", "description": "Significant violations affecting food safety", "color": "#f59e0b"},
+                        "***": {"label": "Minor", "description": "Non-critical issues not posing immediate risk", "color": "#22c55e"}
+                    },
+                    "score_description": "Pass/fail system with violation severity indicators (*=Critical, **=Serious, ***=Minor)"
                 }
             },
             "Austin": {
@@ -91,13 +93,13 @@ class HealthInspectionAPI:
                 "grading_system": {
                     "type": "numeric_score",
                     "grades": {
-                        "90-100": {"label": "A", "description": "Excellent (90-100)", "color": "#22c55e", "priority": "low"},
-                        "80-89": {"label": "B", "description": "Good (80-89)", "color": "#f59e0b", "priority": "medium"},
-                        "70-79": {"label": "C", "description": "Satisfactory (70-79)", "color": "#ef4444", "priority": "high"},
-                        "Below 70": {"label": "F", "description": "Needs Improvement (<70)", "color": "#dc2626", "priority": "high"}
+                        "90-100": {"label": "A", "description": "Excellent - Outstanding food safety practices (90-100 points)", "color": "#22c55e", "priority": "low"},
+                        "80-89": {"label": "B", "description": "Good - Solid food safety standards with minor issues (80-89 points)", "color": "#f59e0b", "priority": "medium"},
+                        "70-79": {"label": "C", "description": "Satisfactory - Meets minimum requirements but needs improvement (70-79 points)", "color": "#ef4444", "priority": "high"},
+                        "Below 70": {"label": "F", "description": "Failing - Serious violations requiring immediate attention (<70 points)", "color": "#dc2626", "priority": "high"}
                     },
                     "score_system": True,
-                    "score_description": "Higher scores indicate better performance"
+                    "score_description": "Numerical score system: 100-point scale where higher scores indicate better food safety performance"
                 }
             },
             "Seattle": {
