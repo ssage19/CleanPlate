@@ -177,14 +177,30 @@ def main():
             color: #a0aec0 !important;
         }
         
-        /* Hide Streamlit elements */
+        /* Hide Streamlit default elements */
         div[data-testid="stToolbar"] {
             display: none;
         }
         
+        /* Hide Streamlit header */
+        header[data-testid="stHeader"] {
+            display: none !important;
+        }
+        
+        /* Hide top padding from main container */
         .main .block-container {
-            padding-top: 1rem;
+            padding-top: 0rem !important;
             max-width: 1200px;
+        }
+        
+        /* Ensure no top margin on main container */
+        .main {
+            padding-top: 0rem !important;
+        }
+        
+        /* Remove any top spacing */
+        [data-testid="stAppViewContainer"] {
+            padding-top: 0rem !important;
         }
     </style>
     """, unsafe_allow_html=True)
