@@ -11,7 +11,7 @@ class HealthInspectionAPI:
     
     def __init__(self):
         # NYC Open Data API endpoint for restaurant inspections
-        self.nyc_api_base = "https://data.cityofnewyork.us/resource/43nn-pn8j.json$offset=1000"
+        self.nyc_api_base = "https://data.cityofnewyork.us/resource/43nn-pn8j.json"
         
         # Cache for API responses
         self._location_cache = None
@@ -26,13 +26,23 @@ class HealthInspectionAPI:
                 'User-Agent': 'Restaurant-Health-Inspector/1.0'
             }
             
+            print(f"Making request to: {endpoint}")
+            print(f"Parameters: {params}")
+            
             response = requests.get(endpoint, params=params, headers=headers, timeout=30)
+            print(f"Response status: {response.status_code}")
+            print(f"Response URL: {response.url}")
+            
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            print(f"Records received: {len(data) if data else 0}")
+            return data
         
         except requests.exceptions.RequestException as e:
+            print(f"Request exception: {e}")
             raise Exception(f"API request failed: {str(e)}")
         except json.JSONDecodeError as e:
+            print(f"JSON decode error: {e}")
             raise Exception(f"Invalid API response format: {str(e)}")
     
     def _is_cache_valid(self):
