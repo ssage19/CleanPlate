@@ -524,7 +524,7 @@ class HealthInspectionAPI:
             '$limit': min(limit, 500),
             '$order': 'inspection_date DESC',
             '$where': where_clause,
-            '$select': 'restaurant_name,address_1,address_2,city,state,zip_code,score,inspection_date,process_description'
+            '$select': 'restaurant_name,address,zip_code,score,inspection_date,process_description,facility_id'
         }
         
         raw_data = self._make_api_request(self.current_api["base_url"], params)
@@ -554,9 +554,9 @@ class HealthInspectionAPI:
                 grade = "Below 70"
             
             restaurant = {
-                'id': f"AUS_{item.get('restaurant_name', '').replace(' ', '')}_{item.get('zip_code', '')}",
+                'id': f"AUS_{item.get('facility_id', '')}{item.get('restaurant_name', '').replace(' ', '')}",
                 'name': item.get('restaurant_name', 'Unknown Restaurant').strip(),
-                'address': self._format_austin_address(item),
+                'address': f"{item.get('address', '')}, Austin, TX {item.get('zip_code', '')}",
                 'cuisine_type': item.get('process_description', 'Not specified'),
                 'grade': grade,
                 'score': score,

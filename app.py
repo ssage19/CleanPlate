@@ -306,6 +306,44 @@ def main():
             - **Medium Risk**: Limited food preparation
             - **Low Risk**: Minimal food handling (convenience stores, etc.)
             """)
+        elif st.session_state.current_jurisdiction == "Austin":
+            st.markdown("""
+            **Austin Numeric Scoring System:**
+            - **90-100**: Grade A - Excellent
+            - **80-89**: Grade B - Good
+            - **70-79**: Grade C - Satisfactory
+            - **Below 70**: Grade F - Needs Improvement
+            
+            **Scoring**: Higher scores indicate better performance. Restaurants must post scores of 70 or above.
+            """)
+        elif st.session_state.current_jurisdiction == "Seattle":
+            st.markdown("""
+            **Seattle Rating System:**
+            - **Excellent**: Outstanding compliance with health codes
+            - **Good**: Generally compliant with minor issues
+            - **Okay**: Some violations requiring attention
+            - **Needs Improvement**: Significant violations found
+            - **Unsatisfactory**: Major health code violations
+            """)
+        elif st.session_state.current_jurisdiction == "Boston":
+            st.markdown("""
+            **Boston Violation Level System:**
+            - **No Violations**: Clean inspection with no issues found
+            - ***** (3 stars): Minor violations
+            - ***** (2 stars): Serious violations
+            - ***** (1 star): Critical violations requiring immediate attention
+            
+            **System**: Based on violation severity rather than letter grades.
+            """)
+        elif st.session_state.current_jurisdiction == "San Diego":
+            st.markdown("""
+            **San Diego Letter Grade System:**
+            - **Grade A**: Excellent (90-100 points)
+            - **Grade B**: Good (80-89 points)
+            - **Grade C**: Satisfactory (70-79 points)
+            
+            **Scoring**: Similar to Los Angeles County system with numerical scores.
+            """)
     
     # Set default grades based on jurisdiction
     if st.session_state.current_jurisdiction == "NYC":
