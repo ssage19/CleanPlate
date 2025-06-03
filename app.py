@@ -39,25 +39,25 @@ initialize_database()
 
 def main():
     
-    # Premium dark theme with purple accents and geometric patterns
+    # Organic farm-to-table theme with sage green and natural textures
     st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@300;400;600;700&family=Lato:wght@300;400;500;600&display=swap');
         
         .stApp {
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f6f4 0%, #e8ebe6 50%, #dde2d6 100%);
+            color: #2c3e2d;
+            font-family: 'Lato', sans-serif;
         }
         
         .main-header {
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            background: linear-gradient(135deg, #7a8471 0%, #8b9a7e 100%);
             padding: 3rem 2rem;
-            border-radius: 0 0 24px 24px;
+            border-radius: 0 0 20px 20px;
             margin: -1rem -1rem 2rem -1rem;
             position: relative;
             overflow: hidden;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+            box-shadow: 0 8px 32px rgba(122, 132, 113, 0.3);
         }
         
         .main-header::before {
@@ -68,141 +68,132 @@ def main():
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
-        
-        .main-header::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(139, 92, 246, 0.04) 2px, rgba(139, 92, 246, 0.04) 4px),
-                repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(59, 130, 246, 0.03) 2px, rgba(59, 130, 246, 0.03) 4px);
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="organic" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="2" fill="%23ffffff" fill-opacity="0.08"/><path d="M5,5 Q10,15 15,5" stroke="%23ffffff" stroke-opacity="0.05" fill="none"/></pattern></defs><rect width="100" height="100" fill="url(%23organic)"/></svg>');
             pointer-events: none;
         }
         
         .main-header h1 {
-            color: #ffffff;
+            color: #f8faf7;
             font-size: 3.5rem;
-            font-weight: 800;
+            font-weight: 700;
             margin: 0;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: -0.03em;
+            font-family: 'Source Serif Pro', serif;
+            letter-spacing: -0.02em;
             line-height: 1.1;
             position: relative;
             z-index: 2;
-            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(44, 62, 45, 0.4);
         }
         
         .main-header p {
-            color: #94a3b8;
+            color: #e8ebe6;
             font-size: 1.25rem;
             margin: 1rem 0 0 0;
             font-weight: 400;
             letter-spacing: 0.01em;
             position: relative;
             z-index: 2;
+            font-style: italic;
         }
         
         .stSelectbox > div > div {
-            background: rgba(15, 23, 42, 0.8) !important;
-            border: 1px solid rgba(139, 92, 246, 0.3) !important;
-            border-radius: 12px !important;
-            color: #ffffff !important;
-            backdrop-filter: blur(10px) !important;
+            background: rgba(248, 250, 247, 0.9) !important;
+            border: 2px solid #a8b5a0 !important;
+            border-radius: 8px !important;
+            color: #2c3e2d !important;
+            box-shadow: 0 2px 8px rgba(122, 132, 113, 0.15) !important;
         }
         
         .stTextInput > div > div > input {
-            background: rgba(15, 23, 42, 0.8) !important;
-            border: 1px solid rgba(139, 92, 246, 0.3) !important;
-            border-radius: 12px !important;
-            color: #ffffff !important;
-            backdrop-filter: blur(10px) !important;
+            background: rgba(248, 250, 247, 0.9) !important;
+            border: 2px solid #a8b5a0 !important;
+            border-radius: 8px !important;
+            color: #2c3e2d !important;
             padding: 12px 16px !important;
+            box-shadow: 0 2px 8px rgba(122, 132, 113, 0.15) !important;
         }
         
         .stTextInput > div > div > input:focus {
-            border-color: rgba(139, 92, 246, 0.6) !important;
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+            border-color: #7a8471 !important;
+            box-shadow: 0 0 0 3px rgba(122, 132, 113, 0.2) !important;
         }
         
         .stButton > button {
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+            background: linear-gradient(135deg, #7a8471 0%, #8b9a7e 100%) !important;
             border: none !important;
-            border-radius: 12px !important;
-            color: #ffffff !important;
+            border-radius: 8px !important;
+            color: #f8faf7 !important;
             font-weight: 600 !important;
             padding: 12px 24px !important;
             transition: all 0.3s ease !important;
-            box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3) !important;
+            box-shadow: 0 4px 16px rgba(122, 132, 113, 0.3) !important;
+            font-family: 'Lato', sans-serif !important;
         }
         
         .stButton > button:hover {
             transform: translateY(-2px) !important;
-            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4) !important;
-            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+            box-shadow: 0 8px 24px rgba(122, 132, 113, 0.4) !important;
+            background: linear-gradient(135deg, #6d7564 0%, #7a8471 100%) !important;
         }
         
         .stExpander {
-            background: rgba(15, 23, 42, 0.6) !important;
-            border: 1px solid rgba(139, 92, 246, 0.2) !important;
-            border-radius: 16px !important;
-            backdrop-filter: blur(20px) !important;
-            margin: 1rem 0 !important;
+            background: rgba(248, 250, 247, 0.95) !important;
+            border: 2px solid #a8b5a0 !important;
+            border-radius: 12px !important;
+            margin: 1.5rem 0 !important;
+            box-shadow: 0 4px 16px rgba(122, 132, 113, 0.15) !important;
         }
         
         .stExpander > div:first-child {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
-            border-radius: 16px 16px 0 0 !important;
-            color: #ffffff !important;
+            background: linear-gradient(135deg, #7a8471 0%, #8b9a7e 100%) !important;
+            border-radius: 12px 12px 0 0 !important;
+            color: #f8faf7 !important;
             font-weight: 600 !important;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+            font-family: 'Source Serif Pro', serif !important;
+            border-bottom: 2px solid #a8b5a0 !important;
+            padding: 1rem 1.5rem !important;
         }
         
         .info-section {
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(248, 250, 247, 0.8);
             border-radius: 12px;
             padding: 20px;
             margin: 16px 0;
-            border: 1px solid rgba(139, 92, 246, 0.15);
-            backdrop-filter: blur(15px);
+            border: 2px solid #c8d5c0;
+            box-shadow: 0 4px 16px rgba(122, 132, 113, 0.1);
         }
         
         .section-header {
-            color: #e2e8f0;
-            font-size: 1.1rem;
+            color: #4a5a4b;
+            font-size: 1.2rem;
             font-weight: 600;
             margin: 0 0 16px 0;
-            letter-spacing: 0.02em;
-            border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+            letter-spacing: 0.01em;
+            border-bottom: 2px solid #7a8471;
             padding-bottom: 8px;
+            font-family: 'Source Serif Pro', serif;
         }
         
         .detail-text {
-            color: #cbd5e1;
+            color: #4a5a4b;
             font-weight: 400;
             line-height: 1.6;
+            font-family: 'Lato', sans-serif;
         }
         
         .detail-text strong {
-            color: #ffffff;
+            color: #2c3e2d;
             font-weight: 600;
         }
         
         .stMarkdown {
-            color: #cbd5e1;
+            color: #4a5a4b;
+            font-family: 'Lato', sans-serif;
         }
         
         .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {
-            color: #ffffff;
+            color: #2c3e2d;
+            font-family: 'Source Serif Pro', serif;
         }
         
         div[data-testid="stToolbar"] {
@@ -428,37 +419,37 @@ def main():
         st.info("Please check your internet connection and try again.")
 
 def display_simple_restaurant_card(restaurant):
-    """Display restaurant card with premium dark theme and glassmorphism effects"""
+    """Display restaurant card with organic farm-to-table theme"""
     
-    # Premium dark theme styling for restaurant cards
+    # Organic farm-to-table styling for restaurant cards
     st.markdown("""
     <style>
     .streamlit-expander {
-        background: rgba(15, 23, 42, 0.6) !important;
-        border: 1px solid rgba(139, 92, 246, 0.2) !important;
-        border-radius: 16px !important;
-        backdrop-filter: blur(20px) !important;
+        background: rgba(248, 250, 247, 0.95) !important;
+        border: 2px solid #c8d5c0 !important;
+        border-radius: 12px !important;
         margin: 1.5rem 0 !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.5) !important;
+        box-shadow: 0 6px 20px rgba(122, 132, 113, 0.15) !important;
     }
     .streamlit-expander:hover {
-        transform: translateY(-4px) !important;
-        box-shadow: 0 16px 48px rgba(15, 23, 42, 0.7) !important;
-        border-color: rgba(139, 92, 246, 0.4) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 12px 32px rgba(122, 132, 113, 0.25) !important;
+        border-color: #a8b5a0 !important;
     }
     .streamlit-expander > div:first-child {
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%) !important;
-        border-radius: 16px 16px 0 0 !important;
-        color: #ffffff !important;
+        background: linear-gradient(135deg, #7a8471 0%, #8b9a7e 100%) !important;
+        border-radius: 12px 12px 0 0 !important;
+        color: #f8faf7 !important;
         font-weight: 600 !important;
         font-size: 1.1rem !important;
         padding: 1.25rem 1.5rem !important;
-        border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+        border-bottom: 2px solid #a8b5a0 !important;
+        font-family: 'Source Serif Pro', serif !important;
     }
     .streamlit-expander > div:last-child {
-        background: rgba(15, 23, 42, 0.4) !important;
-        border-radius: 0 0 16px 16px !important;
+        background: rgba(248, 250, 247, 0.9) !important;
+        border-radius: 0 0 12px 12px !important;
         padding: 1.5rem !important;
     }
     </style>
