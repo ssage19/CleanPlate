@@ -1,7 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from data_fetcher import HealthInspectionAPI
 from database import init_database, save_restaurant_to_db
@@ -20,57 +18,187 @@ if 'api_client' not in st.session_state:
     st.session_state.api_client = HealthInspectionAPI()
     st.session_state.current_jurisdiction = "NYC"
 
-# Initialize database
+# Initialize database on startup
 init_database()
 
 def main():
-    # Apply CSS styling
+    
+    # SINGLE CONSOLIDATED THEME - All styling in one location only
     st.markdown("""
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+        
+        /* Main App Background - Sophisticated Restaurant Atmosphere */
+        .stApp {
+            background: 
+                radial-gradient(ellipse at top left, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(212, 175, 55, 0.03) 0%, transparent 40%),
+                linear-gradient(135deg, #0a0e13 0%, #1a1f2e 25%, #2d3748 50%, #1a1f2e 75%, #0a0e13 100%) !important;
+            color: #f7fafc !important;
+            font-family: 'Inter', sans-serif !important;
+            min-height: 100vh !important;
+        }
+        
+        /* Header */
         .main-header {
-            text-align: center;
-            padding: 2rem 0;
-            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-            margin: -1rem -1rem 2rem -1rem;
-            border-radius: 0 0 20px 20px;
+            background: linear-gradient(135deg, rgba(20, 25, 35, 0.95) 0%, rgba(45, 55, 72, 0.9) 100%);
+            padding: 4rem 3rem;
+            margin: -1rem -1rem 3rem -1rem;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
+        
         .main-header h1 {
-            color: #f7fafc;
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-        .main-header p {
-            color: #a0aec0;
-            font-size: 1.2rem;
-            margin: 0;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.5;
-        }
-        .info-section {
-            background-color: #2d3748;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin: 1rem 0;
-            border-left: 4px solid #d4af37;
-        }
-        .section-header {
-            color: #f7fafc;
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
+            color: #ffffff;
+            font-size: 4rem;
             font-weight: 600;
+            margin: 0;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
         }
+        
+        .main-header p {
+            color: rgba(212, 175, 55, 0.9);
+            font-size: 0.95rem;
+            margin: 1.5rem 0 0 0;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+        }
+        
+        /* Form Controls */
+        .stSelectbox > div > div {
+            background: rgba(45, 55, 72, 0.9) !important;
+            border: 1px solid rgba(212, 175, 55, 0.4) !important;
+            border-radius: 8px !important;
+            color: #f7fafc !important;
+        }
+        
+        .stTextInput > div > div > input {
+            background: rgba(45, 55, 72, 0.9) !important;
+            border: 1px solid rgba(212, 175, 55, 0.4) !important;
+            border-radius: 8px !important;
+            color: #f7fafc !important;
+            padding: 12px 16px !important;
+        }
+        
+        .stTextInput > div > div > input:focus {
+            border-color: #d4af37 !important;
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2) !important;
+        }
+        
+        /* Buttons */
+        .stButton > button {
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%) !important;
+            border: none !important;
+            border-radius: 8px !important;
+            color: #1a1f2e !important;
+            font-weight: 600 !important;
+            padding: 12px 24px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-size: 0.875rem;
+        }
+        
+        .stButton > button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4) !important;
+        }
+        
+        /* Restaurant Cards */
+        .stExpander {
+            background: rgba(45, 55, 72, 0.9) !important;
+            border: 1px solid rgba(212, 175, 55, 0.3) !important;
+            border-radius: 12px !important;
+            margin: 2rem 0 !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .stExpander > div:first-child {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%) !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            font-family: 'Playfair Display', serif !important;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3) !important;
+        }
+        
+        /* Info Sections */
+        .info-section {
+            background: rgba(45, 55, 72, 0.8);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        .section-header {
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0 0 16px 0;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 8px;
+            font-family: 'Playfair Display', serif;
+        }
+        
         .detail-text {
             color: #e2e8f0;
-            margin: 0.5rem 0;
+            font-weight: 400;
             line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 8px;
         }
+        
+        .detail-text strong {
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        /* Dividers */
         .divider {
             height: 1px;
-            background: linear-gradient(90deg, transparent, #4a5568, transparent);
-            margin: 1.5rem 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.5) 50%, transparent 100%);
+            margin: 2rem 0;
         }
+        
+        /* General Elements */
+        .stMarkdown {
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .stCaption {
+            color: #a0aec0 !important;
+        }
+        
+        /* Hide Streamlit default elements */
+        div[data-testid="stToolbar"] {
+            display: none;
+        }
+        
+        /* Hide Streamlit header */
+        header[data-testid="stHeader"] {
+            display: none !important;
+        }
+        
+        /* Hide top padding from main container */
+        .main .block-container {
+            padding-top: 0rem !important;
+            max-width: 1200px;
+        }
+        
+        /* Ensure no top margin on main container */
+        .main {
+            padding-top: 0rem !important;
+        }
+        
+        /* Remove any top spacing */
         [data-testid="stAppViewContainer"] {
             padding-top: 0rem !important;
         }
@@ -88,20 +216,6 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Navigation tabs
-    tab1, tab2, tab3 = st.tabs(["🔍 Restaurant Search", "📊 City Analytics", "📅 Inspection Trends"])
-    
-    with tab1:
-        show_restaurant_search()
-    
-    with tab2:
-        show_city_analytics()
-    
-    with tab3:
-        show_inspection_trends()
-
-def show_restaurant_search():
-    """Show the main restaurant search interface"""
     # Main interface
     col_juris, col_search, col_location = st.columns([1, 2, 1])
     
@@ -199,230 +313,6 @@ def show_restaurant_search():
             except Exception as e:
                 st.error(f"Error loading restaurant data: {str(e)}")
                 st.info("Please check your internet connection and try again.")
-
-def show_city_analytics():
-    """Show city health performance analytics"""
-    st.markdown("## 🏙️ City Health Performance Dashboard")
-    st.markdown("Compare health inspection performance across all 6 major cities")
-    
-    if st.button("Load City Comparison Data", key="load_city_data"):
-        with st.spinner("Loading data from all cities..."):
-            city_data = {}
-            jurisdictions = ["NYC", "Chicago", "Boston", "Austin", "Seattle", "Los Angeles"]
-            
-            progress_bar = st.progress(0)
-            status_text = st.empty()
-            
-            for i, jurisdiction in enumerate(jurisdictions):
-                status_text.text(f"Loading {jurisdiction} data...")
-                progress_bar.progress((i + 1) / len(jurisdictions))
-                
-                try:
-                    st.session_state.api_client.set_jurisdiction(jurisdiction)
-                    restaurants_df = st.session_state.api_client.get_restaurants(limit=300)
-                    
-                    if not restaurants_df.empty:
-                        city_data[jurisdiction] = restaurants_df
-                        
-                except Exception as e:
-                    st.warning(f"Could not load data for {jurisdiction}: {str(e)}")
-                    
-            status_text.empty()
-            progress_bar.empty()
-            
-            if city_data:
-                create_city_comparison_charts(city_data)
-                create_grade_distribution_charts(city_data)
-            else:
-                st.error("No data available for visualization")
-
-def show_inspection_trends():
-    """Show inspection frequency and trends analysis"""
-    st.markdown("## 📅 Inspection Frequency Analysis")
-    
-    jurisdictions = ["NYC", "Chicago", "Boston", "Austin", "Seattle", "Los Angeles"]
-    selected_city = st.selectbox("Select city for detailed inspection analysis:", jurisdictions)
-    
-    if st.button("Analyze Inspection Patterns"):
-        with st.spinner("Analyzing inspection frequency patterns..."):
-            try:
-                st.session_state.api_client.set_jurisdiction(selected_city)
-                restaurants_df = st.session_state.api_client.get_restaurants(limit=500)
-                
-                if not restaurants_df.empty and 'inspection_date' in restaurants_df.columns:
-                    # Parse inspection dates
-                    restaurants_df['inspection_date_parsed'] = pd.to_datetime(
-                        restaurants_df['inspection_date'], errors='coerce'
-                    )
-                    
-                    # Remove rows with invalid dates
-                    valid_dates_df = restaurants_df.dropna(subset=['inspection_date_parsed'])
-                    
-                    if not valid_dates_df.empty:
-                        create_inspection_timeline(valid_dates_df, selected_city)
-                        create_monthly_patterns(valid_dates_df, selected_city)
-                    else:
-                        st.warning(f"No valid inspection dates found for {selected_city}")
-                else:
-                    st.warning(f"No inspection data available for {selected_city}")
-                    
-            except Exception as e:
-                st.error(f"Error analyzing inspection patterns: {str(e)}")
-
-def create_city_comparison_charts(city_data):
-    """Create city comparison metrics and charts"""
-    st.markdown("### 📊 City Performance Metrics")
-    
-    metrics_data = []
-    
-    for city, df in city_data.items():
-        if df.empty:
-            continue
-            
-        total_restaurants = len(df)
-        
-        # Get grading system info for this city
-        st.session_state.api_client.set_jurisdiction(city)
-        grading_info = st.session_state.api_client.get_grading_system_info()
-        
-        # Calculate grade distribution based on city's grading system
-        if grading_info.get('type') == 'letter':
-            excellent_count = len(df[df['grade'] == 'A'])
-            good_count = len(df[df['grade'] == 'B'])
-            poor_count = len(df[df['grade'].isin(['C', 'F'])])
-        elif grading_info.get('type') == 'pass_fail':
-            excellent_count = len(df[df['grade'] == 'Pass'])
-            good_count = 0
-            poor_count = len(df[df['grade'].isin(['Fail', 'Conditional'])])
-        else:
-            # For numeric systems, use simple categorization
-            excellent_count = len(df) // 3  # Approximate
-            good_count = len(df) // 3
-            poor_count = len(df) - excellent_count - good_count
-        
-        excellent_pct = (excellent_count / total_restaurants * 100) if total_restaurants > 0 else 0
-        good_pct = (good_count / total_restaurants * 100) if total_restaurants > 0 else 0
-        poor_pct = (poor_count / total_restaurants * 100) if total_restaurants > 0 else 0
-        
-        metrics_data.append({
-            'City': city,
-            'Total Restaurants': total_restaurants,
-            'Excellent Performance (%)': round(excellent_pct, 1),
-            'Good Performance (%)': round(good_pct, 1),
-            'Poor Performance (%)': round(poor_pct, 1),
-            'Grading System': grading_info.get('type', 'Unknown')
-        })
-    
-    if metrics_data:
-        metrics_df = pd.DataFrame(metrics_data)
-        
-        # Display metrics table
-        st.dataframe(metrics_df, use_container_width=True)
-        
-        # Create bar chart comparison
-        fig = px.bar(
-            metrics_df, 
-            x='City', 
-            y=['Excellent Performance (%)', 'Good Performance (%)', 'Poor Performance (%)'],
-            title="Health Performance Comparison Across Cities",
-            color_discrete_map={
-                'Excellent Performance (%)': '#22c55e',
-                'Good Performance (%)': '#f59e0b', 
-                'Poor Performance (%)': '#ef4444'
-            },
-            height=500
-        )
-        fig.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_color='white'
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-def create_grade_distribution_charts(city_data):
-    """Create grade distribution pie charts for each city"""
-    st.markdown("### 🎯 Grade Distribution by City")
-    
-    cols = st.columns(2)
-    col_idx = 0
-    
-    for city, df in city_data.items():
-        if df.empty:
-            continue
-            
-        # Get grade distribution
-        grade_counts = df['grade'].value_counts()
-        
-        if len(grade_counts) > 0:
-            with cols[col_idx % 2]:
-                fig = px.pie(
-                    values=grade_counts.values,
-                    names=grade_counts.index,
-                    title=f"{city} Grade Distribution",
-                    color_discrete_map={
-                        'A': '#22c55e', 'Pass': '#22c55e', 'Excellent': '#22c55e',
-                        'B': '#f59e0b', 'Good': '#f59e0b',
-                        'C': '#ef4444', 'Fail': '#ef4444', 'Poor': '#ef4444',
-                        'Conditional': '#f97316'
-                    }
-                )
-                fig.update_traces(textposition='inside', textinfo='percent+label')
-                fig.update_layout(
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    font_color='white'
-                )
-                st.plotly_chart(fig, use_container_width=True)
-                
-            col_idx += 1
-
-def create_inspection_timeline(df, city):
-    """Create inspection timeline visualization"""
-    st.markdown(f"### 📈 {city} Inspection Timeline")
-    
-    # Group by month
-    df['year_month'] = df['inspection_date_parsed'].dt.to_period('M')
-    monthly_counts = df.groupby('year_month').size()
-    
-    # Convert period index to string for plotting
-    monthly_counts.index = monthly_counts.index.astype(str)
-    
-    fig = px.line(
-        x=monthly_counts.index,
-        y=monthly_counts.values,
-        title=f"Monthly Inspection Trends - {city}",
-        labels={'x': 'Month', 'y': 'Number of Inspections'}
-    )
-    fig.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font_color='white'
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-def create_monthly_patterns(df, city):
-    """Create monthly inspection pattern analysis"""
-    st.markdown(f"### 📊 {city} Seasonal Inspection Patterns")
-    
-    # Extract month names
-    df['month_name'] = df['inspection_date_parsed'].dt.month_name()
-    monthly_pattern = df['month_name'].value_counts().reindex([
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ], fill_value=0)
-    
-    fig = px.bar(
-        x=monthly_pattern.index,
-        y=monthly_pattern.values,
-        title=f"Inspections by Month - {city}",
-        labels={'x': 'Month', 'y': 'Number of Inspections'}
-    )
-    fig.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font_color='white'
-    )
-    st.plotly_chart(fig, use_container_width=True)
 
 def display_restaurant_card(restaurant):
     """Display restaurant card with consolidated styling"""
