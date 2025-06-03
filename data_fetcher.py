@@ -101,23 +101,23 @@ class HealthInspectionAPI:
                 }
             },
             "Seattle": {
-                "base_url": "https://data.seattle.gov/resource/f29f-zza5.json",
+                "base_url": "https://data.seattle.gov/resource/d6dy-3h7r.json",
                 "name": "Seattle, WA",
                 "location_field": "zip_code",
-                "grade_field": "grade",
-                "name_field": "name",
+                "grade_field": "current_grade",
+                "name_field": "business_name",
                 "address_fields": ["address", "city", "zip_code"],
                 "grading_system": {
-                    "type": "letter_with_scores",
+                    "type": "letter",
                     "grades": {
-                        "Excellent": {"label": "Excellent", "description": "Excellent Rating", "color": "#22c55e", "priority": "low"},
-                        "Good": {"label": "Good", "description": "Good Rating", "color": "#22c55e", "priority": "low"},
-                        "Okay": {"label": "Okay", "description": "Okay Rating", "color": "#f59e0b", "priority": "medium"},
-                        "Needs Improvement": {"label": "Poor", "description": "Needs Improvement", "color": "#ef4444", "priority": "high"},
-                        "Unsatisfactory": {"label": "Fail", "description": "Unsatisfactory Rating", "color": "#dc2626", "priority": "high"}
+                        "A": {"label": "A", "description": "Excellent", "color": "#22c55e", "priority": "low"},
+                        "B": {"label": "B", "description": "Good", "color": "#f59e0b", "priority": "medium"},
+                        "C": {"label": "C", "description": "Satisfactory", "color": "#ef4444", "priority": "high"},
+                        "D": {"label": "D", "description": "Needs Improvement", "color": "#dc2626", "priority": "high"},
+                        "Ungraded": {"label": "Ungraded", "description": "Not Yet Graded", "color": "#6b7280", "priority": "medium"}
                     },
                     "score_system": True,
-                    "score_description": "Inspection score and violation points"
+                    "score_description": "Inspection rating and violation count"
                 }
             },
             "San Diego": {
@@ -580,10 +580,10 @@ class HealthInspectionAPI:
     
     def _get_seattle_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Seattle restaurant inspection data"""
-        where_conditions = ['grade IS NOT NULL']
+        where_conditions = []
         
         if search_term:
-            where_conditions.append(f"UPPER(name) LIKE '%{search_term.upper()}%'")
+            where_conditions.append(f"UPPER(business_name) LIKE '%{search_term.upper()}%'")
         
         if date_range and len(date_range) == 2:
             start_date = date_range[0].strftime('%Y-%m-%d')
@@ -594,10 +594,11 @@ class HealthInspectionAPI:
         
         params = {
             '$limit': min(limit, 500),
-            '$order': 'inspection_date DESC',
-            '$where': where_clause,
-            '$select': 'name,address,city,zip_code,grade,inspection_score,inspection_date,business_id,program_identifier'
+            '$order': 'inspection_date DESC'
         }
+        
+        if where_conditions:
+            params['$where'] = ' AND '.join(where_conditions)
         
         raw_data = self._make_api_request(self.current_api["base_url"], params)
         
