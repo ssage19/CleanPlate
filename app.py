@@ -57,14 +57,7 @@ def main():
             margin: 0.5rem 0 0 0;
             font-size: 1.1rem;
         }
-        .restaurant-card {
-            background: #262730;
-            border: 1px solid #3d3d3d;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
+
         .grade-badge {
             display: inline-block;
             padding: 0.5rem 1rem;
@@ -96,6 +89,30 @@ def main():
         }
         .non-critical-violation {
             border-left-color: #ffbb33;
+        }
+        .restaurant-block {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%) !important;
+            border: 3px solid #4CAF50 !important;
+            border-radius: 20px !important;
+            padding: 2.5rem !important;
+            margin: 2rem 0 !important;
+            box-shadow: 0 15px 35px rgba(76, 175, 80, 0.15), 0 5px 15px rgba(0, 0, 0, 0.5) !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+        .restaurant-block::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            height: 6px !important;
+            background: linear-gradient(90deg, #4CAF50, #66BB6A, #4CAF50) !important;
+        }
+        .restaurant-block:hover {
+            border-color: #66BB6A !important;
+            box-shadow: 0 20px 40px rgba(76, 175, 80, 0.25), 0 10px 20px rgba(0, 0, 0, 0.6) !important;
+            transform: translateY(-5px) !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -210,53 +227,6 @@ def display_simple_restaurant_card(restaurant):
     
     # Create a visually distinct block for each restaurant
     with st.container():
-        # Enhanced CSS for clear visual blocks
-        st.markdown("""
-        <style>
-        .restaurant-block {
-            background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
-            border: 3px solid #4CAF50;
-            border-radius: 20px;
-            padding: 2.5rem;
-            margin: 2rem 0;
-            box-shadow: 0 15px 35px rgba(76, 175, 80, 0.15), 
-                        0 5px 15px rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-        }
-        .restaurant-block::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, #4CAF50, #66BB6A, #4CAF50);
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-        .restaurant-block::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #4CAF50, transparent);
-        }
-        @keyframes glow {
-            from { opacity: 0.8; }
-            to { opacity: 1; }
-        }
-        .restaurant-block:hover {
-            border-color: #66BB6A;
-            box-shadow: 0 20px 40px rgba(76, 175, 80, 0.25), 
-                        0 10px 20px rgba(0, 0, 0, 0.6);
-            transform: translateY(-5px);
-        }
-        </style>
-        """, unsafe_allow_html=True)
-        
         # Apply the enhanced block styling
         st.markdown('<div class="restaurant-block">', unsafe_allow_html=True)
         
