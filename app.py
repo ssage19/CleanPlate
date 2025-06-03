@@ -237,7 +237,9 @@ def display_simple_restaurant_card(restaurant):
             for violation in violations[:3]:
                 color = "#F44336" if "critical" in violation.lower() else "#FF9800"
                 icon = "🔴" if "critical" in violation.lower() else "🟡"
-                violations_html += f"<div style='color: {color}; margin: 0.5rem 0;'>{icon} {violation}</div>"
+                # Escape HTML characters in violation text
+                violation_text = violation.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
+                violations_html += f"<div style='color: {color}; margin: 0.5rem 0;'>{icon} {violation_text}</div>"
             if len(violations) > 3:
                 violations_html += f"<div style='color: #888; font-size: 0.9rem;'>...and {len(violations) - 3} more violation(s)</div>"
         else:
@@ -252,6 +254,12 @@ def display_simple_restaurant_card(restaurant):
     score_html = ""
     if 'score' in restaurant and pd.notna(restaurant['score']):
         score_html = f"<div style='text-align: center; margin-top: 1rem;'><div style='font-size: 1.5rem; font-weight: bold; color: white;'>{restaurant['score']}</div><div style='font-size: 0.9rem; color: #888;'>Score (Lower is better)</div></div>"
+    
+    # Escape HTML characters in restaurant data
+    name = str(restaurant['name']).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
+    address = str(restaurant.get('address', 'N/A')).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
+    cuisine = str(restaurant.get('cuisine_type', 'Not specified')).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
+    borough = str(restaurant.get('boro', 'N/A')).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
     
     st.markdown(f"""
     <div style="
@@ -276,10 +284,10 @@ def display_simple_restaurant_card(restaurant):
         
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div style="flex: 3; padding-right: 2rem;">
-                <h3 style="color: #4CAF50; margin: 0 0 1rem 0; font-size: 1.5rem;">{restaurant['name']}</h3>
-                <div style="margin: 0.5rem 0;"><strong>📍 Address:</strong> {restaurant.get('address', 'N/A')}</div>
-                <div style="margin: 0.5rem 0;"><strong>🍽️ Cuisine:</strong> {restaurant.get('cuisine_type', 'Not specified')}</div>
-                <div style="margin: 0.5rem 0;"><strong>🏙️ Borough:</strong> {restaurant.get('boro', 'N/A')}</div>
+                <h3 style="color: #4CAF50; margin: 0 0 1rem 0; font-size: 1.5rem;">{name}</h3>
+                <div style="margin: 0.5rem 0;"><strong>📍 Address:</strong> {address}</div>
+                <div style="margin: 0.5rem 0;"><strong>🍽️ Cuisine:</strong> {cuisine}</div>
+                <div style="margin: 0.5rem 0;"><strong>🏙️ Borough:</strong> {borough}</div>
             </div>
             
             <div style="flex: 1; text-align: center;">
