@@ -4,7 +4,12 @@ import plotly.express as px
 from datetime import datetime, timedelta
 import os
 from data_fetcher import HealthInspectionAPI
-from utils import format_grade_badge, calculate_average_rating, get_cuisine_types
+from utils import format_grade_badge, get_cuisine_types
+from database import (
+    init_database, save_restaurant_to_db, save_user_review, 
+    get_restaurant_reviews, calculate_db_average_rating,
+    get_restaurant_violations, search_restaurants_in_db, get_db_statistics
+)
 
 # Configure page
 st.set_page_config(
@@ -120,7 +125,7 @@ def main():
         elif sort_by == "Inspection Date":
             restaurants_df = restaurants_df.sort_values('inspection_date', ascending=(sort_order == "Ascending"))
         elif sort_by == "User Rating":
-            restaurants_df['user_rating'] = restaurants_df['id'].apply(calculate_average_rating)
+            restaurants_df['user_rating'] = restaurants_df['id'].apply(calculate_db_average_rating)
             restaurants_df = restaurants_df.sort_values('user_rating', ascending=(sort_order == "Ascending"))
         
         # Display restaurants in card format
