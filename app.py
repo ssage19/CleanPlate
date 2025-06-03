@@ -39,107 +39,179 @@ initialize_database()
 
 def main():
     
-    # Sage green themed styling with enhanced visual hierarchy
+    # Premium dark theme with purple accents and geometric patterns
     st.markdown("""
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        .stApp {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+        
         .main-header {
-            background: linear-gradient(135deg, #9CAF88, #B8C5A8);
-            padding: 2rem 2.5rem;
-            border-radius: 15px;
-            margin-bottom: 3rem;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(156, 175, 136, 0.3);
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            padding: 3rem 2rem;
+            border-radius: 0 0 24px 24px;
+            margin: -1rem -1rem 2rem -1rem;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
         }
+        
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .main-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(139, 92, 246, 0.04) 2px, rgba(139, 92, 246, 0.04) 4px),
+                repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(59, 130, 246, 0.03) 2px, rgba(59, 130, 246, 0.03) 4px);
+            pointer-events: none;
+        }
+        
         .main-header h1 {
-            color: #2F3E2F;
+            color: #ffffff;
+            font-size: 3.5rem;
+            font-weight: 800;
             margin: 0;
-            font-size: 3rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
+        
         .main-header p {
-            color: #3A4F3A;
+            color: #94a3b8;
+            font-size: 1.25rem;
             margin: 1rem 0 0 0;
-            font-size: 1.3rem;
             font-weight: 400;
+            letter-spacing: 0.01em;
+            position: relative;
+            z-index: 2;
         }
         
-        /* Typography Hierarchy */
-        .section-header {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #9CAF88;
-            margin: 2rem 0 1rem 0;
-            border-bottom: 2px solid #9CAF88;
-            padding-bottom: 0.5rem;
+        .stSelectbox > div > div {
+            background: rgba(15, 23, 42, 0.8) !important;
+            border: 1px solid rgba(139, 92, 246, 0.3) !important;
+            border-radius: 12px !important;
+            color: #ffffff !important;
+            backdrop-filter: blur(10px) !important;
         }
         
-        .content-block {
-            background: #3A4F3A;
+        .stTextInput > div > div > input {
+            background: rgba(15, 23, 42, 0.8) !important;
+            border: 1px solid rgba(139, 92, 246, 0.3) !important;
+            border-radius: 12px !important;
+            color: #ffffff !important;
+            backdrop-filter: blur(10px) !important;
+            padding: 12px 16px !important;
+        }
+        
+        .stTextInput > div > div > input:focus {
+            border-color: rgba(139, 92, 246, 0.6) !important;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+        }
+        
+        .stButton > button {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+            border: none !important;
+            border-radius: 12px !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            padding: 12px 24px !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3) !important;
+        }
+        
+        .stButton > button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4) !important;
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+        }
+        
+        .stExpander {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid rgba(139, 92, 246, 0.2) !important;
+            border-radius: 16px !important;
+            backdrop-filter: blur(20px) !important;
+            margin: 1rem 0 !important;
+        }
+        
+        .stExpander > div:first-child {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
+            border-radius: 16px 16px 0 0 !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+        }
+        
+        .info-section {
+            background: rgba(15, 23, 42, 0.6);
             border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            border-left: 4px solid #9CAF88;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            margin: 16px 0;
+            border: 1px solid rgba(139, 92, 246, 0.15);
+            backdrop-filter: blur(15px);
         }
         
-        .info-group {
-            background: rgba(156, 175, 136, 0.1);
-            border-radius: 10px;
-            padding: 1.25rem;
-            margin: 1rem 0;
-            border: 1px solid rgba(156, 175, 136, 0.3);
-        }
-        
-        .priority-high {
-            background: #8B4F47;
-            color: #F5F7F5;
-        }
-        
-        .priority-medium {
-            background: #C5A572;
-            color: #2F3E2F;
-        }
-        
-        .priority-low {
-            background: #9CAF88;
-            color: #F5F7F5;
-        }
-        
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #9CAF88, transparent);
-            margin: 2rem 0;
-        }
-        
-        /* Enhanced spacing */
-        .spaced-content > * {
-            margin-bottom: 1.5rem;
-        }
-        
-        .card-grid {
-            display: grid;
-            gap: 2rem;
-            margin: 2rem 0;
-        }
-        
-        /* Visual emphasis */
-        .highlight-box {
-            background: linear-gradient(135deg, #9CAF88, #B8C5A8);
-            color: #2F3E2F;
-            padding: 1rem 1.5rem;
-            border-radius: 25px;
+        .section-header {
+            color: #e2e8f0;
+            font-size: 1.1rem;
             font-weight: 600;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(156, 175, 136, 0.4);
+            margin: 0 0 16px 0;
+            letter-spacing: 0.02em;
+            border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+            padding-bottom: 8px;
         }
         
-        .metric-container {
-            background: #3A4F3A;
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            border: 2px solid #9CAF88;
+        .detail-text {
+            color: #cbd5e1;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+        
+        .detail-text strong {
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        .stMarkdown {
+            color: #cbd5e1;
+        }
+        
+        .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {
+            color: #ffffff;
+        }
+        
+        div[data-testid="stToolbar"] {
+            display: none;
+        }
+        
+        .main .block-container {
+            padding-top: 1rem;
+            max-width: 1200px;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -311,45 +383,53 @@ def main():
         st.info("Please check your internet connection and try again.")
 
 def display_simple_restaurant_card(restaurant):
-    """Display restaurant card with enhanced visual hierarchy and sage green theme"""
+    """Display restaurant card with premium dark theme and glassmorphism effects"""
     
-    # Enhanced sage green styling for restaurant cards
+    # Premium dark theme styling for restaurant cards
     st.markdown("""
     <style>
     .streamlit-expander {
-        border: 3px solid #9CAF88 !important;
-        border-radius: 15px !important;
-        background: linear-gradient(135deg, #3A4F3A 0%, #2F3E2F 100%) !important;
-        box-shadow: 0 12px 32px rgba(156, 175, 136, 0.25) !important;
-        margin: 2rem 0 !important;
+        background: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid rgba(139, 92, 246, 0.2) !important;
+        border-radius: 16px !important;
+        backdrop-filter: blur(20px) !important;
+        margin: 1.5rem 0 !important;
         transition: all 0.3s ease !important;
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.5) !important;
     }
     .streamlit-expander:hover {
         transform: translateY(-4px) !important;
-        box-shadow: 0 16px 40px rgba(156, 175, 136, 0.35) !important;
+        box-shadow: 0 16px 48px rgba(15, 23, 42, 0.7) !important;
+        border-color: rgba(139, 92, 246, 0.4) !important;
     }
     .streamlit-expander > div:first-child {
-        background: linear-gradient(90deg, #9CAF88, #B8C5A8, #9CAF88) !important;
-        border-radius: 12px 12px 0 0 !important;
-        color: #2F3E2F !important;
-        font-weight: 700 !important;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%) !important;
+        border-radius: 16px 16px 0 0 !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
         font-size: 1.1rem !important;
-        padding: 1rem 1.5rem !important;
+        padding: 1.25rem 1.5rem !important;
+        border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+    }
+    .streamlit-expander > div:last-child {
+        background: rgba(15, 23, 42, 0.4) !important;
+        border-radius: 0 0 16px 16px !important;
+        padding: 1.5rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
     
     # Use expander with enhanced visual hierarchy
     with st.expander(f"🍽️ {restaurant['name']}", expanded=True):
-        # Restaurant information with clear visual grouping
-        st.markdown('<div class="info-group">', unsafe_allow_html=True)
+        # Restaurant information with dark theme styling
+        st.markdown('<div class="info-section">', unsafe_allow_html=True)
         st.markdown('<h4 class="section-header">📍 Location Details</h4>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([2, 1])
         with col1:
-            st.markdown(f"**Address:** {restaurant.get('address', 'N/A')}")
-            st.markdown(f"**Cuisine:** {restaurant.get('cuisine_type', 'Not specified')}")
-            st.markdown(f"**Borough:** {restaurant.get('boro', 'N/A')}")
+            st.markdown(f'<div class="detail-text"><strong>Address:</strong> {restaurant.get("address", "N/A")}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="detail-text"><strong>Cuisine:</strong> {restaurant.get("cuisine_type", "Not specified")}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="detail-text"><strong>Location:</strong> {restaurant.get("boro", "N/A")}</div>', unsafe_allow_html=True)
         
         with col2:
             # Get jurisdiction-specific grade information
