@@ -254,6 +254,13 @@ def main():
         selected_jurisdiction = reverse_map.get(selected_jurisdiction_display, "NYC")
         
         if selected_jurisdiction != st.session_state.current_jurisdiction:
+            # Clean up any existing database connections before switching
+            try:
+                from database import engine
+                engine.dispose()  # Close all existing connections
+            except:
+                pass  # Ignore cleanup errors
+            
             st.session_state.current_jurisdiction = selected_jurisdiction
             st.session_state.api_client.set_jurisdiction(selected_jurisdiction)
             st.rerun()

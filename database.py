@@ -11,8 +11,15 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable not set")
 
-# SQLAlchemy setup
-engine = create_engine(DATABASE_URL)
+# SQLAlchemy setup with connection pooling and better error handling
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=10,
+    max_overflow=20,
+    pool_pre_ping=True,  # Validates connections before use
+    pool_recycle=3600,   # Recycle connections every hour
+    echo=False
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -70,8 +77,18 @@ def init_database():
         return False
 
 def get_db_session():
-    """Get database session"""
-    return SessionLocal()
+    """Get database session with proper error handling"""
+    session = None
+    try:
+        session = SessionLocal()
+        return session
+    except Exception as e:
+        if session:
+            try:
+                session.close()
+            except:
+                pass
+        return None
 
 def save_restaurant_to_db(restaurant_data, violations_data=None):
     """Save or update restaurant data in database using raw SQL for upsert"""
@@ -152,14 +169,21 @@ def save_restaurant_to_db(restaurant_data, violations_data=None):
 
 def get_restaurant_from_db(restaurant_id):
     """Get restaurant data from database"""
+    session = None
     try:
         session = get_db_session()
+        if not session:
+            return None
         restaurant = session.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
-        session.close()
         return restaurant
     except Exception as e:
-        st.error(f"Failed to get restaurant data: {str(e)}")
         return None
+    finally:
+        if session:
+            try:
+                session.close()
+            except:
+                pass
 
 def save_user_review(restaurant_id, rating, comment):
     """Save user review to database"""
@@ -272,8 +296,12 @@ def get_restaurant_violations(restaurant_id):
 
 def search_restaurants_in_db(search_term=None, location=None, grades=None, limit=100):
     """Search restaurants in database"""
+    session = None
     try:
         session = get_db_session()
+        if not session:
+            return []
+        
         query = session.query(Restaurant)
         
         if search_term:
