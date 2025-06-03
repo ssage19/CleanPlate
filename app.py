@@ -210,19 +210,39 @@ def display_simple_restaurant_card(restaurant):
     
     # Create a container with custom styling
     with st.container():
-        # Apply custom CSS for this card
+        # Apply enhanced CSS for clean bordered cards
         st.markdown("""
         <style>
         .restaurant-container {
             background: #262730;
-            border: 1px solid #3d3d3d;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            border: 2px solid #4a4a4a;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .restaurant-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+        }
+        .restaurant-container:hover {
+            border-color: #4CAF50;
+            box-shadow: 0 12px 30px rgba(76, 175, 80, 0.2);
+            transform: translateY(-3px);
         }
         </style>
         """, unsafe_allow_html=True)
+        
+        # Apply the container styling
+        st.markdown('<div class="restaurant-container">', unsafe_allow_html=True)
         
         # Main restaurant info section
         col1, col2 = st.columns([3, 1])
@@ -272,6 +292,9 @@ def display_simple_restaurant_card(restaurant):
         
         # Add divider
         st.divider()
+        
+        # Close the container div
+        st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
