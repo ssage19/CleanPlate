@@ -120,13 +120,13 @@ class HealthInspectionAPI:
                     "score_description": "Inspection score and violation points"
                 }
             },
-            "San Diego": {
-                "base_url": "https://data.sandiego.gov/resource/jizw-kk23.json",
-                "name": "San Diego, CA",
-                "location_field": "zip",
+            "Los Angeles": {
+                "base_url": "https://data.lacity.org/resource/384s-wygj.json",
+                "name": "Los Angeles, CA",
+                "location_field": "zip_code",
                 "grade_field": "grade",
-                "name_field": "business_name",
-                "address_fields": ["address", "city", "zip"],
+                "name_field": "facility_name",
+                "address_fields": ["facility_address", "city", "zip_code"],
                 "grading_system": {
                     "type": "letter",
                     "grades": {
@@ -135,7 +135,7 @@ class HealthInspectionAPI:
                         "C": {"label": "C", "description": "Grade C", "color": "#ef4444", "priority": "high"}
                     },
                     "score_system": True,
-                    "score_description": "Health inspection score"
+                    "score_description": "Health inspection score and violations"
                 }
             }
         }
@@ -332,8 +332,8 @@ class HealthInspectionAPI:
                 all_data = self._get_austin_restaurants(location, grades, cuisines, search_term, date_range, limit)
             elif self.current_jurisdiction == "Seattle":
                 all_data = self._get_seattle_restaurants(location, grades, cuisines, search_term, date_range, limit)
-            elif self.current_jurisdiction == "San Diego":
-                all_data = self._get_sandiego_restaurants(location, grades, cuisines, search_term, date_range, limit)
+            elif self.current_jurisdiction == "Los Angeles":
+                all_data = self._get_losangeles_restaurants(location, grades, cuisines, search_term, date_range, limit)
             else:
                 return pd.DataFrame()
             
@@ -697,14 +697,14 @@ class HealthInspectionAPI:
             print(f"Boston API error: {e}")
             return []
     
-    def _get_sandiego_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
-        """Fetch San Diego restaurant inspection data"""
+    def _get_losangeles_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
+        """Fetch Los Angeles restaurant inspection data"""
         params = {'$limit': min(limit, 500)}
         
         # Add search filters
         where_conditions = []
         if search_term:
-            where_conditions.append(f"UPPER(business_name) LIKE '%{search_term.upper()}%'")
+            where_conditions.append(f"UPPER(facility_name) LIKE '%{search_term.upper()}%'")
         
         if where_conditions:
             params['$where'] = ' AND '.join(where_conditions)
@@ -718,26 +718,26 @@ class HealthInspectionAPI:
         seen_restaurants = set()
         
         for item in raw_data:
-            business_name = item.get('business_name', '').strip()
-            if not business_name:
+            facility_name = item.get('facility_name', '').strip()
+            if not facility_name:
                 continue
                 
-            restaurant_key = (business_name, item.get('address', ''))
+            restaurant_key = (facility_name, item.get('facility_address', ''))
             
             if restaurant_key in seen_restaurants:
                 continue
             seen_restaurants.add(restaurant_key)
             
             restaurant = {
-                'id': f"SD_{item.get('serial_number', '')}{business_name.replace(' ', '')}",
-                'name': business_name,
-                'address': self._format_sandiego_address(item),
-                'cuisine_type': item.get('business_category', 'Not specified'),
+                'id': f"LA_{item.get('serial_number', '')}{facility_name.replace(' ', '')}",
+                'name': facility_name,
+                'address': self._format_losangeles_address(item),
+                'cuisine_type': item.get('pe_description', 'Not specified'),
                 'grade': item.get('grade', 'Not Graded'),
-                'score': self._safe_int(item.get('inspection_score')),
+                'score': self._safe_int(item.get('score')),
                 'inspection_date': item.get('activity_date', '').split('T')[0] if item.get('activity_date') else 'N/A',
                 'violations': [item.get('violation_description', 'No violations recorded')],
-                'boro': f"San Diego, CA {item.get('zip', '')}",
+                'boro': f"Los Angeles, CA {item.get('zip_code', '')}",
                 'phone': '',
                 'inspection_type': item.get('inspection_type', 'Health Inspection')
             }
@@ -803,11 +803,11 @@ class HealthInspectionAPI:
         address_parts = [part for part in [address, city, state, zip_code] if part]
         return ', '.join(address_parts) if address_parts else 'Address not available'
     
-    def _format_sandiego_address(self, item):
-        """Format San Diego restaurant address from API data"""
-        address = item.get('address', '')
-        city = item.get('city', '')
-        zip_code = item.get('zip', '')
+    def _format_losangeles_address(self, item):
+        """Format Los Angeles restaurant address from API data"""
+        address = item.get('facility_address', '')
+        city = item.get('city', 'Los Angeles')
+        zip_code = item.get('zip_code', '')
         
         address_parts = [part for part in [address, city, zip_code] if part]
         return ', '.join(address_parts) if address_parts else 'Address not available'
