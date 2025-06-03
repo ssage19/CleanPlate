@@ -45,7 +45,13 @@ def main():
         @import url('https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@300;400;600;700&family=Lato:wght@300;400;500;600&display=swap');
         
         .stApp {
-            background: linear-gradient(135deg, #f5f6f4 0%, #e8ebe6 50%, #dde2d6 100%);
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(122, 132, 113, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 154, 126, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(161, 176, 150, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #f8faf7 0%, #f0f3ed 25%, #e8ebe6 50%, #dde2d6 75%, #d5dac9 100%);
+            background-size: 800px 800px, 600px 600px, 400px 400px, 100% 100%;
+            background-attachment: fixed;
             color: #2c3e2d;
             font-family: 'Lato', sans-serif;
         }
@@ -68,8 +74,21 @@ def main():
             right: 0;
             bottom: 0;
             background: 
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="organic" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="2" fill="%23ffffff" fill-opacity="0.08"/><path d="M5,5 Q10,15 15,5" stroke="%23ffffff" stroke-opacity="0.05" fill="none"/></pattern></defs><rect width="100" height="100" fill="url(%23organic)"/></svg>');
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><pattern id="leaf" width="40" height="40" patternUnits="userSpaceOnUse"><ellipse cx="20" cy="15" rx="8" ry="3" fill="%23ffffff" fill-opacity="0.08" transform="rotate(45 20 15)"/><ellipse cx="10" cy="30" rx="6" ry="2" fill="%23ffffff" fill-opacity="0.06" transform="rotate(-30 10 30)"/><path d="M25,25 Q30,20 35,25 Q30,30 25,25" fill="%23ffffff" fill-opacity="0.05"/></pattern></defs><rect width="200" height="200" fill="url(%23leaf)"/></svg>');
             pointer-events: none;
+        }
+        
+        .stApp::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><defs><pattern id="texture" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1" fill="%237a8471" fill-opacity="0.02"/><circle cx="20" cy="20" r="0.5" fill="%238b9a7e" fill-opacity="0.03"/><circle cx="60" cy="60" r="0.8" fill="%23a1b096" fill-opacity="0.02"/></pattern></defs><rect width="400" height="400" fill="url(%23texture)"/></svg>');
+            pointer-events: none;
+            z-index: 0;
         }
         
         .main-header h1 {
@@ -155,12 +174,31 @@ def main():
         }
         
         .info-section {
-            background: rgba(248, 250, 247, 0.8);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 16px 0;
+            background: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="card-texture" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="0.5" fill="%237a8471" fill-opacity="0.03"/><circle cx="15" cy="15" r="0.3" fill="%238b9a7e" fill-opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23card-texture)"/></svg>'),
+                linear-gradient(135deg, rgba(248, 250, 247, 0.95) 0%, rgba(240, 243, 237, 0.9) 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
             border: 2px solid #c8d5c0;
-            box-shadow: 0 4px 16px rgba(122, 132, 113, 0.1);
+            box-shadow: 
+                0 8px 24px rgba(122, 132, 113, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .info-section::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #7a8471, #8b9a7e, #a1b096, #7a8471);
+            border-radius: 18px;
+            z-index: -1;
+            opacity: 0.6;
         }
         
         .section-header {
