@@ -208,53 +208,84 @@ def main():
 def display_simple_restaurant_card(restaurant):
     """Display a simplified restaurant card using Streamlit components"""
     
-    # Create a container with custom styling
+    # Create a visually distinct block for each restaurant
     with st.container():
-        # Apply enhanced CSS for clean bordered cards
+        # Enhanced CSS for clear visual blocks
         st.markdown("""
         <style>
-        .restaurant-container {
-            background: #262730;
-            border: 2px solid #4a4a4a;
-            border-radius: 15px;
-            padding: 2rem;
-            margin: 1.5rem 0;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-            transition: all 0.3s ease;
+        .restaurant-block {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
+            border: 3px solid #4CAF50;
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin: 2rem 0;
+            box-shadow: 0 15px 35px rgba(76, 175, 80, 0.15), 
+                        0 5px 15px rgba(0, 0, 0, 0.5);
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(10px);
         }
-        .restaurant-container::before {
+        .restaurant-block::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #4CAF50, #45a049);
+            height: 6px;
+            background: linear-gradient(90deg, #4CAF50, #66BB6A, #4CAF50);
+            animation: glow 2s ease-in-out infinite alternate;
         }
-        .restaurant-container:hover {
-            border-color: #4CAF50;
-            box-shadow: 0 12px 30px rgba(76, 175, 80, 0.2);
-            transform: translateY(-3px);
+        .restaurant-block::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #4CAF50, transparent);
+        }
+        @keyframes glow {
+            from { opacity: 0.8; }
+            to { opacity: 1; }
+        }
+        .restaurant-block:hover {
+            border-color: #66BB6A;
+            box-shadow: 0 20px 40px rgba(76, 175, 80, 0.25), 
+                        0 10px 20px rgba(0, 0, 0, 0.6);
+            transform: translateY(-5px);
         }
         </style>
         """, unsafe_allow_html=True)
         
-        # Apply the container styling
-        st.markdown('<div class="restaurant-container">', unsafe_allow_html=True)
+        # Apply the enhanced block styling
+        st.markdown('<div class="restaurant-block">', unsafe_allow_html=True)
         
         # Main restaurant info section
         col1, col2 = st.columns([3, 1])
         
         with col1:
-            st.markdown(f"### {restaurant['name']}")
-            st.write(f"**Address:** {restaurant.get('address', 'N/A')}")
-            st.write(f"**Cuisine:** {restaurant.get('cuisine_type', 'Not specified')}")
-            st.write(f"**Borough:** {restaurant.get('boro', 'N/A')}")
+            # Restaurant header section
+            st.markdown(f"""
+            <div style="border-bottom: 1px solid #4CAF50; padding-bottom: 1rem; margin-bottom: 1rem;">
+                <h3 style="color: #4CAF50; margin: 0;">{restaurant['name']}</h3>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Location information block
+            st.markdown("""
+            <div style="background: rgba(76, 175, 80, 0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem; border-left: 4px solid #4CAF50;">
+            """, unsafe_allow_html=True)
+            st.write(f"**📍 Address:** {restaurant.get('address', 'N/A')}")
+            st.write(f"**🍽️ Cuisine:** {restaurant.get('cuisine_type', 'Not specified')}")
+            st.write(f"**🏙️ Borough:** {restaurant.get('boro', 'N/A')}")
+            st.markdown("</div>", unsafe_allow_html=True)
         
         with col2:
-            # Health grade badge
+            # Health grade section
+            st.markdown("""
+            <div style="background: rgba(76, 175, 80, 0.1); padding: 1rem; border-radius: 10px; text-align: center; border: 2px solid #4CAF50;">
+            """, unsafe_allow_html=True)
+            
             grade = restaurant.get('grade', 'Not Yet Graded')
             if grade == 'A':
                 st.success(f"Grade: {grade}")
@@ -268,8 +299,14 @@ def display_simple_restaurant_card(restaurant):
             # Inspection score
             if 'score' in restaurant and pd.notna(restaurant['score']):
                 st.metric("Score", f"{restaurant['score']}", help="Lower is better")
+            
+            st.markdown("</div>", unsafe_allow_html=True)
         
-        # Violations section
+        # Violations section with clear visual block
+        st.markdown("""
+        <div style="background: rgba(76, 175, 80, 0.05); padding: 1.5rem; border-radius: 10px; margin-top: 1rem; border: 1px solid #4CAF50;">
+        """, unsafe_allow_html=True)
+        
         if 'violations' in restaurant and restaurant['violations']:
             violations = [v for v in restaurant['violations'] if v != "No violations recorded"]
             if violations:
@@ -286,14 +323,17 @@ def display_simple_restaurant_card(restaurant):
         else:
             st.success("✅ No violations recorded")
         
-        # Inspection date
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        # Inspection date in footer block
         if restaurant.get('inspection_date') and restaurant['inspection_date'] != 'N/A':
-            st.caption(f"Last inspected: {restaurant['inspection_date']}")
+            st.markdown(f"""
+            <div style="text-align: center; padding: 1rem; margin-top: 1rem; border-top: 1px solid #4CAF50; opacity: 0.8;">
+                <small>Last inspected: {restaurant['inspection_date']}</small>
+            </div>
+            """, unsafe_allow_html=True)
         
-        # Add divider
-        st.divider()
-        
-        # Close the container div
+        # Close the main restaurant block
         st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
