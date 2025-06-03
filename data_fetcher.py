@@ -637,65 +637,71 @@ class HealthInspectionAPI:
     
     def _get_boston_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Boston restaurant inspection data"""
-        # Boston uses CKAN API format
+        # Boston uses CKAN API format with direct datastore access
         params = {
             'resource_id': self.current_api["resource_id"],
-            'limit': min(limit, 500)
+            'limit': min(limit, 100)  # Smaller limit for better performance
         }
         
-        # Add search filters
-        filters = {}
+        # Add search parameter if provided
         if search_term:
-            filters['businessname'] = search_term
+            params['q'] = search_term
         
-        if filters:
-            params['filters'] = json.dumps(filters)
-        
-        raw_data = self._make_api_request(self.current_api["base_url"], params)
-        
-        if not raw_data or 'result' not in raw_data or 'records' not in raw_data['result']:
+        try:
+            raw_data = self._make_api_request(self.current_api["base_url"], params)
+            
+            if not raw_data or 'result' not in raw_data or 'records' not in raw_data['result']:
+                return []
+            
+            records = raw_data['result']['records']
+            restaurants = []
+            seen_restaurants = set()
+            
+            for item in records:
+                business_name = item.get('businessname', '').strip()
+                if not business_name:
+                    continue
+                    
+                restaurant_key = (business_name, item.get('address', ''))
+                
+                if restaurant_key in seen_restaurants:
+                    continue
+                seen_restaurants.add(restaurant_key)
+                
+                # Use Boston's pass/fail result system
+                result = item.get('result', 'Unknown')
+                grade = result if result in ['HE_Pass', 'HE_Fail', 'Conditional'] else 'Unknown'
+                
+                # Get violation information
+                violation_desc = item.get('violdesc', 'No violations recorded')
+                viol_level = item.get('viol_level', '')
+                
+                restaurant = {
+                    'id': f"BOS_{item.get('licenseno', '')}{business_name.replace(' ', '')}",
+                    'name': business_name,
+                    'address': self._format_boston_address(item),
+                    'cuisine_type': item.get('descript', 'Not specified'),
+                    'grade': grade,
+                    'score': None,
+                    'inspection_date': item.get('resultdttm', '').split('T')[0] if item.get('resultdttm') else 'N/A',
+                    'violations': [f"({viol_level}) {violation_desc}" if viol_level else violation_desc],
+                    'boro': f"Boston, MA {item.get('zip', '')}",
+                    'phone': '',
+                    'inspection_type': 'Health Inspection',
+                    'violation_level': viol_level
+                }
+                
+                restaurants.append(restaurant)
+            
+            # Apply cuisine filter if provided
+            if cuisines and "All" not in cuisines:
+                restaurants = [r for r in restaurants if r['cuisine_type'] in cuisines]
+            
+            return restaurants[:limit]
+            
+        except Exception as e:
+            print(f"Boston API error: {e}")
             return []
-        
-        records = raw_data['result']['records']
-        restaurants = []
-        seen_restaurants = set()
-        
-        for item in records:
-            restaurant_key = (item.get('businessname', '').strip(), item.get('address', ''))
-            
-            if restaurant_key in seen_restaurants:
-                continue
-            seen_restaurants.add(restaurant_key)
-            
-            # Use Boston's pass/fail result system
-            result = item.get('result', 'Unknown')
-            grade = result if result in ['HE_Pass', 'HE_Fail', 'Conditional'] else 'HE_Fail'
-            
-            # Get violation information
-            violation_desc = item.get('violdesc', 'No violations recorded')
-            viol_level = item.get('viol_level', '')
-            
-            restaurant = {
-                'id': f"BOS_{item.get('licenseno', '')}{item.get('businessname', '').replace(' ', '')}",
-                'name': item.get('businessname', 'Unknown Restaurant').strip(),
-                'address': self._format_boston_address(item),
-                'cuisine_type': item.get('descript', 'Not specified'),
-                'grade': grade,
-                'score': None,
-                'inspection_date': item.get('resultdttm', '').split('T')[0] if item.get('resultdttm') else 'N/A',
-                'violations': [f"({viol_level}) {violation_desc}" if viol_level else violation_desc],
-                'boro': f"Boston, MA {item.get('zip', '')}",
-                'phone': '',
-                'inspection_type': 'Health Inspection',
-                'violation_level': viol_level
-            }
-            
-            restaurants.append(restaurant)
-        
-        if cuisines and "All" not in cuisines:
-            restaurants = [r for r in restaurants if r['cuisine_type'] in cuisines]
-        
-        return restaurants[:limit]
     
     def _get_sandiego_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch San Diego restaurant inspection data"""
