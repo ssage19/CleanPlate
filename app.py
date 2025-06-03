@@ -225,7 +225,7 @@ def main():
             </svg>
             CleanPlate
         </h1>
-        <p>Premium Restaurant Health Inspection Intelligence</p>
+        <p>Clean Plate: Peeking behind the kitchen door, so you can dine without doubt. We dish out health inspection scores, making informed choices deliciously easy.</p>
     </div>
     """, unsafe_allow_html=True)
     
