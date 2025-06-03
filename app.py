@@ -132,33 +132,41 @@ def main():
     selected_cuisines = None
     date_range = None
     
+    # Add search button to control when search executes
+    search_button = st.button("Search", type="primary", use_container_width=False)
+    
+    # Initialize session state for search trigger
+    if 'search_triggered' not in st.session_state:
+        st.session_state.search_triggered = False
+    
     # Main content area
     try:
-        # Show loading progress when user has entered search criteria
-        if search_term or selected_location != "All":
-            with st.spinner("Loading results..."):
-                progress_bar = st.progress(0)
-                progress_bar.progress(25)
-                
+        # Only search when button is clicked or on initial load
+        if search_button or not st.session_state.search_triggered:
+            st.session_state.search_triggered = True
+            
+            # Show spinner only when actively searching
+            if search_button and (search_term or selected_location != "All"):
+                with st.spinner("Searching for results..."):
+                    restaurants_df = st.session_state.api_client.get_restaurants(
+                        location=selected_location if selected_location != "All" else None,
+                        grades=selected_grades,
+                        cuisines=selected_cuisines,
+                        search_term=search_term,
+                        date_range=date_range
+                    )
+            else:
+                # Load default data without spinner for initial load
                 restaurants_df = st.session_state.api_client.get_restaurants(
-                    location=selected_location if selected_location != "All" else None,
+                    location=None,
                     grades=selected_grades,
                     cuisines=selected_cuisines,
-                    search_term=search_term,
+                    search_term=None,
                     date_range=date_range
                 )
-                
-                progress_bar.progress(100)
-                progress_bar.empty()
         else:
-            # Load default data without progress bar
-            restaurants_df = st.session_state.api_client.get_restaurants(
-                location=None,
-                grades=selected_grades,
-                cuisines=selected_cuisines,
-                search_term=None,
-                date_range=date_range
-            )
+            # Return empty dataframe if search hasn't been triggered
+            restaurants_df = pd.DataFrame()
         
         # Handle empty results quietly
         if restaurants_df.empty:
