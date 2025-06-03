@@ -108,16 +108,17 @@ class HealthInspectionAPI:
                 "name_field": "name",
                 "address_fields": ["address", "city", "zip_code"],
                 "grading_system": {
-                    "type": "letter",
+                    "type": "violation_points",
                     "grades": {
-                        "Excellent": {"label": "Excellent", "description": "Excellent Rating", "color": "#22c55e", "priority": "low"},
-                        "Good": {"label": "Good", "description": "Good Rating", "color": "#22c55e", "priority": "low"},
-                        "Okay": {"label": "Okay", "description": "Okay Rating", "color": "#f59e0b", "priority": "medium"},
-                        "Needs Improvement": {"label": "Poor", "description": "Needs Improvement", "color": "#ef4444", "priority": "high"},
-                        "Unsatisfactory": {"label": "Fail", "description": "Unsatisfactory Rating", "color": "#dc2626", "priority": "high"}
+                        "0": {"label": "Excellent", "description": "No Violations (0 points)", "color": "#22c55e", "priority": "low"},
+                        "1-10": {"label": "Good", "description": "Minor Issues (1-10 points)", "color": "#22c55e", "priority": "low"},
+                        "11-25": {"label": "Fair", "description": "Some Concerns (11-25 points)", "color": "#f59e0b", "priority": "medium"},
+                        "26-50": {"label": "Poor", "description": "Multiple Issues (26-50 points)", "color": "#ef4444", "priority": "high"},
+                        "51+": {"label": "Critical", "description": "Serious Violations (51+ points)", "color": "#dc2626", "priority": "high"},
+                        "Ungraded": {"label": "Pending", "description": "Not Yet Inspected", "color": "#6b7280", "priority": "medium"}
                     },
                     "score_system": True,
-                    "score_description": "Inspection score and violation points"
+                    "score_description": "Violation points (lower is better)"
                 }
             },
             "Los Angeles": {
@@ -608,13 +609,29 @@ class HealthInspectionAPI:
                 continue
             seen_restaurants.add(restaurant_key)
             
+            # Convert violation points to meaningful grade categories
+            violation_points = self._safe_int(item.get('inspection_score')) or 0
+            
+            if violation_points == 0:
+                grade = "0"
+            elif violation_points <= 10:
+                grade = "1-10"
+            elif violation_points <= 25:
+                grade = "11-25"
+            elif violation_points <= 50:
+                grade = "26-50"
+            elif violation_points > 50:
+                grade = "51+"
+            else:
+                grade = "Ungraded"
+            
             restaurant = {
                 'id': f"SEA_{item.get('business_id', '')}{business_name.replace(' ', '')}",
                 'name': business_name,
                 'address': self._format_seattle_address(item),
                 'cuisine_type': item.get('program_identifier', 'Not specified'),
-                'grade': item.get('grade', 'Ungraded'),
-                'score': self._safe_int(item.get('inspection_score')),
+                'grade': grade,
+                'score': violation_points,
                 'inspection_date': item.get('inspection_date', '').split('T')[0] if item.get('inspection_date') else 'N/A',
                 'violations': [item.get('violation_description', 'No violations recorded')],
                 'boro': f"Seattle, WA {item.get('zip_code', '')}",
