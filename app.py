@@ -36,49 +36,31 @@ initialize_database()
 
 def main():
     st.title("🏥 Restaurant Health Inspection Tracker")
-    st.markdown("Make informed dining decisions based on official health inspection data")
+    st.markdown("Search restaurants and view their health inspection grades and violations")
     
-    # Sidebar for filters
-    with st.sidebar:
-        st.header("🔍 Filter & Search")
-        
-        # Search functionality
-        search_term = st.text_input("Search restaurants", placeholder="Enter restaurant name...")
-        
+    # Main search interface
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        search_term = st.text_input(
+            "Search for a restaurant", 
+            placeholder="Enter restaurant name...",
+            help="Search by restaurant name to see health inspection results"
+        )
+    
+    with col2:
         # Location filter
         try:
             locations = st.session_state.api_client.get_available_locations()
-            selected_location = st.selectbox("Location", ["All"] + locations)
+            selected_location = st.selectbox("Borough", ["All"] + locations)
         except Exception as e:
             st.error(f"Failed to load locations: {str(e)}")
             selected_location = "All"
-        
-        # Grade filter
-        selected_grades = st.multiselect(
-            "Health Grades",
-            ["A", "B", "C", "Grade Pending", "Not Yet Graded"],
-            default=["A", "B", "C"]
-        )
-        
-        # Cuisine type filter
-        try:
-            cuisine_types = get_cuisine_types()
-            selected_cuisines = st.multiselect("Cuisine Type", ["All"] + cuisine_types)
-        except Exception as e:
-            st.error(f"Failed to load cuisine types: {str(e)}")
-            selected_cuisines = ["All"]
-        
-        # Inspection date filter
-        st.subheader("Inspection Date Range")
-        date_range = st.date_input(
-            "Select date range",
-            value=(datetime.now() - timedelta(days=365), datetime.now()),
-            max_value=datetime.now()
-        )
-        
-        # Apply filters button
-        if st.button("Apply Filters", type="primary"):
-            st.rerun()
+    
+    # Set default grades to show all grades
+    selected_grades = ["A", "B", "C", "Grade Pending", "Not Yet Graded"]
+    selected_cuisines = None
+    date_range = None
     
     # Main content area
     try:
@@ -87,7 +69,7 @@ def main():
             restaurants_df = st.session_state.api_client.get_restaurants(
                 location=selected_location if selected_location != "All" else None,
                 grades=selected_grades,
-                cuisines=selected_cuisines if "All" not in selected_cuisines else None,
+                cuisines=selected_cuisines,
                 search_term=search_term,
                 date_range=date_range
             )
@@ -103,130 +85,64 @@ def main():
             st.warning("No restaurants found matching your criteria. Please adjust your filters.")
             return
         
-        # Display summary statistics
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.metric("Total Restaurants", len(restaurants_df))
-        with col2:
-            grade_a_count = len(restaurants_df[restaurants_df['grade'] == 'A'])
-            st.metric("Grade A Restaurants", grade_a_count)
-        with col3:
-            avg_score = restaurants_df['score'].mean() if 'score' in restaurants_df.columns else 0
-            st.metric("Average Inspection Score", f"{avg_score:.1f}")
-        with col4:
-            recent_inspections = len(restaurants_df[
-                pd.to_datetime(restaurants_df['inspection_date']) >= (datetime.now() - timedelta(days=30))
-            ])
-            st.metric("Recent Inspections (30 days)", recent_inspections)
+        # Show results count
+        if search_term:
+            st.subheader(f"Found {len(restaurants_df)} restaurants matching '{search_term}'")
+        else:
+            st.subheader(f"Showing {len(restaurants_df)} recent inspections")
         
-        # Sort options
-        sort_col1, sort_col2 = st.columns([3, 1])
-        with sort_col1:
-            sort_by = st.selectbox(
-                "Sort by:",
-                ["Restaurant Name", "Health Grade", "Inspection Date", "User Rating"],
-                index=2
-            )
-        with sort_col2:
-            sort_order = st.selectbox("Order:", ["Descending", "Ascending"])
+        # Sort by most recent inspections by default
+        restaurants_df = restaurants_df.sort_values('inspection_date', ascending=False)
         
-        # Sort dataframe
-        if sort_by == "Restaurant Name":
-            restaurants_df = restaurants_df.sort_values('name', ascending=(sort_order == "Ascending"))
-        elif sort_by == "Health Grade":
-            grade_order = {'A': 1, 'B': 2, 'C': 3, 'Grade Pending': 4, 'Not Yet Graded': 5}
-            restaurants_df['grade_order'] = restaurants_df['grade'].map(grade_order)
-            restaurants_df = restaurants_df.sort_values('grade_order', ascending=(sort_order == "Ascending"))
-        elif sort_by == "Inspection Date":
-            restaurants_df = restaurants_df.sort_values('inspection_date', ascending=(sort_order == "Ascending"))
-        elif sort_by == "User Rating":
-            restaurants_df['user_rating'] = restaurants_df['id'].apply(calculate_db_average_rating)
-            restaurants_df = restaurants_df.sort_values('user_rating', ascending=(sort_order == "Ascending"))
-        
-        # Display restaurants in card format
-        st.header(f"📋 Restaurants ({len(restaurants_df)} found)")
-        
-        # Create cards in columns (2 per row)
-        for i in range(0, len(restaurants_df), 2):
-            col1, col2 = st.columns(2)
-            
-            # First restaurant card
-            with col1:
-                display_restaurant_card(restaurants_df.iloc[i])
-            
-            # Second restaurant card (if exists)
-            if i + 1 < len(restaurants_df):
-                with col2:
-                    display_restaurant_card(restaurants_df.iloc[i + 1])
+        # Display restaurants as simple list
+        for _, restaurant in restaurants_df.iterrows():
+            display_simple_restaurant_card(restaurant)
     
     except Exception as e:
         st.error(f"Error loading restaurant data: {str(e)}")
         st.info("Please check your internet connection and try again.")
 
-def display_restaurant_card(restaurant):
-    """Display a single restaurant card with health inspection info and user reviews"""
+def display_simple_restaurant_card(restaurant):
+    """Display a simplified restaurant card with health inspection info"""
     
     with st.container():
-        # Restaurant header
-        st.markdown(f"### {restaurant['name']}")
-        
-        # Grade badge and basic info
-        col1, col2, col3 = st.columns([1, 1, 2])
+        # Create columns for layout
+        col1, col2, col3 = st.columns([3, 1, 1])
         
         with col1:
+            st.markdown(f"### {restaurant['name']}")
+            st.write(f"**Address:** {restaurant.get('address', 'N/A')}")
+            if restaurant.get('cuisine_type'):
+                st.write(f"**Cuisine:** {restaurant['cuisine_type']}")
+        
+        with col2:
+            # Health grade badge
             grade_html = format_grade_badge(restaurant['grade'])
             st.markdown(grade_html, unsafe_allow_html=True)
         
-        with col2:
-            if 'score' in restaurant and pd.notna(restaurant['score']):
-                st.metric("Score", f"{restaurant['score']}/100")
-        
         with col3:
-            user_rating = calculate_db_average_rating(restaurant['id'])
-            if user_rating > 0:
-                st.metric("User Rating", f"⭐ {user_rating:.1f}/5")
+            # Inspection score
+            if 'score' in restaurant and pd.notna(restaurant['score']):
+                st.metric("Score", f"{restaurant['score']}")
+                st.caption("(Lower is better)")
         
-        # Restaurant details
-        st.write(f"**Address:** {restaurant.get('address', 'N/A')}")
-        st.write(f"**Cuisine:** {restaurant.get('cuisine_type', 'N/A')}")
-        st.write(f"**Last Inspection:** {restaurant.get('inspection_date', 'N/A')}")
-        
-        # Inspection details
+        # Violations section
         if 'violations' in restaurant and restaurant['violations']:
-            with st.expander("🔍 Inspection Details"):
-                st.write("**Violations Found:**")
-                for violation in restaurant['violations']:
+            violations = [v for v in restaurant['violations'] if v != "No violations recorded"]
+            if violations:
+                st.write("**⚠️ Violations Found:**")
+                for violation in violations[:3]:  # Show up to 3 violations
                     st.write(f"• {violation}")
+                if len(violations) > 3:
+                    st.caption(f"...and {len(violations) - 3} more violation(s)")
+            else:
+                st.write("**✅ No violations recorded**")
+        else:
+            st.write("**✅ No violations recorded**")
         
-        # User reviews section
-        restaurant_id = restaurant['id']
-        
-        with st.expander("💬 User Reviews & Ratings"):
-            # Display existing reviews from database
-            reviews = get_restaurant_reviews(restaurant_id)
-            if reviews:
-                st.write("**Recent Reviews:**")
-                for review in reviews[:3]:  # Show last 3 reviews
-                    st.write(f"⭐ **{review.rating}/5** - {review.comment}")
-                    st.caption(f"Posted on {review.created_at.strftime('%Y-%m-%d %H:%M')}")
-                    st.divider()
-            
-            # Add new review form
-            st.write("**Add Your Review:**")
-            rating = st.slider(f"Rating for {restaurant['name']}", 1, 5, 3, key=f"rating_{restaurant_id}")
-            comment = st.text_area(f"Your experience", key=f"comment_{restaurant_id}", 
-                                 placeholder="Share your thoughts about this restaurant's cleanliness and food safety...")
-            
-            if st.button(f"Submit Review", key=f"submit_{restaurant_id}"):
-                if comment.strip():
-                    # Save review to database
-                    if save_user_review(restaurant_id, rating, comment.strip()):
-                        st.success("Review submitted successfully!")
-                        st.rerun()
-                    else:
-                        st.error("Failed to submit review. Please try again.")
-                else:
-                    st.warning("Please enter a comment for your review.")
+        # Inspection date
+        if restaurant.get('inspection_date') and restaurant['inspection_date'] != 'N/A':
+            st.caption(f"Last inspected: {restaurant['inspection_date']}")
         
         st.divider()
 

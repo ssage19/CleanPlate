@@ -11,7 +11,7 @@ class HealthInspectionAPI:
     
     def __init__(self):
         # NYC Open Data API endpoint for restaurant inspections
-        self.nyc_api_base = "https://data.cityofnewyork.us/resource/43nn-pn8j.json"
+        self.nyc_api_base = "https://data.cityofnewyork.us/resource/43nn-pn8j.json$offset=1000"
         
         # Cache for API responses
         self._location_cache = None
