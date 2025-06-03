@@ -134,33 +134,17 @@ def main():
     
     # Main content area
     try:
-        # Fetch restaurant data with progress indicator
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-        status_text.text("Connecting to NYC Health Department database...")
+        # Fetch restaurant data silently
+        restaurants_df = st.session_state.api_client.get_restaurants(
+            location=selected_location if selected_location != "All" else None,
+            grades=selected_grades,
+            cuisines=selected_cuisines,
+            search_term=search_term,
+            date_range=date_range
+        )
         
-        with st.spinner("Retrieving restaurant inspection data..."):
-            restaurants_df = st.session_state.api_client.get_restaurants(
-                location=selected_location if selected_location != "All" else None,
-                grades=selected_grades,
-                cuisines=selected_cuisines,
-                search_term=search_term,
-                date_range=date_range
-            )
-            
-        # Clear progress indicators
-        progress_bar.progress(1.0)
-        status_text.text("Data retrieval complete!")
-        
-        # Display data statistics with enhanced styling
-        if not restaurants_df.empty:
-            st.markdown(f"""
-            <div class="stats-container">
-                <h4 style="color: #00C851; margin: 0;">✅ Retrieved {len(restaurants_df)} restaurant inspection records</h4>
-                <p style="color: #b0b0b0; margin: 0.5rem 0 0 0;">Data sourced from NYC Health Department database</p>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
+        # Handle empty results quietly
+        if restaurants_df.empty:
             st.markdown("""
             <div class="stats-container">
                 <h4 style="color: #ffbb33; margin: 0;">ℹ️ No restaurants found</h4>
