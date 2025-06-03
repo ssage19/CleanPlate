@@ -225,34 +225,31 @@ def main():
 def display_simple_restaurant_card(restaurant):
     """Display a simplified restaurant card using Streamlit components"""
     
-    # Use CSS styling that works with Streamlit containers
+    # Style the expander to look like a bordered card
     st.markdown("""
     <style>
-    .bordered-card {
+    .streamlit-expander {
         border: 3px solid #4CAF50 !important;
         border-radius: 15px !important;
-        padding: 1.5rem !important;
-        margin: 1rem 0 !important;
         background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%) !important;
         box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2) !important;
+        margin: 1rem 0 !important;
+    }
+    .streamlit-expander > div:first-child {
+        background: linear-gradient(90deg, #4CAF50, #66BB6A, #4CAF50) !important;
+        border-radius: 12px 12px 0 0 !important;
+        color: white !important;
+        font-weight: bold !important;
     }
     </style>
     """, unsafe_allow_html=True)
     
-    # Create container with border class
-    with st.container():
-        st.markdown('<div class="bordered-card">', unsafe_allow_html=True)
-        
-        # Top accent bar
-        st.markdown("""
-        <div style="height: 4px; background: linear-gradient(90deg, #4CAF50, #66BB6A, #4CAF50); margin: -1.5rem -1.5rem 1rem -1.5rem; border-radius: 12px 12px 0 0;"></div>
-        """, unsafe_allow_html=True)
-        
+    # Use expander as a bordered container
+    with st.expander(f"🍽️ {restaurant['name']}", expanded=True):
         # Main restaurant info section
         col1, col2 = st.columns([3, 1])
         
         with col1:
-            st.markdown(f"### {restaurant['name']}")
             st.write(f"**📍 Address:** {restaurant.get('address', 'N/A')}")
             st.write(f"**🍽️ Cuisine:** {restaurant.get('cuisine_type', 'Not specified')}")
             st.write(f"**🏙️ Borough:** {restaurant.get('boro', 'N/A')}")
@@ -293,8 +290,6 @@ def display_simple_restaurant_card(restaurant):
         # Inspection date
         if restaurant.get('inspection_date') and restaurant['inspection_date'] != 'N/A':
             st.caption(f"Last inspected: {restaurant['inspection_date']}")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
