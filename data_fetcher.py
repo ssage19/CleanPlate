@@ -69,7 +69,7 @@ class HealthInspectionAPI:
             # Return default NYC boroughs if API fails
             return ['MANHATTAN', 'BROOKLYN', 'QUEENS', 'BRONX', 'STATEN ISLAND']
     
-    def get_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=5000):
+    def get_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=50000):
         """
         Fetch restaurant inspection data with filters and pagination for larger datasets
         """
@@ -98,8 +98,10 @@ class HealthInspectionAPI:
             all_data = []
             batch_size = 1000  # NYC Open Data API limit per request
             offset = 0
+            max_requests = 50  # Increase to retrieve more data
+            requests_made = 0
             
-            while len(all_data) < limit:
+            while len(all_data) < limit and requests_made < max_requests:
                 remaining = limit - len(all_data)
                 current_limit = min(batch_size, remaining)
                 
@@ -111,6 +113,7 @@ class HealthInspectionAPI:
                 }
                 
                 batch_data = self._make_api_request(self.nyc_api_base, params)
+                requests_made += 1
                 
                 if not batch_data or len(batch_data) == 0:
                     break  # No more data available
@@ -121,6 +124,10 @@ class HealthInspectionAPI:
                 # If we got less than requested, we've reached the end
                 if len(batch_data) < current_limit:
                     break
+                
+                # Add a small delay to be respectful to the API
+                import time
+                time.sleep(0.1)
             
             if not all_data:
                 return pd.DataFrame()

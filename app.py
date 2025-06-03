@@ -135,7 +135,11 @@ def main():
     # Main content area
     try:
         # Fetch restaurant data with progress indicator
-        with st.spinner("Loading restaurant inspection data from NYC database..."):
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        status_text.text("Connecting to NYC Health Department database...")
+        
+        with st.spinner("Retrieving restaurant inspection data..."):
             restaurants_df = st.session_state.api_client.get_restaurants(
                 location=selected_location if selected_location != "All" else None,
                 grades=selected_grades,
@@ -144,6 +148,10 @@ def main():
                 date_range=date_range
             )
             
+        # Clear progress indicators
+        progress_bar.progress(1.0)
+        status_text.text("Data retrieval complete!")
+        
         # Display data statistics with enhanced styling
         if not restaurants_df.empty:
             st.markdown(f"""
