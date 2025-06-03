@@ -17,7 +17,8 @@ class HealthInspectionAPI:
         self._location_cache = None
         self._data_cache = {}
         self._cache_timestamp = None
-        self._cache_duration = 3600  # 1 hour cache
+        self._cache_duration = 1800  # 30 minute cache for faster responses
+        self._search_cache = {}  # Cache for search results
     
     def _make_api_request(self, endpoint, params=None):
         """Make API request with enhanced error handling and retries"""
@@ -100,6 +101,15 @@ class HealthInspectionAPI:
         Fetch restaurant inspection data with filters and pagination for larger datasets
         """
         try:
+            # Create cache key for this search
+            cache_key = f"{location}_{grades}_{search_term}_{limit}"
+            
+            # Check if we have cached results
+            import time
+            if cache_key in self._search_cache:
+                cached_result, cached_time = self._search_cache[cache_key]
+                if time.time() - cached_time < 300:  # 5 minute cache for searches
+                    return cached_result
             # Build where clause conditions
             where_conditions = ['grade IS NOT NULL']
             
@@ -121,42 +131,18 @@ class HealthInspectionAPI:
             
             where_clause = ' AND '.join(where_conditions)
             
-            # Fetch data with pagination for larger datasets
-            all_data = []
-            batch_size = 1000  # NYC Open Data API limit per request
-            offset = 0
-            max_requests = 2  # Reduce to prevent timeouts
-            requests_made = 0
+            # Optimized single request for faster searches
+            params = {
+                '$limit': min(limit, 500),  # Reduced limit for faster response
+                '$order': 'inspection_date DESC',
+                '$where': where_clause,
+                '$select': 'camis,dba,boro,building,street,zipcode,phone,cuisine_description,inspection_date,action,violation_code,violation_description,critical_flag,score,grade,grade_date,record_date,inspection_type'
+            }
             
-            while len(all_data) < limit and requests_made < max_requests:
-                remaining = limit - len(all_data)
-                current_limit = min(batch_size, remaining)
-                
-                params = {
-                    '$limit': current_limit,
-                    '$offset': offset,
-                    '$order': 'inspection_date DESC',
-                    '$where': where_clause
-                }
-                
-                batch_data = self._make_api_request(self.nyc_api_base, params)
-                requests_made += 1
-                
-                if not batch_data or len(batch_data) == 0:
-                    break  # No more data available
-                
-                all_data.extend(batch_data)
-                offset += len(batch_data)
-                
-                # If we got less than requested, we've reached the end
-                if len(batch_data) < current_limit:
-                    break
-                
-                # Add a delay to be respectful to the API and prevent rate limiting
-                import time
-                time.sleep(0.5)
+            all_data = self._make_api_request(self.nyc_api_base, params)
             
             if not all_data:
+                all_data = []
                 return pd.DataFrame()
             
             # Process and clean data
@@ -194,7 +180,12 @@ class HealthInspectionAPI:
             if cuisines and "All" not in cuisines:
                 df = df[df['cuisine_type'].isin(cuisines)]
             
-            return df.head(limit)
+            result_df = df.head(limit)
+            
+            # Cache the result for faster subsequent searches
+            self._search_cache[cache_key] = (result_df, time.time())
+            
+            return result_df
             
         except Exception as e:
             raise Exception(f"Failed to fetch restaurant data: {str(e)}")
