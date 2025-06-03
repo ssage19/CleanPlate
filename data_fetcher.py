@@ -59,22 +59,26 @@ class HealthInspectionAPI:
             },
             "Boston": {
                 "base_url": "https://data.boston.gov/api/3/action/datastore_search",
-                "resource_id": "f1e13724-284d-478c-b8bc-ef042aa5b70f",
+                "resource_id": "4582bec6-2b4f-4f9e-bc55-cbaa73117f4c",
                 "name": "Boston, MA",
                 "location_field": "city",
                 "grade_field": "viollevel",
                 "name_field": "businessname",
                 "address_fields": ["address", "city", "state", "zip"],
                 "grading_system": {
-                    "type": "violation_level",
+                    "type": "pass_fail",
                     "grades": {
-                        "*": {"label": "Critical", "description": "Critical Violations", "color": "#ef4444", "priority": "high"},
-                        "**": {"label": "Serious", "description": "Serious Violations", "color": "#f59e0b", "priority": "medium"},
-                        "***": {"label": "Minor", "description": "Minor Violations", "color": "#22c55e", "priority": "low"},
-                        "No Violations": {"label": "Clean", "description": "No Violations Found", "color": "#22c55e", "priority": "low"}
+                        "HE_Pass": {"label": "Pass", "description": "Passed Health Inspection", "color": "#22c55e", "priority": "low"},
+                        "HE_Fail": {"label": "Fail", "description": "Failed Health Inspection", "color": "#ef4444", "priority": "high"},
+                        "Conditional": {"label": "Conditional", "description": "Conditional Pass", "color": "#f59e0b", "priority": "medium"}
                     },
                     "score_system": False,
-                    "violation_system": True
+                    "violation_system": True,
+                    "violation_levels": {
+                        "*": {"label": "Critical", "description": "Critical Violations", "color": "#ef4444"},
+                        "**": {"label": "Serious", "description": "Serious Violations", "color": "#f59e0b"},
+                        "***": {"label": "Minor", "description": "Minor Violations", "color": "#22c55e"}
+                    }
                 }
             },
             "Austin": {
@@ -663,22 +667,27 @@ class HealthInspectionAPI:
                 continue
             seen_restaurants.add(restaurant_key)
             
-            # Map violation level to grade
-            viol_level = item.get('viollevel', 'No Violations')
-            grade = viol_level if viol_level in ['*', '**', '***'] else 'No Violations'
+            # Use Boston's pass/fail result system
+            result = item.get('result', 'Unknown')
+            grade = result if result in ['HE_Pass', 'HE_Fail', 'Conditional'] else 'HE_Fail'
+            
+            # Get violation information
+            violation_desc = item.get('violdesc', 'No violations recorded')
+            viol_level = item.get('viol_level', '')
             
             restaurant = {
                 'id': f"BOS_{item.get('licenseno', '')}{item.get('businessname', '').replace(' ', '')}",
                 'name': item.get('businessname', 'Unknown Restaurant').strip(),
                 'address': self._format_boston_address(item),
-                'cuisine_type': item.get('dbaname', 'Not specified'),
+                'cuisine_type': item.get('descript', 'Not specified'),
                 'grade': grade,
                 'score': None,
                 'inspection_date': item.get('resultdttm', '').split('T')[0] if item.get('resultdttm') else 'N/A',
-                'violations': [item.get('violdesc', 'No violations recorded')],
+                'violations': [f"({viol_level}) {violation_desc}" if viol_level else violation_desc],
                 'boro': f"Boston, MA {item.get('zip', '')}",
                 'phone': '',
-                'inspection_type': 'Food Establishment Inspection'
+                'inspection_type': 'Health Inspection',
+                'violation_level': viol_level
             }
             
             restaurants.append(restaurant)
