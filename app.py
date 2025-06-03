@@ -225,89 +225,76 @@ def main():
 def display_simple_restaurant_card(restaurant):
     """Display a simplified restaurant card using Streamlit components"""
     
-    # Create the complete card with content inside the styled div
-    grade = restaurant.get('grade', 'Not Yet Graded')
-    grade_color = "#4CAF50" if grade == 'A' else "#FF9800" if grade == 'B' else "#F44336" if grade == 'C' else "#2196F3"
-    
-    violations_html = ""
-    if 'violations' in restaurant and restaurant['violations']:
-        violations = [v for v in restaurant['violations'] if v != "No violations recorded"]
-        if violations:
-            violations_html = "<h4 style='color: #FF9800; margin: 1rem 0 0.5rem 0;'>⚠️ Health Violations:</h4>"
-            for violation in violations[:3]:
-                color = "#F44336" if "critical" in violation.lower() else "#FF9800"
-                icon = "🔴" if "critical" in violation.lower() else "🟡"
-                # Escape HTML characters in violation text
-                violation_text = violation.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
-                violations_html += f"<div style='color: {color}; margin: 0.5rem 0;'>{icon} {violation_text}</div>"
-            if len(violations) > 3:
-                violations_html += f"<div style='color: #888; font-size: 0.9rem;'>...and {len(violations) - 3} more violation(s)</div>"
-        else:
-            violations_html = "<div style='color: #4CAF50; margin: 1rem 0;'>✅ No violations recorded</div>"
-    else:
-        violations_html = "<div style='color: #4CAF50; margin: 1rem 0;'>✅ No violations recorded</div>"
-    
-    inspection_date = ""
-    if restaurant.get('inspection_date') and restaurant['inspection_date'] != 'N/A':
-        inspection_date = f"<div style='color: #888; font-size: 0.9rem; margin-top: 1rem;'>Last inspected: {restaurant['inspection_date']}</div>"
-    
-    score_html = ""
-    if 'score' in restaurant and pd.notna(restaurant['score']):
-        score_html = f"<div style='text-align: center; margin-top: 1rem;'><div style='font-size: 1.5rem; font-weight: bold; color: white;'>{restaurant['score']}</div><div style='font-size: 0.9rem; color: #888;'>Score (Lower is better)</div></div>"
-    
-    # Escape HTML characters in restaurant data
-    name = str(restaurant['name']).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
-    address = str(restaurant.get('address', 'N/A')).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
-    cuisine = str(restaurant.get('cuisine_type', 'Not specified')).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
-    borough = str(restaurant.get('boro', 'N/A')).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
-    
-    st.markdown(f"""
-    <div style="
-        background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
-        border: 3px solid #4CAF50;
-        border-radius: 20px;
-        padding: 2rem;
-        margin: 1.5rem 0;
-        box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
-        position: relative;
-        overflow: hidden;
-        color: white;
-    ">
-        <div style="
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #4CAF50, #66BB6A, #4CAF50);
-        "></div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div style="flex: 3; padding-right: 2rem;">
-                <h3 style="color: #4CAF50; margin: 0 0 1rem 0; font-size: 1.5rem;">{name}</h3>
-                <div style="margin: 0.5rem 0;"><strong>📍 Address:</strong> {address}</div>
-                <div style="margin: 0.5rem 0;"><strong>🍽️ Cuisine:</strong> {cuisine}</div>
-                <div style="margin: 0.5rem 0;"><strong>🏙️ Borough:</strong> {borough}</div>
-            </div>
-            
-            <div style="flex: 1; text-align: center;">
-                <div style="
-                    background: {grade_color};
-                    color: white;
-                    padding: 0.8rem 1.5rem;
-                    border-radius: 25px;
-                    font-weight: bold;
-                    font-size: 1.1rem;
-                    margin-bottom: 1rem;
-                ">Grade: {grade}</div>
-                {score_html}
-            </div>
-        </div>
-        
-        {violations_html}
-        {inspection_date}
-    </div>
+    # Use CSS styling that works with Streamlit containers
+    st.markdown("""
+    <style>
+    .bordered-card {
+        border: 3px solid #4CAF50 !important;
+        border-radius: 15px !important;
+        padding: 1.5rem !important;
+        margin: 1rem 0 !important;
+        background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%) !important;
+        box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2) !important;
+    }
+    </style>
     """, unsafe_allow_html=True)
+    
+    # Create container with border class
+    with st.container():
+        st.markdown('<div class="bordered-card">', unsafe_allow_html=True)
+        
+        # Top accent bar
+        st.markdown("""
+        <div style="height: 4px; background: linear-gradient(90deg, #4CAF50, #66BB6A, #4CAF50); margin: -1.5rem -1.5rem 1rem -1.5rem; border-radius: 12px 12px 0 0;"></div>
+        """, unsafe_allow_html=True)
+        
+        # Main restaurant info section
+        col1, col2 = st.columns([3, 1])
+        
+        with col1:
+            st.markdown(f"### {restaurant['name']}")
+            st.write(f"**📍 Address:** {restaurant.get('address', 'N/A')}")
+            st.write(f"**🍽️ Cuisine:** {restaurant.get('cuisine_type', 'Not specified')}")
+            st.write(f"**🏙️ Borough:** {restaurant.get('boro', 'N/A')}")
+        
+        with col2:
+            # Health grade badge
+            grade = restaurant.get('grade', 'Not Yet Graded')
+            if grade == 'A':
+                st.success(f"Grade: {grade}")
+            elif grade == 'B':
+                st.warning(f"Grade: {grade}")
+            elif grade == 'C':
+                st.error(f"Grade: {grade}")
+            else:
+                st.info(f"Grade: {grade}")
+            
+            # Inspection score
+            if 'score' in restaurant and pd.notna(restaurant['score']):
+                st.metric("Score", f"{restaurant['score']}", help="Lower is better")
+        
+        # Violations section
+        if 'violations' in restaurant and restaurant['violations']:
+            violations = [v for v in restaurant['violations'] if v != "No violations recorded"]
+            if violations:
+                st.markdown("**⚠️ Health Violations:**")
+                for i, violation in enumerate(violations[:3]):
+                    if "critical" in violation.lower():
+                        st.error(f"🔴 {violation}")
+                    else:
+                        st.warning(f"🟡 {violation}")
+                if len(violations) > 3:
+                    st.caption(f"...and {len(violations) - 3} more violation(s)")
+            else:
+                st.success("✅ No violations recorded")
+        else:
+            st.success("✅ No violations recorded")
+        
+        # Inspection date
+        if restaurant.get('inspection_date') and restaurant['inspection_date'] != 'N/A':
+            st.caption(f"Last inspected: {restaurant['inspection_date']}")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
