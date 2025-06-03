@@ -101,28 +101,27 @@ class HealthInspectionAPI:
                 }
             },
             "Seattle": {
-                "base_url": "https://data.seattle.gov/resource/d6dy-3h7r.json",
+                "base_url": "https://data.kingcounty.gov/resource/f29f-zza5.json",
                 "name": "Seattle, WA",
                 "location_field": "zip_code",
-                "grade_field": "current_grade",
-                "name_field": "business_name",
+                "grade_field": "grade",
+                "name_field": "name",
                 "address_fields": ["address", "city", "zip_code"],
                 "grading_system": {
                     "type": "letter",
                     "grades": {
-                        "A": {"label": "A", "description": "Excellent", "color": "#22c55e", "priority": "low"},
-                        "B": {"label": "B", "description": "Good", "color": "#f59e0b", "priority": "medium"},
-                        "C": {"label": "C", "description": "Satisfactory", "color": "#ef4444", "priority": "high"},
-                        "D": {"label": "D", "description": "Needs Improvement", "color": "#dc2626", "priority": "high"},
-                        "Ungraded": {"label": "Ungraded", "description": "Not Yet Graded", "color": "#6b7280", "priority": "medium"}
+                        "Excellent": {"label": "Excellent", "description": "Excellent Rating", "color": "#22c55e", "priority": "low"},
+                        "Good": {"label": "Good", "description": "Good Rating", "color": "#22c55e", "priority": "low"},
+                        "Okay": {"label": "Okay", "description": "Okay Rating", "color": "#f59e0b", "priority": "medium"},
+                        "Needs Improvement": {"label": "Poor", "description": "Needs Improvement", "color": "#ef4444", "priority": "high"},
+                        "Unsatisfactory": {"label": "Fail", "description": "Unsatisfactory Rating", "color": "#dc2626", "priority": "high"}
                     },
                     "score_system": True,
-                    "score_description": "Inspection rating and violation count"
+                    "score_description": "Inspection score and violation points"
                 }
             },
             "San Diego": {
-                "base_url": "https://data.sandiego.gov/api/3/action/datastore_search",
-                "resource_id": "ee7f2771-712d-4349-8e39-be17e8921af3",
+                "base_url": "https://data.sandiego.gov/resource/jizw-kk23.json",
                 "name": "San Diego, CA",
                 "location_field": "zip",
                 "grade_field": "grade",
@@ -580,15 +579,55 @@ class HealthInspectionAPI:
     
     def _get_seattle_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Seattle restaurant inspection data"""
-        # Seattle API requires authentication - check for API key
-        if not hasattr(self, '_seattle_api_available'):
-            self._seattle_api_available = False
-            
-        if not self._seattle_api_available:
-            return []  # Return empty list when API key not available
+        params = {'$limit': min(limit, 500)}
         
-        # Implementation would use authenticated Seattle API here
-        return []
+        # Add search filters
+        where_conditions = []
+        if search_term:
+            where_conditions.append(f"UPPER(name) LIKE '%{search_term.upper()}%'")
+        
+        if where_conditions:
+            params['$where'] = ' AND '.join(where_conditions)
+        
+        raw_data = self._make_api_request(self.current_api["base_url"], params)
+        
+        if not raw_data:
+            return []
+        
+        restaurants = []
+        seen_restaurants = set()
+        
+        for item in raw_data:
+            business_name = item.get('name', '').strip()
+            if not business_name:
+                continue
+                
+            restaurant_key = (business_name, item.get('address', ''))
+            
+            if restaurant_key in seen_restaurants:
+                continue
+            seen_restaurants.add(restaurant_key)
+            
+            restaurant = {
+                'id': f"SEA_{item.get('business_id', '')}{business_name.replace(' ', '')}",
+                'name': business_name,
+                'address': self._format_seattle_address(item),
+                'cuisine_type': item.get('program_identifier', 'Not specified'),
+                'grade': item.get('grade', 'Ungraded'),
+                'score': self._safe_int(item.get('inspection_score')),
+                'inspection_date': item.get('inspection_date', '').split('T')[0] if item.get('inspection_date') else 'N/A',
+                'violations': [item.get('violation_description', 'No violations recorded')],
+                'boro': f"Seattle, WA {item.get('zip_code', '')}",
+                'phone': '',
+                'inspection_type': item.get('inspection_type', 'Regular Inspection')
+            }
+            
+            restaurants.append(restaurant)
+        
+        if cuisines and "All" not in cuisines:
+            restaurants = [r for r in restaurants if r['cuisine_type'] in cuisines]
+        
+        return restaurants[:limit]
     
     def _get_boston_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Boston restaurant inspection data"""
@@ -660,48 +699,47 @@ class HealthInspectionAPI:
     
     def _get_sandiego_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch San Diego restaurant inspection data"""
-        # San Diego uses CKAN API format
-        params = {
-            'resource_id': self.current_api["resource_id"],
-            'limit': min(limit, 500)
-        }
+        params = {'$limit': min(limit, 500)}
         
         # Add search filters
-        filters = {}
+        where_conditions = []
         if search_term:
-            filters['business_name'] = search_term
+            where_conditions.append(f"UPPER(business_name) LIKE '%{search_term.upper()}%'")
         
-        if filters:
-            params['filters'] = json.dumps(filters)
+        if where_conditions:
+            params['$where'] = ' AND '.join(where_conditions)
         
         raw_data = self._make_api_request(self.current_api["base_url"], params)
         
-        if not raw_data or 'result' not in raw_data or 'records' not in raw_data['result']:
+        if not raw_data:
             return []
         
-        records = raw_data['result']['records']
         restaurants = []
         seen_restaurants = set()
         
-        for item in records:
-            restaurant_key = (item.get('business_name', '').strip(), item.get('address', ''))
+        for item in raw_data:
+            business_name = item.get('business_name', '').strip()
+            if not business_name:
+                continue
+                
+            restaurant_key = (business_name, item.get('address', ''))
             
             if restaurant_key in seen_restaurants:
                 continue
             seen_restaurants.add(restaurant_key)
             
             restaurant = {
-                'id': f"SD_{item.get('serial_number', '')}{item.get('business_name', '').replace(' ', '')}",
-                'name': item.get('business_name', 'Unknown Restaurant').strip(),
+                'id': f"SD_{item.get('serial_number', '')}{business_name.replace(' ', '')}",
+                'name': business_name,
                 'address': self._format_sandiego_address(item),
                 'cuisine_type': item.get('business_category', 'Not specified'),
                 'grade': item.get('grade', 'Not Graded'),
                 'score': self._safe_int(item.get('inspection_score')),
                 'inspection_date': item.get('activity_date', '').split('T')[0] if item.get('activity_date') else 'N/A',
-                'violations': ["Violation details not available in San Diego dataset"],
+                'violations': [item.get('violation_description', 'No violations recorded')],
                 'boro': f"San Diego, CA {item.get('zip', '')}",
                 'phone': '',
-                'inspection_type': 'Health Inspection'
+                'inspection_type': item.get('inspection_type', 'Health Inspection')
             }
             
             restaurants.append(restaurant)
