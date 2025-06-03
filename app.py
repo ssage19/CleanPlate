@@ -36,24 +36,24 @@ initialize_database()
 
 def main():
     
-    # Custom CSS for enhanced dark theme styling
+    # Luxury theme styling with sophisticated color palette
     st.markdown("""
     <style>
         .main-header {
-            background: linear-gradient(90deg, #00C851, #007E33);
+            background: linear-gradient(90deg, #D4AF37, #E8B4B8);
             padding: 1.5rem 2rem;
             border-radius: 10px;
             margin-bottom: 2rem;
             text-align: center;
         }
         .main-header h1 {
-            color: white;
+            color: #2C2C2C;
             margin: 0;
             font-size: 2.5rem;
             font-weight: 700;
         }
         .main-header p {
-            color: #e0e0e0;
+            color: #2C2C2C;
             margin: 0.5rem 0 0 0;
             font-size: 1.1rem;
         }
@@ -66,53 +66,29 @@ def main():
             font-size: 1.2rem;
             margin-right: 1rem;
         }
-        .grade-a { background: #00C851; color: white; }
-        .grade-b { background: #ffbb33; color: black; }
-        .grade-c { background: #ff4444; color: white; }
-        .grade-pending { background: #33b5e5; color: white; }
-        .grade-not-graded { background: #aa66cc; color: white; }
+        .grade-a { background: #9CAF88; color: #F8F6F0; }
+        .grade-b { background: #D4AF37; color: #2C2C2C; }
+        .grade-c { background: #722F37; color: #F8F6F0; }
+        .grade-pending { background: #8B7D6B; color: #F8F6F0; }
+        .grade-not-graded { background: #1B263B; color: #F8F6F0; }
         .stats-container {
-            background: #1e2130;
+            background: #1B263B;
             border-radius: 10px;
             padding: 1rem;
             margin: 1rem 0;
         }
         .violation-item {
-            background: #1e1e1e;
-            border-left: 4px solid #ff4444;
+            background: #1B263B;
+            border-left: 4px solid #722F37;
             padding: 0.8rem;
             margin: 0.5rem 0;
             border-radius: 5px;
         }
         .critical-violation {
-            border-left-color: #ff4444;
+            border-left-color: #722F37;
         }
         .non-critical-violation {
-            border-left-color: #ffbb33;
-        }
-        .restaurant-block {
-            background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%) !important;
-            border: 3px solid #4CAF50 !important;
-            border-radius: 20px !important;
-            padding: 2.5rem !important;
-            margin: 2rem 0 !important;
-            box-shadow: 0 15px 35px rgba(76, 175, 80, 0.15), 0 5px 15px rgba(0, 0, 0, 0.5) !important;
-            position: relative !important;
-            overflow: hidden !important;
-        }
-        .restaurant-block::before {
-            content: '' !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            height: 6px !important;
-            background: linear-gradient(90deg, #4CAF50, #66BB6A, #4CAF50) !important;
-        }
-        .restaurant-block:hover {
-            border-color: #66BB6A !important;
-            box-shadow: 0 20px 40px rgba(76, 175, 80, 0.25), 0 10px 20px rgba(0, 0, 0, 0.6) !important;
-            transform: translateY(-5px) !important;
+            border-left-color: #D4AF37;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -225,20 +201,20 @@ def main():
 def display_simple_restaurant_card(restaurant):
     """Display a simplified restaurant card using Streamlit components"""
     
-    # Style the expander to look like a bordered card
+    # Style the expander with luxury color palette
     st.markdown("""
     <style>
     .streamlit-expander {
-        border: 3px solid #4CAF50 !important;
+        border: 3px solid #D4AF37 !important;
         border-radius: 15px !important;
-        background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%) !important;
-        box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2) !important;
+        background: linear-gradient(135deg, #1B263B 0%, #2C2C2C 100%) !important;
+        box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2) !important;
         margin: 1rem 0 !important;
     }
     .streamlit-expander > div:first-child {
-        background: linear-gradient(90deg, #4CAF50, #66BB6A, #4CAF50) !important;
+        background: linear-gradient(90deg, #D4AF37, #E8B4B8, #D4AF37) !important;
         border-radius: 12px 12px 0 0 !important;
-        color: white !important;
+        color: #2C2C2C !important;
         font-weight: bold !important;
     }
     </style>
@@ -255,37 +231,69 @@ def display_simple_restaurant_card(restaurant):
             st.write(f"**🏙️ Borough:** {restaurant.get('boro', 'N/A')}")
         
         with col2:
-            # Health grade badge
+            # Health grade badge with luxury theme colors
             grade = restaurant.get('grade', 'Not Yet Graded')
             if grade == 'A':
-                st.success(f"Grade: {grade}")
+                st.markdown(f"""
+                <div style="background: #9CAF88; color: #F8F6F0; padding: 0.5rem 1rem; border-radius: 25px; text-align: center; font-weight: bold;">
+                    Grade: {grade}
+                </div>
+                """, unsafe_allow_html=True)
             elif grade == 'B':
-                st.warning(f"Grade: {grade}")
+                st.markdown(f"""
+                <div style="background: #D4AF37; color: #2C2C2C; padding: 0.5rem 1rem; border-radius: 25px; text-align: center; font-weight: bold;">
+                    Grade: {grade}
+                </div>
+                """, unsafe_allow_html=True)
             elif grade == 'C':
-                st.error(f"Grade: {grade}")
+                st.markdown(f"""
+                <div style="background: #722F37; color: #F8F6F0; padding: 0.5rem 1rem; border-radius: 25px; text-align: center; font-weight: bold;">
+                    Grade: {grade}
+                </div>
+                """, unsafe_allow_html=True)
             else:
-                st.info(f"Grade: {grade}")
+                st.markdown(f"""
+                <div style="background: #8B7D6B; color: #F8F6F0; padding: 0.5rem 1rem; border-radius: 25px; text-align: center; font-weight: bold;">
+                    Grade: {grade}
+                </div>
+                """, unsafe_allow_html=True)
             
             # Inspection score
             if 'score' in restaurant and pd.notna(restaurant['score']):
                 st.metric("Score", f"{restaurant['score']}", help="Lower is better")
         
-        # Violations section
+        # Violations section with luxury theme colors
         if 'violations' in restaurant and restaurant['violations']:
             violations = [v for v in restaurant['violations'] if v != "No violations recorded"]
             if violations:
                 st.markdown("**⚠️ Health Violations:**")
                 for i, violation in enumerate(violations[:3]):
                     if "critical" in violation.lower():
-                        st.error(f"🔴 {violation}")
+                        st.markdown(f"""
+                        <div style="background: #722F37; color: #F8F6F0; padding: 0.8rem; margin: 0.5rem 0; border-radius: 5px; border-left: 4px solid #722F37;">
+                            🔴 {violation}
+                        </div>
+                        """, unsafe_allow_html=True)
                     else:
-                        st.warning(f"🟡 {violation}")
+                        st.markdown(f"""
+                        <div style="background: #8B7D6B; color: #F8F6F0; padding: 0.8rem; margin: 0.5rem 0; border-radius: 5px; border-left: 4px solid #D4AF37;">
+                            🟡 {violation}
+                        </div>
+                        """, unsafe_allow_html=True)
                 if len(violations) > 3:
                     st.caption(f"...and {len(violations) - 3} more violation(s)")
             else:
-                st.success("✅ No violations recorded")
+                st.markdown("""
+                <div style="background: #9CAF88; color: #F8F6F0; padding: 0.8rem; border-radius: 5px; text-align: center;">
+                    ✅ No violations recorded
+                </div>
+                """, unsafe_allow_html=True)
         else:
-            st.success("✅ No violations recorded")
+            st.markdown("""
+            <div style="background: #9CAF88; color: #F8F6F0; padding: 0.8rem; border-radius: 5px; text-align: center;">
+                ✅ No violations recorded
+            </div>
+            """, unsafe_allow_html=True)
         
         # Inspection date
         if restaurant.get('inspection_date') and restaurant['inspection_date'] != 'N/A':
