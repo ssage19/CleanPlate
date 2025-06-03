@@ -271,22 +271,32 @@ def main():
         elif grading_info.get('type') == 'pass_fail':
             st.caption("Pass/Fail System")
     
-    with col_search:
-        search_term = st.text_input(
-            "Search for a restaurant", 
-            placeholder="Enter restaurant name...",
-            help="Search by restaurant name to see health inspection results"
-        )
-    
-    with col_location:
-        locations = st.session_state.api_client.get_available_locations()
-        location_filter = st.selectbox(
-            "Borough",
-            ["All"] + locations
-        )
-        location_filter = None if location_filter == "All" else location_filter
+    # Create a form to enable Enter key submission
+    with st.form(key="search_form", clear_on_submit=False):
+        col_search_form, col_location_form, col_button_form = st.columns([2, 1, 0.5])
+        
+        with col_search_form:
+            search_term = st.text_input(
+                "Search for a restaurant", 
+                placeholder="Enter restaurant name...",
+                help="Search by restaurant name to see health inspection results",
+                key="search_input"
+            )
+        
+        with col_location_form:
+            locations = st.session_state.api_client.get_available_locations()
+            location_filter = st.selectbox(
+                "Borough",
+                ["All"] + locations,
+                key="location_select"
+            )
+            location_filter = None if location_filter == "All" else location_filter
+        
+        with col_button_form:
+            st.write("")  # Add spacing
+            search_clicked = st.form_submit_button("SEARCH", use_container_width=True)
 
-    if st.button("SEARCH"):
+    if search_clicked:
         try:
             restaurants_df = st.session_state.api_client.get_restaurants(
                 location=location_filter,
