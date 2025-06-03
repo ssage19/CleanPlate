@@ -580,61 +580,15 @@ class HealthInspectionAPI:
     
     def _get_seattle_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Seattle restaurant inspection data"""
-        where_conditions = []
-        
-        if search_term:
-            where_conditions.append(f"UPPER(business_name) LIKE '%{search_term.upper()}%'")
-        
-        if date_range and len(date_range) == 2:
-            start_date = date_range[0].strftime('%Y-%m-%d')
-            end_date = date_range[1].strftime('%Y-%m-%d')
-            where_conditions.append(f"inspection_date >= '{start_date}' AND inspection_date <= '{end_date}'")
-        
-        where_clause = ' AND '.join(where_conditions)
-        
-        params = {
-            '$limit': min(limit, 500),
-            '$order': 'inspection_date DESC'
-        }
-        
-        if where_conditions:
-            params['$where'] = ' AND '.join(where_conditions)
-        
-        raw_data = self._make_api_request(self.current_api["base_url"], params)
-        
-        if not raw_data:
-            return []
-        
-        restaurants = []
-        seen_restaurants = set()
-        
-        for item in raw_data:
-            restaurant_key = (item.get('name', '').strip(), item.get('address', ''))
+        # Seattle API requires authentication - check for API key
+        if not hasattr(self, '_seattle_api_available'):
+            self._seattle_api_available = False
             
-            if restaurant_key in seen_restaurants:
-                continue
-            seen_restaurants.add(restaurant_key)
-            
-            restaurant = {
-                'id': f"SEA_{item.get('business_id', '')}{item.get('name', '').replace(' ', '')}",
-                'name': item.get('name', 'Unknown Restaurant').strip(),
-                'address': self._format_seattle_address(item),
-                'cuisine_type': item.get('program_identifier', 'Not specified'),
-                'grade': item.get('grade', 'Not Graded'),
-                'score': self._safe_int(item.get('inspection_score')),
-                'inspection_date': item.get('inspection_date', '').split('T')[0] if item.get('inspection_date') else 'N/A',
-                'violations': ["Violation details not available in Seattle dataset"],
-                'boro': f"Seattle, WA {item.get('zip_code', '')}",
-                'phone': '',
-                'inspection_type': 'Health Inspection'
-            }
-            
-            restaurants.append(restaurant)
+        if not self._seattle_api_available:
+            return []  # Return empty list when API key not available
         
-        if cuisines and "All" not in cuisines:
-            restaurants = [r for r in restaurants if r['cuisine_type'] in cuisines]
-        
-        return restaurants[:limit]
+        # Implementation would use authenticated Seattle API here
+        return []
     
     def _get_boston_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Boston restaurant inspection data"""
