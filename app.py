@@ -323,7 +323,17 @@ def display_simple_restaurant_card(restaurant):
             </div>
             """, unsafe_allow_html=True)
             
-            # Inspection score with enhanced metric display
+            # Show risk level for Chicago restaurants
+            if 'risk' in restaurant and restaurant['risk']:
+                risk_level = restaurant['risk']
+                risk_class = "priority-high" if "High" in risk_level else "priority-medium" if "Medium" in risk_level else "priority-low"
+                st.markdown(f"""
+                <div class="highlight-box {risk_class}" style="margin-top: 0.5rem;">
+                    <div style="font-size: 1rem; font-weight: 600;">{risk_level}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Inspection score with enhanced metric display (NYC only)
             if 'score' in restaurant and pd.notna(restaurant['score']):
                 st.markdown(f"""
                 <div class="metric-container">

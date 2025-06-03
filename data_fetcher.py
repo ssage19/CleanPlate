@@ -170,9 +170,12 @@ class HealthInspectionAPI:
                 return pd.DataFrame()
             
             # Cache the result for faster subsequent searches
-            result_df = pd.DataFrame(all_data) if all_data else pd.DataFrame()
-            self._search_cache[cache_key] = (result_df, time.time())
+            if all_data and len(all_data) > 0:
+                result_df = pd.DataFrame(all_data)
+            else:
+                result_df = pd.DataFrame()
             
+            self._search_cache[cache_key] = (result_df, time.time())
             return result_df
             
         except Exception as e:
