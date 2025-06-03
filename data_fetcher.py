@@ -20,20 +20,43 @@ class HealthInspectionAPI:
         self._cache_duration = 3600  # 1 hour cache
     
     def _make_api_request(self, endpoint, params=None):
-        """Make API request with error handling"""
-        try:
-            headers = {
-                'User-Agent': 'Restaurant-Health-Inspector/1.0'
-            }
-            
-            response = requests.get(endpoint, params=params, headers=headers, timeout=30)
-            response.raise_for_status()
-            return response.json()
+        """Make API request with enhanced error handling and retries"""
+        import time
         
-        except requests.exceptions.RequestException as e:
-            raise Exception(f"API request failed: {str(e)}")
-        except json.JSONDecodeError as e:
-            raise Exception(f"Invalid API response format: {str(e)}")
+        max_retries = 3
+        retry_delay = 1
+        
+        for attempt in range(max_retries):
+            try:
+                headers = {
+                    'User-Agent': 'Restaurant-Health-Inspector/1.0',
+                    'Accept': 'application/json'
+                }
+                
+                response = requests.get(
+                    endpoint, 
+                    params=params, 
+                    headers=headers, 
+                    timeout=60,  # Increased timeout
+                    verify=True
+                )
+                response.raise_for_status()
+                return response.json()
+            
+            except requests.exceptions.Timeout:
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay * (attempt + 1))
+                    continue
+                raise Exception("Request timed out after multiple attempts")
+            except requests.exceptions.ConnectionError:
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay * (attempt + 1))
+                    continue
+                raise Exception("Connection failed - please check your internet connection")
+            except requests.exceptions.RequestException as e:
+                raise Exception(f"API request failed: {str(e)}")
+            except json.JSONDecodeError as e:
+                raise Exception(f"Invalid API response format: {str(e)}")
     
     def _is_cache_valid(self):
         """Check if cache is still valid"""
@@ -54,7 +77,10 @@ class HealthInspectionAPI:
             }
             
             data = self._make_api_request(self.nyc_api_base, params)
-            locations = [item['boro'] for item in data if item.get('boro') and item['boro'].strip() and item['boro'] != '0']
+            if data and isinstance(data, list):
+                locations = [item['boro'] for item in data if item.get('boro') and item['boro'].strip() and item['boro'] != '0']
+            else:
+                locations = []
             
             # Add common NYC boroughs if not in data
             standard_boroughs = ['MANHATTAN', 'BROOKLYN', 'QUEENS', 'BRONX', 'STATEN ISLAND']
@@ -69,7 +95,7 @@ class HealthInspectionAPI:
             # Return default NYC boroughs if API fails
             return ['MANHATTAN', 'BROOKLYN', 'QUEENS', 'BRONX', 'STATEN ISLAND']
     
-    def get_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=50000):
+    def get_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=1000):
         """
         Fetch restaurant inspection data with filters and pagination for larger datasets
         """
@@ -98,7 +124,7 @@ class HealthInspectionAPI:
             all_data = []
             batch_size = 1000  # NYC Open Data API limit per request
             offset = 0
-            max_requests = 50  # Increase to retrieve more data
+            max_requests = 2  # Reduce to prevent timeouts
             requests_made = 0
             
             while len(all_data) < limit and requests_made < max_requests:
@@ -125,9 +151,9 @@ class HealthInspectionAPI:
                 if len(batch_data) < current_limit:
                     break
                 
-                # Add a small delay to be respectful to the API
+                # Add a delay to be respectful to the API and prevent rate limiting
                 import time
-                time.sleep(0.1)
+                time.sleep(0.5)
             
             if not all_data:
                 return pd.DataFrame()
