@@ -19,12 +19,20 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Initialize database
+@st.cache_resource
+def initialize_database():
+    return init_database()
+
 # Initialize session state
 if 'user_reviews' not in st.session_state:
     st.session_state.user_reviews = {}
 
 if 'api_client' not in st.session_state:
     st.session_state.api_client = HealthInspectionAPI()
+
+# Initialize database on startup
+initialize_database()
 
 def main():
     st.title("🏥 Restaurant Health Inspection Tracker")
@@ -83,6 +91,13 @@ def main():
                 search_term=search_term,
                 date_range=date_range
             )
+            
+            # Save restaurants to database
+            if not restaurants_df.empty:
+                for _, restaurant in restaurants_df.iterrows():
+                    restaurant_data = restaurant.to_dict()
+                    violations = restaurant_data.pop('violations', [])
+                    save_restaurant_to_db(restaurant_data, violations)
         
         if restaurants_df.empty:
             st.warning("No restaurants found matching your criteria. Please adjust your filters.")
@@ -167,7 +182,7 @@ def display_restaurant_card(restaurant):
                 st.metric("Score", f"{restaurant['score']}/100")
         
         with col3:
-            user_rating = calculate_average_rating(restaurant['id'])
+            user_rating = calculate_db_average_rating(restaurant['id'])
             if user_rating > 0:
                 st.metric("User Rating", f"⭐ {user_rating:.1f}/5")
         
@@ -187,13 +202,13 @@ def display_restaurant_card(restaurant):
         restaurant_id = restaurant['id']
         
         with st.expander("💬 User Reviews & Ratings"):
-            # Display existing reviews
-            if restaurant_id in st.session_state.user_reviews:
-                reviews = st.session_state.user_reviews[restaurant_id]
+            # Display existing reviews from database
+            reviews = get_restaurant_reviews(restaurant_id)
+            if reviews:
                 st.write("**Recent Reviews:**")
-                for review in reviews[-3:]:  # Show last 3 reviews
-                    st.write(f"⭐ **{review['rating']}/5** - {review['comment']}")
-                    st.caption(f"Posted on {review['date']}")
+                for review in reviews[:3]:  # Show last 3 reviews
+                    st.write(f"⭐ **{review.rating}/5** - {review.comment}")
+                    st.caption(f"Posted on {review.created_at.strftime('%Y-%m-%d %H:%M')}")
                     st.divider()
             
             # Add new review form
@@ -204,19 +219,12 @@ def display_restaurant_card(restaurant):
             
             if st.button(f"Submit Review", key=f"submit_{restaurant_id}"):
                 if comment.strip():
-                    # Add review to session state
-                    if restaurant_id not in st.session_state.user_reviews:
-                        st.session_state.user_reviews[restaurant_id] = []
-                    
-                    new_review = {
-                        'rating': rating,
-                        'comment': comment.strip(),
-                        'date': datetime.now().strftime("%Y-%m-%d %H:%M")
-                    }
-                    
-                    st.session_state.user_reviews[restaurant_id].append(new_review)
-                    st.success("Review submitted successfully!")
-                    st.rerun()
+                    # Save review to database
+                    if save_user_review(restaurant_id, rating, comment.strip()):
+                        st.success("Review submitted successfully!")
+                        st.rerun()
+                    else:
+                        st.error("Failed to submit review. Please try again.")
                 else:
                     st.warning("Please enter a comment for your review.")
         
