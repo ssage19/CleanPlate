@@ -13,10 +13,10 @@ from database import (
 
 # Configure page
 st.set_page_config(
-    page_title="Restaurant Health Inspection Tracker",
-    page_icon="🏥",
+    page_title="CleanPlate - Restaurant Health Inspector",
+    page_icon="🍽️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # Initialize database
@@ -35,8 +35,84 @@ if 'api_client' not in st.session_state:
 initialize_database()
 
 def main():
-    st.title("🏥 Restaurant Health Inspection Tracker")
-    st.markdown("Search restaurants and view their health inspection grades and violations")
+    st.set_page_config(
+        page_title="CleanPlate - Restaurant Health Inspector",
+        page_icon="🍽️",
+        layout="wide",
+        initial_sidebar_state="collapsed"
+    )
+    
+    # Custom CSS for enhanced dark theme styling
+    st.markdown("""
+    <style>
+        .main-header {
+            background: linear-gradient(90deg, #00C851, #007E33);
+            padding: 1.5rem 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .main-header h1 {
+            color: white;
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .main-header p {
+            color: #e0e0e0;
+            margin: 0.5rem 0 0 0;
+            font-size: 1.1rem;
+        }
+        .restaurant-card {
+            background: #262730;
+            border: 1px solid #3d3d3d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .grade-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+        .grade-a { background: #00C851; color: white; }
+        .grade-b { background: #ffbb33; color: black; }
+        .grade-c { background: #ff4444; color: white; }
+        .grade-pending { background: #33b5e5; color: white; }
+        .grade-not-graded { background: #aa66cc; color: white; }
+        .stats-container {
+            background: #1e2130;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .violation-item {
+            background: #1e1e1e;
+            border-left: 4px solid #ff4444;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border-radius: 5px;
+        }
+        .critical-violation {
+            border-left-color: #ff4444;
+        }
+        .non-critical-violation {
+            border-left-color: #ffbb33;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Main header with gradient background
+    st.markdown("""
+    <div class="main-header">
+        <h1>🍽️ CleanPlate</h1>
+        <p>Discover restaurants with their latest health inspection grades and safety records</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Main search interface
     col1, col2 = st.columns([3, 1])
@@ -74,14 +150,24 @@ def main():
                 date_range=date_range
             )
             
-        # Display data statistics
+        # Display data statistics with enhanced styling
         if not restaurants_df.empty:
-            st.success(f"✅ Retrieved {len(restaurants_df)} restaurant inspection records from NYC Health Department database")
+            st.markdown(f"""
+            <div class="stats-container">
+                <h4 style="color: #00C851; margin: 0;">✅ Retrieved {len(restaurants_df)} restaurant inspection records</h4>
+                <p style="color: #b0b0b0; margin: 0.5rem 0 0 0;">Data sourced from NYC Health Department database</p>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.info("No restaurant inspection records found matching your search criteria")
+            st.markdown("""
+            <div class="stats-container">
+                <h4 style="color: #ffbb33; margin: 0;">ℹ️ No restaurants found</h4>
+                <p style="color: #b0b0b0; margin: 0.5rem 0 0 0;">Try adjusting your search criteria or selecting a different borough</p>
+            </div>
+            """, unsafe_allow_html=True)
             
-            # Save restaurants to database
-            if not restaurants_df.empty:
+        # Save restaurants to database
+        if not restaurants_df.empty:
                 for _, restaurant in restaurants_df.iterrows():
                     restaurant_data = restaurant.to_dict()
                     violations = restaurant_data.pop('violations', [])
@@ -109,48 +195,81 @@ def main():
         st.info("Please check your internet connection and try again.")
 
 def display_simple_restaurant_card(restaurant):
-    """Display a simplified restaurant card with health inspection info"""
+    """Display a simplified restaurant card with enhanced dark theme styling"""
     
-    with st.container():
-        # Create columns for layout
-        col1, col2, col3 = st.columns([3, 1, 1])
-        
-        with col1:
-            st.markdown(f"### {restaurant['name']}")
-            st.write(f"**Address:** {restaurant.get('address', 'N/A')}")
-            if restaurant.get('cuisine_type'):
-                st.write(f"**Cuisine:** {restaurant['cuisine_type']}")
-        
-        with col2:
-            # Health grade badge
-            grade_html = format_grade_badge(restaurant['grade'])
-            st.markdown(grade_html, unsafe_allow_html=True)
-        
-        with col3:
-            # Inspection score
-            if 'score' in restaurant and pd.notna(restaurant['score']):
-                st.metric("Score", f"{restaurant['score']}")
-                st.caption("(Lower is better)")
-        
-        # Violations section
-        if 'violations' in restaurant and restaurant['violations']:
-            violations = [v for v in restaurant['violations'] if v != "No violations recorded"]
-            if violations:
-                st.write("**⚠️ Violations Found:**")
-                for violation in violations[:3]:  # Show up to 3 violations
-                    st.write(f"• {violation}")
-                if len(violations) > 3:
-                    st.caption(f"...and {len(violations) - 3} more violation(s)")
-            else:
-                st.write("**✅ No violations recorded**")
+    # Get grade class for styling
+    grade = restaurant.get('grade', 'Not Yet Graded')
+    grade_class = f"grade-{grade.lower().replace(' ', '-')}" if grade in ['A', 'B', 'C'] else "grade-pending"
+    
+    # Create restaurant card HTML
+    card_html = f"""
+    <div class="restaurant-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <div style="flex: 1;">
+                <h3 style="color: #fafafa; margin: 0 0 0.5rem 0; font-size: 1.4rem;">{restaurant['name']}</h3>
+                <p style="color: #b0b0b0; margin: 0.2rem 0;"><strong>Address:</strong> {restaurant.get('address', 'N/A')}</p>
+                <p style="color: #b0b0b0; margin: 0.2rem 0;"><strong>Cuisine:</strong> {restaurant.get('cuisine_type', 'Not specified')}</p>
+                <p style="color: #b0b0b0; margin: 0.2rem 0;"><strong>Borough:</strong> {restaurant.get('boro', 'N/A')}</p>
+            </div>
+            <div style="text-align: center; margin-left: 2rem;">
+                <span class="grade-badge {grade_class}">{grade}</span>
+                <div style="margin-top: 0.5rem;">
+                    <span style="color: #fafafa; font-size: 1.2rem; font-weight: bold;">Score: {restaurant.get('score', 'N/A')}</span>
+                    <br><span style="color: #888; font-size: 0.8rem;">(Lower is better)</span>
+                </div>
+            </div>
+        </div>
+    """
+    
+    # Add violations section if available
+    if 'violations' in restaurant and restaurant['violations']:
+        violations = [v for v in restaurant['violations'] if v != "No violations recorded"]
+        if violations:
+            card_html += """
+            <div style="margin-top: 1rem;">
+                <h4 style="color: #ff6b6b; margin-bottom: 0.8rem;">⚠️ Health Violations</h4>
+            """
+            for i, violation in enumerate(violations[:3]):
+                violation_class = "critical-violation" if "critical" in violation.lower() else "non-critical-violation"
+                card_html += f"""
+                <div class="violation-item {violation_class}">
+                    <span style="color: #fafafa;">{violation}</span>
+                </div>
+                """
+            if len(violations) > 3:
+                card_html += f'<p style="color: #888; font-style: italic; margin-top: 0.5rem;">...and {len(violations) - 3} more violation(s)</p>'
+            card_html += "</div>"
         else:
-            st.write("**✅ No violations recorded**")
-        
-        # Inspection date
-        if restaurant.get('inspection_date') and restaurant['inspection_date'] != 'N/A':
-            st.caption(f"Last inspected: {restaurant['inspection_date']}")
-        
-        st.divider()
+            card_html += """
+            <div style="margin-top: 1rem;">
+                <p style="color: #00C851; font-weight: bold;">✅ No violations recorded</p>
+            </div>
+            """
+    else:
+        card_html += """
+        <div style="margin-top: 1rem;">
+            <p style="color: #00C851; font-weight: bold;">✅ No violations recorded</p>
+        </div>
+        """
+    
+    # Close the card div
+    card_html += "</div>"
+    
+    # Add inspection date to card
+    if restaurant.get('inspection_date') and restaurant['inspection_date'] != 'N/A':
+        card_html = card_html[:-6]  # Remove closing </div>
+        card_html += f"""
+        <div style="margin-top: 1rem; border-top: 1px solid #3d3d3d; padding-top: 0.8rem;">
+            <p style="color: #888; font-size: 0.9rem; margin: 0;">Last inspected: {restaurant['inspection_date']}</p>
+        </div>
+        </div>
+        """
+    
+    # Display the card
+    st.markdown(card_html, unsafe_allow_html=True)
+    
+    # Add spacing between cards
+    st.markdown("<br>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
