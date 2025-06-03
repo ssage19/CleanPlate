@@ -152,7 +152,7 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Jurisdiction selector
+    # Jurisdiction selector with system information
     col_juris, col_search, col_location = st.columns([1, 2, 1])
     
     with col_juris:
@@ -175,6 +175,13 @@ def main():
             st.session_state.current_jurisdiction = selected_jurisdiction
             st.session_state.api_client.set_jurisdiction(selected_jurisdiction)
             st.rerun()
+        
+        # Show grading system info
+        grading_info = st.session_state.api_client.get_grading_system_info()
+        if grading_info.get('type') == 'letter':
+            st.caption("🅰️ Letter Grade System (A, B, C)")
+        elif grading_info.get('type') == 'pass_fail':
+            st.caption("✓ Pass/Fail System")
     
     with col_search:
         search_term = st.text_input(
@@ -193,8 +200,40 @@ def main():
             st.error(f"Failed to load locations: {str(e)}")
             selected_location = "All"
     
-    # Set default grades to show all grades
-    selected_grades = ["A", "B", "C", "Grade Pending", "Not Yet Graded"]
+    # Display grading system explanation based on jurisdiction
+    grading_info = st.session_state.api_client.get_grading_system_info()
+    
+    with st.expander("ℹ️ Understanding This City's Health Inspection System", expanded=False):
+        if st.session_state.current_jurisdiction == "NYC":
+            st.markdown("""
+            **New York City Letter Grade System:**
+            - **Grade A**: Excellent (0-13 violation points)
+            - **Grade B**: Good (14-27 violation points) 
+            - **Grade C**: Needs Improvement (28+ violation points)
+            - **Pending**: Recently inspected, grade under review
+            
+            **Scoring**: Lower scores indicate better performance. Restaurants with 14+ points must post their grade.
+            """)
+        elif st.session_state.current_jurisdiction == "Chicago":
+            st.markdown("""
+            **Chicago Pass/Fail System:**
+            - **Pass**: Meets all health requirements
+            - **Pass with Conditions**: Minor violations corrected during inspection
+            - **Fail**: Serious violations requiring follow-up inspection
+            - **Out of Business**: Facility permanently closed
+            
+            **Risk Levels**: 
+            - **High Risk**: Facilities handling potentially hazardous foods
+            - **Medium Risk**: Limited food preparation
+            - **Low Risk**: Minimal food handling (convenience stores, etc.)
+            """)
+    
+    # Set default grades based on jurisdiction
+    if st.session_state.current_jurisdiction == "NYC":
+        selected_grades = ["A", "B", "C", "Grade Pending", "Not Yet Graded"]
+    else:  # Chicago
+        selected_grades = ["Pass", "Pass w/ Conditions", "Fail", "Not Ready"]
+    
     selected_cuisines = None
     date_range = None
     
@@ -313,33 +352,51 @@ def display_simple_restaurant_card(restaurant):
             st.markdown(f"**Borough:** {restaurant.get('boro', 'N/A')}")
         
         with col2:
-            # Health grade with priority-based styling
+            # Get jurisdiction-specific grade information
             grade = restaurant.get('grade', 'Not Yet Graded')
-            grade_class = "priority-low" if grade == 'A' else "priority-medium" if grade == 'B' else "priority-high" if grade == 'C' else "priority-medium"
+            grade_info = st.session_state.api_client.get_grade_info(grade)
+            grading_system = st.session_state.api_client.get_grading_system_info()
             
+            # Display grade with jurisdiction-specific styling
             st.markdown(f"""
-            <div class="highlight-box {grade_class}">
-                <div style="font-size: 1.5rem; font-weight: 700;">Grade: {grade}</div>
+            <div style="background-color: {grade_info['color']}20; border: 2px solid {grade_info['color']}; 
+                        border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 8px;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: {grade_info['color']};">
+                    {grade_info['label']}
+                </div>
+                <div style="font-size: 0.9rem; color: #666; margin-top: 4px;">
+                    {grade_info['description']}
+                </div>
+                <div style="font-size: 0.8rem; color: #888; margin-top: 2px;">
+                    {grading_system.get('type', '').replace('_', ' ').title()} System
+                </div>
             </div>
             """, unsafe_allow_html=True)
             
-            # Show risk level for Chicago restaurants
-            if 'risk' in restaurant and restaurant['risk']:
+            # Show risk level for jurisdictions that use risk systems
+            if grading_system.get('risk_system') and 'risk' in restaurant and restaurant['risk']:
                 risk_level = restaurant['risk']
-                risk_class = "priority-high" if "High" in risk_level else "priority-medium" if "Medium" in risk_level else "priority-low"
+                risk_info = st.session_state.api_client.get_risk_info(risk_level)
                 st.markdown(f"""
-                <div class="highlight-box {risk_class}" style="margin-top: 0.5rem;">
-                    <div style="font-size: 1rem; font-weight: 600;">{risk_level}</div>
+                <div style="background-color: {risk_info['color']}15; border: 1px solid {risk_info['color']}; 
+                            border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 8px;">
+                    <div style="font-size: 1rem; font-weight: 600; color: {risk_info['color']};">
+                        {risk_info['label']}
+                    </div>
+                    <div style="font-size: 0.8rem; color: #666; margin-top: 2px;">
+                        {risk_info['description']}
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
             
-            # Inspection score with enhanced metric display (NYC only)
-            if 'score' in restaurant and pd.notna(restaurant['score']):
+            # Show inspection score for jurisdictions that use scoring systems
+            if grading_system.get('score_system') and 'score' in restaurant and pd.notna(restaurant['score']):
                 st.markdown(f"""
-                <div class="metric-container">
+                <div style="background-color: #9CAF8820; border: 1px solid #9CAF88; 
+                            border-radius: 8px; padding: 12px; text-align: center;">
                     <div style="font-size: 2rem; font-weight: 700; color: #9CAF88;">{restaurant['score']}</div>
-                    <div style="font-size: 0.9rem; color: #F5F7F5; opacity: 0.8;">Inspection Score</div>
-                    <div style="font-size: 0.8rem; color: #F5F7F5; opacity: 0.6;">(Lower is better)</div>
+                    <div style="font-size: 0.9rem; color: #666;">Inspection Score</div>
+                    <div style="font-size: 0.8rem; color: #888;">{grading_system.get('score_description', '')}</div>
                 </div>
                 """, unsafe_allow_html=True)
         

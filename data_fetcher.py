@@ -18,7 +18,19 @@ class HealthInspectionAPI:
                 "location_field": "boro",
                 "grade_field": "grade",
                 "name_field": "dba",
-                "address_fields": ["building", "street", "boro", "zipcode"]
+                "address_fields": ["building", "street", "boro", "zipcode"],
+                "grading_system": {
+                    "type": "letter",
+                    "grades": {
+                        "A": {"label": "A", "description": "Grade A", "color": "#22c55e", "priority": "low"},
+                        "B": {"label": "B", "description": "Grade B", "color": "#f59e0b", "priority": "medium"},
+                        "C": {"label": "C", "description": "Grade C", "color": "#ef4444", "priority": "high"},
+                        "Grade Pending": {"label": "Pending", "description": "Grade Pending", "color": "#6b7280", "priority": "medium"},
+                        "Not Yet Graded": {"label": "Not Graded", "description": "Not Yet Graded", "color": "#6b7280", "priority": "medium"}
+                    },
+                    "score_system": True,
+                    "score_description": "Lower scores indicate better performance"
+                }
             },
             "Chicago": {
                 "base_url": "https://data.cityofchicago.org/resource/4ijn-s7e5.json",
@@ -26,7 +38,24 @@ class HealthInspectionAPI:
                 "location_field": "ward",
                 "grade_field": "results",
                 "name_field": "dba_name",
-                "address_fields": ["address", "city", "state", "zip"]
+                "address_fields": ["address", "city", "state", "zip"],
+                "grading_system": {
+                    "type": "pass_fail",
+                    "grades": {
+                        "Pass": {"label": "Pass", "description": "Passed Inspection", "color": "#22c55e", "priority": "low"},
+                        "Pass w/ Conditions": {"label": "Pass*", "description": "Pass with Conditions", "color": "#f59e0b", "priority": "medium"},
+                        "Fail": {"label": "Fail", "description": "Failed Inspection", "color": "#ef4444", "priority": "high"},
+                        "Out of Business": {"label": "Closed", "description": "Out of Business", "color": "#6b7280", "priority": "high"},
+                        "Not Ready": {"label": "Not Ready", "description": "Not Ready for Inspection", "color": "#6b7280", "priority": "medium"}
+                    },
+                    "score_system": False,
+                    "risk_system": True,
+                    "risk_levels": {
+                        "Risk 1 (High)": {"label": "High Risk", "description": "High Risk Facility", "color": "#ef4444", "priority": "high"},
+                        "Risk 2 (Medium)": {"label": "Medium Risk", "description": "Medium Risk Facility", "color": "#f59e0b", "priority": "medium"},
+                        "Risk 3 (Low)": {"label": "Low Risk", "description": "Low Risk Facility", "color": "#22c55e", "priority": "low"}
+                    }
+                }
             }
         }
         
@@ -93,6 +122,32 @@ class HealthInspectionAPI:
     def get_available_jurisdictions(self):
         """Get list of supported jurisdictions"""
         return list(self.apis.keys())
+    
+    def get_grade_info(self, grade):
+        """Get jurisdiction-specific grade information"""
+        grading_system = self.current_api.get("grading_system", {})
+        grades = grading_system.get("grades", {})
+        return grades.get(grade, {
+            "label": grade,
+            "description": grade,
+            "color": "#6b7280",
+            "priority": "medium"
+        })
+    
+    def get_risk_info(self, risk_level):
+        """Get jurisdiction-specific risk level information"""
+        grading_system = self.current_api.get("grading_system", {})
+        risk_levels = grading_system.get("risk_levels", {})
+        return risk_levels.get(risk_level, {
+            "label": risk_level,
+            "description": risk_level,
+            "color": "#6b7280",
+            "priority": "medium"
+        })
+    
+    def get_grading_system_info(self):
+        """Get current jurisdiction's grading system information"""
+        return self.current_api.get("grading_system", {})
     
     def _is_cache_valid(self):
         """Check if cache is still valid"""
@@ -313,16 +368,9 @@ class HealthInspectionAPI:
                 continue
             seen_restaurants.add(restaurant_key)
             
-            # Map Chicago results to NYC-style grades
-            chicago_result = item.get('results', '')
-            if chicago_result == "Pass":
-                grade = "A"
-            elif chicago_result == "Pass w/ Conditions":
-                grade = "B"
-            elif chicago_result in ["Fail", "Out of Business"]:
-                grade = "C"
-            else:
-                grade = "Not Yet Graded"
+            # Use native Chicago grading system
+            chicago_result = item.get('results', 'Not Ready')
+            grade = chicago_result  # Keep original Chicago grade
             
             # Extract and clean restaurant data
             restaurant = {
