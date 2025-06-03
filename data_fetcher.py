@@ -286,11 +286,11 @@ class HealthInspectionAPI:
                     "Capitol Hill", "Ballard", "Fremont", "Queen Anne", "Belltown",
                     "University District", "Georgetown", "Pioneer Square", "SoDo"
                 ]
-            elif self.current_jurisdiction == "San Diego":
-                # San Diego districts
+            elif self.current_jurisdiction == "Los Angeles":
+                # Los Angeles districts
                 locations = [
-                    "Downtown", "Hillcrest", "Mission Beach", "Pacific Beach", "La Jolla",
-                    "Balboa Park", "Gaslamp Quarter", "Little Italy", "Mission Valley"
+                    "Downtown", "Hollywood", "Beverly Hills", "Santa Monica", "West Hollywood",
+                    "Pasadena", "Glendale", "Burbank", "Long Beach"
                 ]
             else:
                 locations = []
