@@ -205,10 +205,26 @@ def main():
     </style>
     """, unsafe_allow_html=True)
     
-    # Header
+    # Header with icon
     st.markdown("""
     <div class="main-header">
-        <h1>CleanPlate</h1>
+        <h1>
+            <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align: middle; margin-right: 12px;" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Plate base -->
+                <circle cx="24" cy="24" r="20" fill="#f8f9fa" stroke="#d4af37" stroke-width="2"/>
+                <!-- Inner plate rim -->
+                <circle cx="24" cy="24" r="16" fill="none" stroke="#d4af37" stroke-width="1" opacity="0.6"/>
+                <!-- Checkmark symbol -->
+                <path d="M16 24l4 4 8-8" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                <!-- Utensil elements -->
+                <path d="M14 10v6c0 1 0.5 2 1.5 2s1.5-1 1.5-2v-6" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M15.5 18v8" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M32 10l-2 16" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M30 10h4" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M31 12h2" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            CleanPlate
+        </h1>
         <p>Premium Restaurant Health Inspection Intelligence</p>
     </div>
     """, unsafe_allow_html=True)
