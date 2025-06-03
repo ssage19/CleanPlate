@@ -187,15 +187,21 @@ def display_simple_restaurant_card(restaurant):
     grade = restaurant.get('grade', 'Not Yet Graded')
     grade_class = f"grade-{grade.lower().replace(' ', '-')}" if grade in ['A', 'B', 'C'] else "grade-pending"
     
+    # Clean and escape restaurant data
+    clean_name = str(restaurant['name']).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+    clean_address = str(restaurant.get('address', 'N/A')).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+    clean_cuisine = str(restaurant.get('cuisine_type', 'Not specified')).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+    clean_boro = str(restaurant.get('boro', 'N/A')).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+    
     # Create restaurant card HTML
     card_html = f"""
     <div class="restaurant-card">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
             <div style="flex: 1;">
-                <h3 style="color: #fafafa; margin: 0 0 0.5rem 0; font-size: 1.4rem;">{restaurant['name']}</h3>
-                <p style="color: #b0b0b0; margin: 0.2rem 0;"><strong>Address:</strong> {restaurant.get('address', 'N/A')}</p>
-                <p style="color: #b0b0b0; margin: 0.2rem 0;"><strong>Cuisine:</strong> {restaurant.get('cuisine_type', 'Not specified')}</p>
-                <p style="color: #b0b0b0; margin: 0.2rem 0;"><strong>Borough:</strong> {restaurant.get('boro', 'N/A')}</p>
+                <h3 style="color: #fafafa; margin: 0 0 0.5rem 0; font-size: 1.4rem;">{clean_name}</h3>
+                <p style="color: #b0b0b0; margin: 0.2rem 0;"><strong>Address:</strong> {clean_address}</p>
+                <p style="color: #b0b0b0; margin: 0.2rem 0;"><strong>Cuisine:</strong> {clean_cuisine}</p>
+                <p style="color: #b0b0b0; margin: 0.2rem 0;"><strong>Borough:</strong> {clean_boro}</p>
             </div>
             <div style="text-align: center; margin-left: 2rem;">
                 <span class="grade-badge {grade_class}">{grade}</span>
@@ -217,9 +223,11 @@ def display_simple_restaurant_card(restaurant):
             """
             for i, violation in enumerate(violations[:3]):
                 violation_class = "critical-violation" if "critical" in violation.lower() else "non-critical-violation"
+                # Clean and escape violation text
+                clean_violation = str(violation).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
                 card_html += f"""
                 <div class="violation-item {violation_class}">
-                    <span style="color: #fafafa;">{violation}</span>
+                    <span style="color: #fafafa;">{clean_violation}</span>
                 </div>
                 """
             if len(violations) > 3:
