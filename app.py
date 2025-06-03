@@ -39,50 +39,43 @@ initialize_database()
 
 def main():
     
-    # Professional restaurant theme with sophisticated dark design
+    # Consolidated CleanPlate Theme - Professional Restaurant Atmosphere
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
         
+        /* Main App Background - Sophisticated Restaurant Atmosphere */
         .stApp {
             background: 
-                linear-gradient(rgba(20, 24, 28, 0.85), rgba(30, 35, 41, 0.9)),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><pattern id="restaurant-texture" width="60" height="60" patternUnits="userSpaceOnUse"><circle cx="30" cy="30" r="1" fill="%23ffffff" fill-opacity="0.02"/><circle cx="15" cy="15" r="0.5" fill="%23d4af37" fill-opacity="0.03"/><circle cx="45" cy="45" r="0.8" fill="%23ffffff" fill-opacity="0.01"/></pattern></defs><rect width="1200" height="800" fill="%23141618"/><rect width="1200" height="800" fill="url(%23restaurant-texture)"/><polygon points="0,800 400,750 800,780 1200,720 1200,800" fill="%231a1e23" opacity="0.6"/><polygon points="0,700 300,680 600,710 900,650 1200,680 1200,800 0,800" fill="%23252a30" opacity="0.4"/></svg>');
+                linear-gradient(45deg, rgba(18, 22, 26, 0.95) 0%, rgba(25, 30, 35, 0.9) 25%, rgba(32, 38, 44, 0.85) 75%, rgba(40, 46, 52, 0.9) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080"><defs><radialGradient id="spotlight1" cx="0.2" cy="0.3" r="0.4"><stop offset="0%" stop-color="%23d4af37" stop-opacity="0.15"/><stop offset="100%" stop-color="transparent"/></radialGradient><radialGradient id="spotlight2" cx="0.8" cy="0.7" r="0.3"><stop offset="0%" stop-color="%23d4af37" stop-opacity="0.08"/><stop offset="100%" stop-color="transparent"/></radialGradient><pattern id="fine-texture" width="120" height="120" patternUnits="userSpaceOnUse"><circle cx="30" cy="30" r="1" fill="%23ffffff" fill-opacity="0.02"/><circle cx="90" cy="90" r="0.8" fill="%23d4af37" fill-opacity="0.03"/><circle cx="60" cy="15" r="0.5" fill="%23ffffff" fill-opacity="0.015"/><circle cx="15" cy="75" r="0.6" fill="%23d4af37" fill-opacity="0.025"/><rect x="45" y="45" width="30" height="30" fill="none" stroke="%23ffffff" stroke-width="0.1" stroke-opacity="0.01" rx="2"/></pattern></defs><rect width="1920" height="1080" fill="%23121619"/><rect width="1920" height="1080" fill="url(%23fine-texture)"/><ellipse cx="384" cy="324" rx="300" ry="200" fill="url(%23spotlight1)"/><ellipse cx="1536" cy="756" rx="240" ry="160" fill="url(%23spotlight2)"/><polygon points="0,1080 500,1040 1000,1060 1500,1020 1920,1050 1920,1080" fill="%231a1e23" opacity="0.8"/><polygon points="0,980 400,950 800,970 1200,930 1600,950 1920,920 1920,1080 0,1080" fill="%23252a30" opacity="0.6"/><polygon points="0,880 300,860 600,880 900,850 1200,870 1500,840 1800,860 1920,840 1920,1080 0,1080" fill="%232d3339" opacity="0.4"/></svg>');
             background-size: cover;
             background-attachment: fixed;
+            background-position: center;
             color: #e8eaed;
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
         }
         
+        /* Header Section */
         .main-header {
-            background: linear-gradient(135deg, #1a1e23 0%, #252a30 50%, #2d3339 100%);
+            background: 
+                linear-gradient(135deg, rgba(26, 30, 35, 0.95) 0%, rgba(37, 42, 48, 0.9) 50%, rgba(45, 51, 57, 0.95) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300"><defs><pattern id="header-pattern" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1" fill="%23d4af37" fill-opacity="0.1"/><circle cx="20" cy="20" r="0.5" fill="%23ffffff" fill-opacity="0.05"/><circle cx="60" cy="60" r="0.8" fill="%23d4af37" fill-opacity="0.08"/><rect x="35" y="35" width="10" height="10" fill="none" stroke="%23ffffff" stroke-width="0.2" stroke-opacity="0.03" rx="1"/></pattern></defs><rect width="800" height="300" fill="url(%23header-pattern)"/><polygon points="0,270 200,250 400,260 600,240 800,250 800,300 0,300" fill="%23d4af37" opacity="0.08"/></svg>');
             padding: 4rem 3rem;
-            border-radius: 0;
             margin: -1rem -1rem 3rem -1rem;
             position: relative;
             overflow: hidden;
             box-shadow: 
-                0 4px 24px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-        }
-        
-        .main-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><defs><pattern id="elegant-pattern" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="0.5" fill="%23d4af37" fill-opacity="0.1"/><rect x="18" y="18" width="4" height="4" fill="%23ffffff" fill-opacity="0.03" rx="1"/></pattern></defs><rect width="400" height="200" fill="url(%23elegant-pattern)"/><polygon points="0,180 100,160 200,170 300,150 400,160 400,200 0,200" fill="%23d4af37" opacity="0.05"/></svg>');
-            pointer-events: none;
+                0 8px 32px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                inset 0 -1px 0 rgba(212, 175, 55, 0.2);
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
         }
         
         .main-header h1 {
             color: #ffffff;
-            font-size: 4rem;
+            font-size: 4.5rem;
             font-weight: 600;
             margin: 0;
             font-family: 'Playfair Display', serif;
@@ -90,29 +83,30 @@ def main():
             line-height: 1.1;
             position: relative;
             z-index: 2;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
         }
         
         .main-header p {
-            color: #b8bcc2;
-            font-size: 1.125rem;
+            color: rgba(212, 175, 55, 0.9);
+            font-size: 0.95rem;
             margin: 1.5rem 0 0 0;
-            font-weight: 400;
-            letter-spacing: 0.02em;
+            font-weight: 500;
+            letter-spacing: 0.15em;
             position: relative;
             z-index: 2;
             font-family: 'Inter', sans-serif;
             text-transform: uppercase;
-            font-size: 0.875rem;
-            opacity: 0.8;
+            opacity: 0.9;
         }
         
+        /* Form Controls */
         .stSelectbox > div > div {
-            background: rgba(45, 51, 57, 0.9) !important;
-            border: 1px solid rgba(212, 175, 55, 0.3) !important;
-            border-radius: 8px !important;
+            background: rgba(37, 42, 48, 0.95) !important;
+            border: 1px solid rgba(212, 175, 55, 0.4) !important;
+            border-radius: 10px !important;
             color: #e8eaed !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+            backdrop-filter: blur(8px) !important;
         }
         
         .stSelectbox > div > div > div {
@@ -120,70 +114,110 @@ def main():
         }
         
         .stTextInput > div > div > input {
-            background: rgba(45, 51, 57, 0.9) !important;
-            border: 1px solid rgba(212, 175, 55, 0.3) !important;
-            border-radius: 8px !important;
+            background: rgba(37, 42, 48, 0.95) !important;
+            border: 1px solid rgba(212, 175, 55, 0.4) !important;
+            border-radius: 10px !important;
             color: #e8eaed !important;
-            padding: 14px 18px !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+            padding: 16px 20px !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
             font-family: 'Inter', sans-serif !important;
+            backdrop-filter: blur(8px) !important;
         }
         
         .stTextInput > div > div > input:focus {
             border-color: #d4af37 !important;
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2) !important;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3) !important;
         }
         
+        .stTextInput > div > div > input::placeholder {
+            color: rgba(184, 188, 194, 0.6) !important;
+        }
+        
+        /* Buttons */
         .stButton > button {
-            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%) !important;
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 50%, #a08419 100%) !important;
             border: none !important;
-            border-radius: 8px !important;
+            border-radius: 10px !important;
             color: #1a1e23 !important;
             font-weight: 600 !important;
-            padding: 14px 28px !important;
+            padding: 16px 32px !important;
             transition: all 0.3s ease !important;
-            box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3) !important;
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4) !important;
             font-family: 'Inter', sans-serif !important;
             text-transform: uppercase;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.03em;
             font-size: 0.875rem;
         }
         
         .stButton > button:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4) !important;
-            background: linear-gradient(135deg, #e6c447 0%, #d4af37 100%) !important;
+            transform: translateY(-3px) !important;
+            box-shadow: 0 12px 32px rgba(212, 175, 55, 0.5) !important;
+            background: linear-gradient(135deg, #e6c447 0%, #d4af37 50%, #b8941f 100%) !important;
         }
         
+        /* Restaurant Cards */
         .stExpander {
-            background: rgba(45, 51, 57, 0.95) !important;
-            border: 1px solid rgba(212, 175, 55, 0.2) !important;
-            border-radius: 12px !important;
-            margin: 2rem 0 !important;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
-            backdrop-filter: blur(10px) !important;
+            background: rgba(37, 42, 48, 0.95) !important;
+            border: 1px solid rgba(212, 175, 55, 0.3) !important;
+            border-radius: 16px !important;
+            margin: 2.5rem 0 !important;
+            box-shadow: 
+                0 12px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(12px) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .stExpander:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 
+                0 20px 48px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(212, 175, 55, 0.5) !important;
+            border-color: rgba(212, 175, 55, 0.6) !important;
         }
         
         .stExpander > div:first-child {
-            background: linear-gradient(135deg, #2d3339 0%, #3a424a 100%) !important;
-            border-radius: 12px 12px 0 0 !important;
+            background: linear-gradient(135deg, #2d3339 0%, #3a424a 50%, #454e57 100%) !important;
+            border-radius: 16px 16px 0 0 !important;
             color: #ffffff !important;
             font-weight: 600 !important;
+            font-size: 1.2rem !important;
+            padding: 2rem 2.5rem !important;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.4) !important;
             font-family: 'Playfair Display', serif !important;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.3) !important;
-            padding: 1.5rem 2rem !important;
+            position: relative;
+            overflow: hidden;
         }
         
+        .stExpander > div:first-child::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 50"><defs><pattern id="card-header-texture" width="25" height="25" patternUnits="userSpaceOnUse"><circle cx="12.5" cy="12.5" r="0.5" fill="%23d4af37" fill-opacity="0.1"/></pattern></defs><rect width="100" height="50" fill="url(%23card-header-texture)"/></svg>');
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        
+        .stExpander > div:last-child {
+            background: rgba(32, 37, 43, 0.95) !important;
+            border-radius: 0 0 16px 16px !important;
+            padding: 2.5rem !important;
+        }
+        
+        /* Info Sections */
         .info-section {
             background: 
-                linear-gradient(135deg, rgba(37, 42, 48, 0.95) 0%, rgba(45, 51, 57, 0.9) 100%);
+                linear-gradient(135deg, rgba(32, 37, 43, 0.98) 0%, rgba(40, 46, 52, 0.95) 100%);
             border-radius: 12px;
-            padding: 24px;
-            margin: 20px 0;
-            border: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 28px;
+            margin: 24px 0;
+            border: 1px solid rgba(212, 175, 55, 0.25);
             box-shadow: 
-                0 8px 24px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+                0 8px 24px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(10px);
@@ -196,41 +230,65 @@ def main():
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><defs><pattern id="luxury-texture" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="0.5" fill="%23d4af37" fill-opacity="0.08"/><rect x="10" y="10" width="10" height="10" fill="none" stroke="%23ffffff" stroke-width="0.2" stroke-opacity="0.02"/></pattern></defs><rect width="60" height="60" fill="url(%23luxury-texture)"/></svg>');
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><defs><pattern id="info-texture" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="0.8" fill="%23d4af37" fill-opacity="0.06"/><rect x="15" y="15" width="10" height="10" fill="none" stroke="%23ffffff" stroke-width="0.1" stroke-opacity="0.02" rx="1"/></pattern></defs><rect width="80" height="80" fill="url(%23info-texture)"/></svg>');
             pointer-events: none;
             z-index: 0;
         }
         
+        /* Typography */
         .section-header {
             color: #ffffff;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 600;
-            margin: 0 0 20px 0;
+            margin: 0 0 24px 0;
             letter-spacing: 0.02em;
             border-bottom: 2px solid #d4af37;
-            padding-bottom: 12px;
+            padding-bottom: 14px;
             font-family: 'Playfair Display', serif;
             position: relative;
             z-index: 1;
         }
         
         .detail-text {
-            color: #b8bcc2;
+            color: #c5c9d0;
             font-weight: 400;
-            line-height: 1.6;
+            line-height: 1.7;
             font-family: 'Inter', sans-serif;
             position: relative;
             z-index: 1;
+            margin-bottom: 12px;
         }
         
         .detail-text strong {
-            color: #e8eaed;
+            color: #ffffff;
             font-weight: 600;
         }
         
+        /* Dividers */
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.2) 10%, rgba(212, 175, 55, 0.8) 50%, rgba(212, 175, 55, 0.2) 90%, transparent 100%);
+            margin: 3rem 0;
+            position: relative;
+            border-radius: 1px;
+        }
+        
+        .divider::before {
+            content: '◆';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(32, 37, 43, 1);
+            color: #d4af37;
+            padding: 0 16px;
+            font-size: 1rem;
+            font-weight: 300;
+        }
+        
+        /* General Streamlit Elements */
         .stMarkdown {
-            color: #b8bcc2;
+            color: #c5c9d0;
             font-family: 'Inter', sans-serif;
         }
         
@@ -239,6 +297,12 @@ def main():
             font-family: 'Playfair Display', serif;
         }
         
+        .stCaption {
+            color: #8a8e95 !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        /* Layout */
         div[data-testid="stToolbar"] {
             display: none;
         }
@@ -248,34 +312,32 @@ def main():
             max-width: 1200px;
         }
         
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.3) 20%, rgba(212, 175, 55, 0.6) 50%, rgba(212, 175, 55, 0.3) 80%, transparent 100%);
-            margin: 2rem 0;
-            position: relative;
-        }
-        
-        .divider::before {
-            content: '◆';
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(37, 42, 48, 1);
-            color: #d4af37;
-            padding: 0 12px;
-            font-size: 0.8rem;
-        }
-        
-        /* Captions and smaller text */
-        .stCaption {
-            color: #8a8e95 !important;
-            font-family: 'Inter', sans-serif !important;
-        }
-        
-        /* Sidebar styling */
+        /* Sidebar */
         .css-1d391kg {
-            background: rgba(30, 35, 41, 0.95) !important;
+            background: rgba(25, 30, 35, 0.98) !important;
+            backdrop-filter: blur(10px) !important;
+        }
+        
+        /* Warning/Info Messages */
+        .stWarning {
+            background: rgba(255, 187, 51, 0.1) !important;
+            border: 1px solid rgba(255, 187, 51, 0.3) !important;
+            border-radius: 10px !important;
+            color: #ffbb33 !important;
+        }
+        
+        .stInfo {
+            background: rgba(212, 175, 55, 0.1) !important;
+            border: 1px solid rgba(212, 175, 55, 0.3) !important;
+            border-radius: 10px !important;
+            color: #d4af37 !important;
+        }
+        
+        .stError {
+            background: rgba(220, 53, 69, 0.1) !important;
+            border: 1px solid rgba(220, 53, 69, 0.3) !important;
+            border-radius: 10px !important;
+            color: #dc3545 !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -494,40 +556,7 @@ def main():
 def display_simple_restaurant_card(restaurant):
     """Display restaurant card with sophisticated dark restaurant theme"""
     
-    # Professional dark restaurant styling for restaurant cards
-    st.markdown("""
-    <style>
-    .streamlit-expander {
-        background: rgba(45, 51, 57, 0.95) !important;
-        border: 1px solid rgba(212, 175, 55, 0.2) !important;
-        border-radius: 12px !important;
-        margin: 2rem 0 !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
-        backdrop-filter: blur(10px) !important;
-    }
-    .streamlit-expander:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4) !important;
-        border-color: rgba(212, 175, 55, 0.4) !important;
-    }
-    .streamlit-expander > div:first-child {
-        background: linear-gradient(135deg, #2d3339 0%, #3a424a 100%) !important;
-        border-radius: 12px 12px 0 0 !important;
-        color: #ffffff !important;
-        font-weight: 600 !important;
-        font-size: 1.1rem !important;
-        padding: 1.5rem 2rem !important;
-        border-bottom: 1px solid rgba(212, 175, 55, 0.3) !important;
-        font-family: 'Playfair Display', serif !important;
-    }
-    .streamlit-expander > div:last-child {
-        background: rgba(37, 42, 48, 0.9) !important;
-        border-radius: 0 0 12px 12px !important;
-        padding: 2rem !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+
     
     # Use expander with enhanced visual hierarchy
     with st.expander(f"{restaurant['name']}", expanded=True):
