@@ -304,6 +304,15 @@ def display_restaurant_card(restaurant):
             st.markdown(f'<div class="detail-text"><strong>Address:</strong> {restaurant.get("address", "N/A")}</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="detail-text"><strong>Cuisine:</strong> {restaurant.get("cuisine_type", "Not specified")}</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="detail-text"><strong>Location:</strong> {restaurant.get("boro", "N/A")}</div>', unsafe_allow_html=True)
+            
+            # Inspection date prominently displayed
+            inspection_date = restaurant.get("inspection_date", "Date not available")
+            if inspection_date and inspection_date != "Date not available":
+                from utils import format_inspection_date
+                formatted_date = format_inspection_date(inspection_date)
+                st.markdown(f'<div class="detail-text" style="font-weight: 600; color: #fbbf24; margin-top: 8px;"><strong>Last Inspected:</strong> {formatted_date}</div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="detail-text" style="color: #9ca3af; margin-top: 8px;"><strong>Last Inspected:</strong> {inspection_date}</div>', unsafe_allow_html=True)
         
         with col2:
             grade = restaurant.get('grade', 'Not Yet Graded')
