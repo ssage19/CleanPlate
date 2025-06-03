@@ -64,8 +64,8 @@ def main():
     
     # Main content area
     try:
-        # Fetch restaurant data
-        with st.spinner("Loading restaurant data..."):
+        # Fetch restaurant data with progress indicator
+        with st.spinner("Loading restaurant inspection data from NYC database..."):
             restaurants_df = st.session_state.api_client.get_restaurants(
                 location=selected_location if selected_location != "All" else None,
                 grades=selected_grades,
@@ -73,6 +73,12 @@ def main():
                 search_term=search_term,
                 date_range=date_range
             )
+            
+        # Display data statistics
+        if not restaurants_df.empty:
+            st.success(f"✅ Retrieved {len(restaurants_df)} restaurant inspection records from NYC Health Department database")
+        else:
+            st.info("No restaurant inspection records found matching your search criteria")
             
             # Save restaurants to database
             if not restaurants_df.empty:

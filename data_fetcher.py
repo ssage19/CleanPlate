@@ -26,23 +26,13 @@ class HealthInspectionAPI:
                 'User-Agent': 'Restaurant-Health-Inspector/1.0'
             }
             
-            print(f"Making request to: {endpoint}")
-            print(f"Parameters: {params}")
-            
             response = requests.get(endpoint, params=params, headers=headers, timeout=30)
-            print(f"Response status: {response.status_code}")
-            print(f"Response URL: {response.url}")
-            
             response.raise_for_status()
-            data = response.json()
-            print(f"Records received: {len(data) if data else 0}")
-            return data
+            return response.json()
         
         except requests.exceptions.RequestException as e:
-            print(f"Request exception: {e}")
             raise Exception(f"API request failed: {str(e)}")
         except json.JSONDecodeError as e:
-            print(f"JSON decode error: {e}")
             raise Exception(f"Invalid API response format: {str(e)}")
     
     def _is_cache_valid(self):
@@ -79,18 +69,11 @@ class HealthInspectionAPI:
             # Return default NYC boroughs if API fails
             return ['MANHATTAN', 'BROOKLYN', 'QUEENS', 'BRONX', 'STATEN ISLAND']
     
-    def get_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=100):
+    def get_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=5000):
         """
-        Fetch restaurant inspection data with filters
+        Fetch restaurant inspection data with filters and pagination for larger datasets
         """
         try:
-            # Build API query parameters with more specific filtering
-            params = {
-                '$limit': limit,
-                '$order': 'inspection_date DESC',
-                '$where': 'grade IS NOT NULL'  # Only get records with actual grades
-            }
-            
             # Build where clause conditions
             where_conditions = ['grade IS NOT NULL']
             
@@ -109,19 +92,44 @@ class HealthInspectionAPI:
                 end_date = date_range[1].strftime('%Y-%m-%d')
                 where_conditions.append(f"inspection_date >= '{start_date}' AND inspection_date <= '{end_date}'")
             
-            params['$where'] = ' AND '.join(where_conditions)
+            where_clause = ' AND '.join(where_conditions)
             
-            # Make API request
-            data = self._make_api_request(self.nyc_api_base, params)
+            # Fetch data with pagination for larger datasets
+            all_data = []
+            batch_size = 1000  # NYC Open Data API limit per request
+            offset = 0
             
-            if not data:
+            while len(all_data) < limit:
+                remaining = limit - len(all_data)
+                current_limit = min(batch_size, remaining)
+                
+                params = {
+                    '$limit': current_limit,
+                    '$offset': offset,
+                    '$order': 'inspection_date DESC',
+                    '$where': where_clause
+                }
+                
+                batch_data = self._make_api_request(self.nyc_api_base, params)
+                
+                if not batch_data or len(batch_data) == 0:
+                    break  # No more data available
+                
+                all_data.extend(batch_data)
+                offset += len(batch_data)
+                
+                # If we got less than requested, we've reached the end
+                if len(batch_data) < current_limit:
+                    break
+            
+            if not all_data:
                 return pd.DataFrame()
             
             # Process and clean data
             restaurants = []
             seen_restaurants = set()
             
-            for item in data:
+            for item in all_data:
                 # Create unique identifier for restaurant
                 restaurant_key = (item.get('dba', '').strip(), item.get('building', ''), item.get('street', ''))
                 
