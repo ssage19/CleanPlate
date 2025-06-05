@@ -315,11 +315,28 @@ def main():
                 st.info("Please check your internet connection and try again.")
 
 def display_restaurant_card(restaurant):
-    """Display restaurant card with consolidated styling"""
+    """Display restaurant card with sophisticated multi-inspection timeline"""
+    
+    # Handle both old and new data formats
+    inspections = restaurant.get('inspections', [])
+    if not inspections:
+        # Create single inspection from main restaurant data for backwards compatibility
+        inspections = [{
+            'grade': restaurant.get('grade', 'Not Yet Graded'),
+            'score': restaurant.get('score'),
+            'inspection_date': restaurant.get('inspection_date', 'N/A'),
+            'violations': restaurant.get('violations', []),
+            'inspection_type': restaurant.get('inspection_type', ''),
+            'critical_flag': restaurant.get('critical_flag', '')
+        }]
+    
+    # Latest inspection for main display
+    latest_inspection = inspections[0] if inspections else {}
     
     with st.expander(f"{restaurant['name']}", expanded=True):
+        # Restaurant Info Section
         st.markdown('<div class="info-section">', unsafe_allow_html=True)
-        st.markdown('<h4 class="section-header">Location Details</h4>', unsafe_allow_html=True)
+        st.markdown('<h4 class="section-header">Restaurant Details</h4>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([2, 1])
         with col1:
@@ -327,17 +344,12 @@ def display_restaurant_card(restaurant):
             st.markdown(f'<div class="detail-text"><strong>Cuisine:</strong> {restaurant.get("cuisine_type", "Not specified")}</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="detail-text"><strong>Location:</strong> {restaurant.get("boro", "N/A")}</div>', unsafe_allow_html=True)
             
-            # Inspection date prominently displayed
-            inspection_date = restaurant.get("inspection_date", "Date not available")
-            if inspection_date and inspection_date != "Date not available":
-                from utils import format_inspection_date
-                formatted_date = format_inspection_date(inspection_date)
-                st.markdown(f'<div class="detail-text" style="font-weight: 600; color: #fbbf24; margin-top: 8px;"><strong>Last Inspected:</strong> {formatted_date}</div>', unsafe_allow_html=True)
-            else:
-                st.markdown(f'<div class="detail-text" style="color: #9ca3af; margin-top: 8px;"><strong>Last Inspected:</strong> {inspection_date}</div>', unsafe_allow_html=True)
+            # Show number of inspections
+            if len(inspections) > 1:
+                st.markdown(f'<div class="detail-text" style="color: #fbbf24; font-weight: 600;"><strong>Total Inspections:</strong> {len(inspections)}</div>', unsafe_allow_html=True)
         
         with col2:
-            grade = restaurant.get('grade', 'Not Yet Graded')
+            grade = latest_inspection.get('grade', 'Not Yet Graded')
             grade_info = st.session_state.api_client.get_grade_info(grade)
             
             st.markdown(f"""
@@ -349,29 +361,85 @@ def display_restaurant_card(restaurant):
                 <div style="font-size: 0.9rem; color: #a0aec0; margin-top: 4px;">
                     {grade_info['description']}
                 </div>
+                <div style="font-size: 0.8rem; color: #68d391; margin-top: 8px;">
+                    Latest Grade
+                </div>
             </div>
             """, unsafe_allow_html=True)
         
         st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
         
-        # Violations section
-        st.markdown('<h4 class="section-header">Health Inspection Results</h4>', unsafe_allow_html=True)
+        # Inspection History Timeline
+        if len(inspections) > 1:
+            st.markdown('<div class="info-section">', unsafe_allow_html=True)
+            st.markdown('<h4 class="section-header">📋 Inspection History Timeline</h4>', unsafe_allow_html=True)
+            
+            for i, inspection in enumerate(inspections[:5]):  # Show up to 5 most recent
+                inspection_date = inspection.get("inspection_date", "Date not available")
+                if inspection_date and inspection_date != "Date not available":
+                    from utils import format_inspection_date
+                    formatted_date = format_inspection_date(inspection_date)
+                else:
+                    formatted_date = inspection_date
+                
+                grade = inspection.get('grade', 'Not Graded')
+                grade_info = st.session_state.api_client.get_grade_info(grade)
+                score = inspection.get('score')
+                inspection_type = inspection.get('inspection_type', 'Regular Inspection')
+                
+                # Timeline entry
+                timeline_color = "#fbbf24" if i == 0 else "#9ca3af"
+                timeline_icon = "🔸" if i == 0 else "🔹"
+                
+                st.markdown(f"""
+                <div style="border-left: 3px solid {timeline_color}; padding: 12px 0 12px 20px; margin: 8px 0; 
+                           background: rgba(45, 55, 72, 0.5); border-radius: 0 8px 8px 0;">
+                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <span style="margin-right: 8px;">{timeline_icon}</span>
+                        <span style="color: {timeline_color}; font-weight: 600; font-size: 1rem;">{formatted_date}</span>
+                        <span style="margin-left: auto; color: {grade_info['color']}; font-weight: 700; 
+                                   background: {grade_info['color']}20; padding: 4px 12px; border-radius: 16px; font-size: 0.9rem;">
+                            {grade_info['label']}
+                        </span>
+                    </div>
+                    <div style="color: #e2e8f0; font-size: 0.9rem;">
+                        <strong>Type:</strong> {inspection_type}
+                        {f"<br><strong>Score:</strong> {score}" if score else ""}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            if len(inspections) > 5:
+                st.markdown(f'<div class="detail-text" style="text-align: center; color: #9ca3af; font-style: italic;">... and {len(inspections) - 5} more inspections</div>', unsafe_allow_html=True)
+            
+            st.markdown('</div>', unsafe_allow_html=True)
         
-        if 'violations' in restaurant and restaurant['violations']:
-            violations = [v for v in restaurant['violations'] if v != "No violations recorded"]
+        # Latest Inspection Details
+        st.markdown('<div class="info-section">', unsafe_allow_html=True)
+        latest_date = latest_inspection.get("inspection_date", "Date not available")
+        if latest_date and latest_date != "Date not available":
+            from utils import format_inspection_date
+            formatted_latest_date = format_inspection_date(latest_date)
+            st.markdown(f'<h4 class="section-header">🔍 Latest Inspection - {formatted_latest_date}</h4>', unsafe_allow_html=True)
+        else:
+            st.markdown('<h4 class="section-header">🔍 Latest Inspection Results</h4>', unsafe_allow_html=True)
+        
+        if 'violations' in latest_inspection and latest_inspection['violations']:
+            violations = [v for v in latest_inspection['violations'] if v != "No violations recorded"]
             if violations:
                 for i, violation in enumerate(violations[:3]):
                     st.markdown(f'<div class="detail-text">• {violation}</div>', unsafe_allow_html=True)
                 
                 if len(violations) > 3:
-                    with st.expander(f"View {len(violations) - 3} more violations"):
+                    with st.expander(f"View {len(violations) - 3} more violations from latest inspection"):
                         for violation in violations[3:]:
                             st.markdown(f'<div class="detail-text">• {violation}</div>', unsafe_allow_html=True)
             else:
                 st.markdown('<div class="detail-text" style="color: #68d391;">✓ No violations recorded</div>', unsafe_allow_html=True)
         else:
             st.markdown('<div class="detail-text" style="color: #68d391;">✓ No violations recorded</div>', unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()

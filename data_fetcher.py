@@ -388,34 +388,55 @@ class HealthInspectionAPI:
         if not raw_data:
             return []
         
-        # Process NYC data
-        restaurants = []
-        seen_restaurants = set()
+        # Process NYC data with multiple inspections per restaurant
+        restaurants_dict = {}
         
         for item in raw_data:
             # Create unique identifier for restaurant
             restaurant_key = (item.get('dba', '').strip(), item.get('building', ''), item.get('street', ''))
             
-            if restaurant_key in seen_restaurants:
-                continue
-            seen_restaurants.add(restaurant_key)
-            
-            # Extract and clean restaurant data
-            restaurant = {
-                'id': f"{item.get('camis', '')}{item.get('dba', '').replace(' ', '')}",
-                'name': item.get('dba', 'Unknown Restaurant').strip(),
-                'address': self._format_address(item),
-                'cuisine_type': item.get('cuisine_description', 'Not specified'),
+            # Create inspection record
+            inspection = {
                 'grade': item.get('grade', 'Not Yet Graded'),
                 'score': self._safe_int(item.get('score')),
                 'inspection_date': item.get('inspection_date', '').split('T')[0] if item.get('inspection_date') else 'N/A',
                 'violations': self._extract_violations(item),
-                'boro': item.get('boro', ''),
-                'phone': item.get('phone', ''),
-                'inspection_type': item.get('inspection_type', '')
+                'inspection_type': item.get('inspection_type', ''),
+                'critical_flag': item.get('critical_flag', '')
             }
             
-            restaurants.append(restaurant)
+            if restaurant_key not in restaurants_dict:
+                # Create new restaurant entry
+                restaurants_dict[restaurant_key] = {
+                    'id': f"{item.get('camis', '')}{item.get('dba', '').replace(' ', '')}",
+                    'name': item.get('dba', 'Unknown Restaurant').strip(),
+                    'address': self._format_address(item),
+                    'cuisine_type': item.get('cuisine_description', 'Not specified'),
+                    'boro': item.get('boro', ''),
+                    'phone': item.get('phone', ''),
+                    'inspections': [inspection]
+                }
+            else:
+                # Add inspection to existing restaurant
+                restaurants_dict[restaurant_key]['inspections'].append(inspection)
+        
+        # Convert to list and add latest inspection info to main level
+        restaurants = []
+        for restaurant_data in restaurants_dict.values():
+            # Sort inspections by date (most recent first)
+            restaurant_data['inspections'].sort(key=lambda x: x['inspection_date'], reverse=True)
+            
+            # Add latest inspection data to main restaurant level for compatibility
+            latest_inspection = restaurant_data['inspections'][0] if restaurant_data['inspections'] else {}
+            restaurant_data.update({
+                'grade': latest_inspection.get('grade', 'Not Yet Graded'),
+                'score': latest_inspection.get('score'),
+                'inspection_date': latest_inspection.get('inspection_date', 'N/A'),
+                'violations': latest_inspection.get('violations', []),
+                'inspection_type': latest_inspection.get('inspection_type', '')
+            })
+            
+            restaurants.append(restaurant_data)
         
         # Apply cuisine filter if specified
         if cuisines and "All" not in cuisines:
@@ -473,39 +494,58 @@ class HealthInspectionAPI:
         if not raw_data:
             return []
         
-        # Process Chicago data
-        restaurants = []
-        seen_restaurants = set()
+        # Process Chicago data with multiple inspections per restaurant
+        restaurants_dict = {}
         
         for item in raw_data:
             # Create unique identifier for restaurant
             restaurant_key = (item.get('dba_name', '').strip(), item.get('address', ''))
             
-            if restaurant_key in seen_restaurants:
-                continue
-            seen_restaurants.add(restaurant_key)
-            
             # Use native Chicago grading system
             chicago_result = item.get('results', 'Not Ready')
-            grade = chicago_result  # Keep original Chicago grade
             
-            # Extract and clean restaurant data
-            restaurant = {
-                'id': f"CHI_{item.get('license_', '')}{item.get('dba_name', '').replace(' ', '')}",
-                'name': item.get('dba_name', 'Unknown Restaurant').strip(),
-                'address': self._format_chicago_address(item),
-                'cuisine_type': item.get('facility_type', 'Not specified'),
-                'grade': grade,
+            # Create inspection record
+            inspection = {
+                'grade': chicago_result,
                 'score': None,  # Chicago doesn't use numeric scores
                 'inspection_date': item.get('inspection_date', '').split('T')[0] if item.get('inspection_date') else 'N/A',
-                'violations': ["Violation details not available in Chicago dataset"],
-                'boro': 'Chicago',  # Since ward data isn't available in main endpoint
-                'phone': '',  # Not available in Chicago data
+                'violations': self._extract_chicago_violations(item),
                 'inspection_type': item.get('inspection_type', ''),
-                'risk': item.get('risk', '')
+                'risk_level': item.get('risk', '')
             }
             
-            restaurants.append(restaurant)
+            if restaurant_key not in restaurants_dict:
+                # Create new restaurant entry
+                restaurants_dict[restaurant_key] = {
+                    'id': f"CHI_{item.get('license_', '')}{item.get('dba_name', '').replace(' ', '')}",
+                    'name': item.get('dba_name', 'Unknown Restaurant').strip(),
+                    'address': self._format_chicago_address(item),
+                    'cuisine_type': item.get('facility_type', 'Not specified'),
+                    'boro': f"Chicago, IL {item.get('zip', '')}",
+                    'phone': '',
+                    'inspections': [inspection]
+                }
+            else:
+                # Add inspection to existing restaurant
+                restaurants_dict[restaurant_key]['inspections'].append(inspection)
+        
+        # Convert to list and add latest inspection info to main level
+        restaurants = []
+        for restaurant_data in restaurants_dict.values():
+            # Sort inspections by date (most recent first)
+            restaurant_data['inspections'].sort(key=lambda x: x['inspection_date'], reverse=True)
+            
+            # Add latest inspection data to main restaurant level for compatibility
+            latest_inspection = restaurant_data['inspections'][0] if restaurant_data['inspections'] else {}
+            restaurant_data.update({
+                'grade': latest_inspection.get('grade', 'Not Ready'),
+                'score': latest_inspection.get('score'),
+                'inspection_date': latest_inspection.get('inspection_date', 'N/A'),
+                'violations': latest_inspection.get('violations', []),
+                'inspection_type': latest_inspection.get('inspection_type', '')
+            })
+            
+            restaurants.append(restaurant_data)
         
         # Apply cuisine filter if specified
         if cuisines and "All" not in cuisines:
