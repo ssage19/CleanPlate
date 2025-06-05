@@ -732,7 +732,18 @@ class HealthInspectionAPI:
         
         # Add search parameter if provided
         if search_term:
-            params['q'] = search_term
+            # Handle advanced search modes for Boston
+            if search_term.startswith('"') and search_term.endswith('"'):
+                # Exact word matching
+                exact_term = search_term.strip('"')
+                params['q'] = exact_term
+            elif search_term.endswith('*'):
+                # Starts with matching
+                prefix_term = search_term.rstrip('*')
+                params['q'] = prefix_term
+            else:
+                # Contains matching (default)
+                params['q'] = search_term
         
         try:
             raw_data = self._make_api_request(self.current_api["base_url"], params)
@@ -797,7 +808,18 @@ class HealthInspectionAPI:
         # Add search filters
         where_conditions = []
         if search_term:
-            where_conditions.append(f"UPPER(facility_name) LIKE '%{search_term.upper()}%'")
+            # Handle advanced search modes
+            if search_term.startswith('"') and search_term.endswith('"'):
+                # Exact word matching
+                exact_term = search_term.strip('"')
+                where_conditions.append(f"UPPER(facility_name) = '{exact_term.upper()}'")
+            elif search_term.endswith('*'):
+                # Starts with matching
+                prefix_term = search_term.rstrip('*')
+                where_conditions.append(f"UPPER(facility_name) LIKE '{prefix_term.upper()}%'")
+            else:
+                # Contains matching (default)
+                where_conditions.append(f"UPPER(facility_name) LIKE '%{search_term.upper()}%'")
         
         if where_conditions:
             params['$where'] = ' AND '.join(where_conditions)
