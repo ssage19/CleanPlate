@@ -783,10 +783,11 @@ class HealthInspectionAPI:
                     params['q'] = search_term
             
             try:
-                # Implement pagination for massive Boston datasets
-                for offset in range(0, min(200000, endpoint.get('max_records', 100000)), 32000):
+                # Implement optimized pagination for massive Boston dataset (838k+ records)
+                for offset in range(0, min(300000, endpoint.get('max_records', 200000)), 25000):
                     batch_params = params.copy()
                     batch_params['offset'] = offset
+                    batch_params['limit'] = 25000  # Optimal batch size
                     
                     raw_data = self._make_api_request(self.current_api["base_url"], batch_params)
                     
@@ -798,8 +799,8 @@ class HealthInspectionAPI:
                         endpoint_restaurants = self._process_boston_records(records, seen_restaurants)
                         all_restaurants.extend(endpoint_restaurants)
                         
-                        # Stop if we have enough unique restaurants
-                        if len(all_restaurants) >= limit * 10:
+                        # Stop if we have enough unique restaurants for this request
+                        if len(all_restaurants) >= limit * 5:
                             break
                     else:
                         break
@@ -815,37 +816,55 @@ class HealthInspectionAPI:
         return all_restaurants[:limit]
     
     def _process_boston_records(self, records, seen_restaurants):
-        """Process Boston restaurant records with deduplication"""
+        """Process Boston restaurant records with enhanced deduplication and data validation"""
         restaurants = []
         
         for item in records:
-            business_name = item.get('businessname', '').strip()
-            if not business_name:
+            # Robust data validation
+            business_name = item.get('businessname', '')
+            if not business_name or not isinstance(business_name, str):
                 continue
                 
-            restaurant_key = (business_name, item.get('address', ''))
+            business_name = business_name.strip()
+            if len(business_name) < 3:  # Skip very short names
+                continue
+                
+            # Create more robust restaurant key
+            address = item.get('address', '') or ''
+            restaurant_key = (business_name.lower(), address.lower())
             
             if restaurant_key in seen_restaurants:
                 continue
             seen_restaurants.add(restaurant_key)
             
-            # Use Boston's pass/fail result system
-            grade = item.get('viollevel', 'Unknown')
+            # Enhanced grade processing
+            grade = item.get('result', item.get('viollevel', 'Unknown'))
             grade_mapping = {
                 'HE_Pass': 'Pass',
-                'HE_Fail': 'Fail',
-                'Conditional': 'Conditional'
+                'HE_Fail': 'Fail', 
+                'Conditional': 'Conditional',
+                'Pass': 'Pass',
+                'Fail': 'Fail'
             }
             
+            # Process violations more comprehensively
+            violations = []
+            if item.get('violdesc'):
+                violations.append(item.get('violdesc'))
+            if item.get('comments'):
+                violations.append(item.get('comments'))
+            if not violations:
+                violations = ['No violations recorded']
+            
             restaurant = {
-                'id': f"BOS_{item.get('licstatus', '')}{business_name.replace(' ', '')}",
+                'id': f"BOS_{item.get('licenseno', '')}{business_name.replace(' ', '')}",
                 'name': business_name,
                 'address': self._format_boston_address(item),
-                'cuisine_type': item.get('dbaname', 'Not specified'),
+                'cuisine_type': item.get('descript', item.get('dbaname', 'Restaurant')),
                 'grade': grade_mapping.get(grade, grade),
                 'score': 0,  # Boston uses pass/fail system
-                'inspection_date': item.get('issdttm', '').split('T')[0] if item.get('issdttm') else 'N/A',
-                'violations': [item.get('comments', 'No violations recorded')],
+                'inspection_date': self._safe_date_extract(item.get('resultdttm') or item.get('issdttm') or ''),
+                'violations': violations,
                 'boro': f"Boston, MA {item.get('zip', '')}",
                 'phone': item.get('phone', ''),
                 'inspection_type': 'Health Inspection'
