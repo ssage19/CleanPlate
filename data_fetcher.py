@@ -1100,3 +1100,14 @@ class HealthInspectionAPI:
             violations.append(f"Violation code: {item['violation_code']}")
         
         return violations if violations else ["No violations recorded"]
+    
+    def _safe_date_extract(self, date_str):
+        """Safely extract date from datetime string"""
+        try:
+            if not date_str or not isinstance(date_str, str):
+                return 'N/A'
+            if 'T' in date_str:
+                return date_str.split('T')[0]
+            return date_str[:10] if len(date_str) >= 10 else date_str
+        except:
+            return 'N/A'
