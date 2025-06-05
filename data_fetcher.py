@@ -147,12 +147,15 @@ class HealthInspectionAPI:
         self.current_jurisdiction = jurisdiction
         self.current_api = self.apis.get(jurisdiction, self.apis["NYC"])
         
-        # Cache for API responses
+        # Performance optimization caches
         self._location_cache = {}
         self._data_cache = {}
         self._cache_timestamp = None
         self._cache_duration = 1800  # 30 minute cache for faster responses
         self._search_cache = {}  # Cache for search results
+        self._restaurant_cache = {}  # Long-term restaurant cache
+        self._processing_batch_size = 10000  # Larger batch processing
+        self._max_records_per_request = 60000  # Increased record limit
     
     def _make_api_request(self, endpoint, params=None):
         """Make API request with enhanced error handling and retries"""
@@ -386,9 +389,9 @@ class HealthInspectionAPI:
         
         where_clause = ' AND '.join(where_conditions)
         
-        # API request parameters - enhanced for maximum restaurant extraction
+        # API request parameters - optimized for performance with increased capacity
         params = {
-            '$limit': min(limit * 80, 40000),
+            '$limit': min(limit * 120, self._max_records_per_request),
             '$order': 'inspection_date DESC',
             '$where': where_clause,
             '$select': 'camis,dba,boro,building,street,zipcode,phone,cuisine_description,inspection_date,action,violation_code,violation_description,critical_flag,score,grade,grade_date,record_date,inspection_type'
@@ -503,9 +506,9 @@ class HealthInspectionAPI:
         
         where_clause = ' AND '.join(where_conditions)
         
-        # API request parameters - enhanced for maximum restaurant extraction
+        # API request parameters - optimized for performance with increased capacity
         params = {
-            '$limit': min(limit * 80, 40000),
+            '$limit': min(limit * 120, self._max_records_per_request),
             '$order': 'inspection_date DESC',
             '$where': where_clause,
             '$select': 'license_,dba_name,aka_name,facility_type,risk,address,city,state,zip,inspection_date,inspection_type,results,latitude,longitude'
@@ -601,7 +604,7 @@ class HealthInspectionAPI:
         where_clause = ' AND '.join(where_conditions)
         
         params = {
-            '$limit': min(limit * 80, 40000),
+            '$limit': min(limit * 120, self._max_records_per_request),
             '$order': 'inspection_date DESC',
             '$where': where_clause,
             '$select': 'restaurant_name,address,zip_code,score,inspection_date,process_description,facility_id'
@@ -727,7 +730,7 @@ class HealthInspectionAPI:
         # Boston uses CKAN API format with direct datastore access
         params = {
             'resource_id': self.current_api["resource_id"],
-            'limit': min(limit * 80, 40000)  # Enhanced limit for maximum restaurant extraction
+            'limit': min(limit * 120, self._max_records_per_request)  # Optimized for performance with increased capacity
         }
         
         # Add search parameter if provided
@@ -803,7 +806,7 @@ class HealthInspectionAPI:
     
     def _get_losangeles_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Los Angeles City restaurant inspection data"""
-        params = {'$limit': min(limit * 80, 40000)}
+        params = {'$limit': min(limit * 120, self._max_records_per_request)}
         
         # Add search filters
         where_conditions = []
