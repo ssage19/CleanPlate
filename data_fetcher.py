@@ -61,6 +61,10 @@ class HealthInspectionAPI:
             "Boston": {
                 "base_url": "https://data.boston.gov/api/3/action/datastore_search",
                 "resource_id": "4582bec6-2b4f-4f9e-bc55-cbaa73117f4c",
+                "alternative_endpoints": [
+                    "https://data.boston.gov/api/3/action/datastore_search?resource_id=ec463b8a-7599-44e8-96c9-537e5bcd3c1b",
+                    "https://data.boston.gov/api/3/action/datastore_search?resource_id=30022137-709d-465e-baae-ca155b51927d"
+                ],
                 "name": "Boston, MA",
                 "location_field": "city",
                 "grade_field": "viollevel",
@@ -104,6 +108,10 @@ class HealthInspectionAPI:
             },
             "Seattle": {
                 "base_url": "https://data.kingcounty.gov/resource/f29f-zza5.json",
+                "alternative_endpoints": [
+                    "https://data.seattle.gov/resource/gkhn-e8mn.json",
+                    "https://data.kingcounty.gov/resource/da9z-k3xz.json"
+                ],
                 "name": "Seattle, WA",
                 "location_field": "zip_code",
                 "grade_field": "grade",
@@ -728,27 +736,107 @@ class HealthInspectionAPI:
     def _get_boston_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Boston restaurant inspection data"""
         # Boston uses CKAN API format with direct datastore access
-        params = {
-            'resource_id': self.current_api["resource_id"],
-            'limit': min(limit * 120, self._max_records_per_request)  # Optimized for performance with increased capacity
-        }
+        all_restaurants = []
         
-        # Add search parameter if provided
-        if search_term:
-            # Handle advanced search modes for Boston
-            if search_term.startswith('"') and search_term.endswith('"'):
-                # Exact word matching
-                exact_term = search_term.strip('"')
-                params['q'] = exact_term
-            elif search_term.endswith('*'):
-                # Starts with matching
-                prefix_term = search_term.rstrip('*')
-                params['q'] = prefix_term
-            else:
-                # Contains matching (default)
-                params['q'] = search_term
+        # Try multiple Boston government data sources for maximum coverage
+        endpoints_to_try = [
+            {'resource_id': self.current_api["resource_id"], 'name': 'Primary Boston Health Inspections'},
+            {'resource_id': 'ec463b8a-7599-44e8-96c9-537e5bcd3c1b', 'name': 'Boston Food Establishments'},
+            {'resource_id': '30022137-709d-465e-baae-ca155b51927d', 'name': 'Boston Business Licenses'}
+        ]
         
+        seen_restaurants = set()
+        
+        for endpoint in endpoints_to_try:
+            params = {
+                'resource_id': endpoint['resource_id'],
+                'limit': min(limit * 40, 20000)  # Higher extraction per endpoint
+            }
+            
+            # Add search parameter if provided
+            if search_term:
+                # Handle advanced search modes for Boston
+                if search_term.startswith('"') and search_term.endswith('"'):
+                    # Exact word matching
+                    exact_term = search_term.strip('"')
+                    params['q'] = exact_term
+                elif search_term.endswith('*'):
+                    # Starts with matching
+                    prefix_term = search_term.rstrip('*')
+                    params['q'] = prefix_term
+                else:
+                    # Contains matching (default)
+                    params['q'] = search_term
+            
+            try:
+                raw_data = self._make_api_request(self.current_api["base_url"], params)
+                
+                if raw_data and 'result' in raw_data and 'records' in raw_data['result']:
+                    endpoint_restaurants = self._process_boston_records(raw_data['result']['records'], seen_restaurants)
+                    all_restaurants.extend(endpoint_restaurants)
+                    
+            except Exception as e:
+                print(f"Error fetching from {endpoint['name']}: {e}")
+                continue
+        
+        # Remove duplicates and apply filters
+        if cuisines and "All" not in cuisines:
+            all_restaurants = [r for r in all_restaurants if r['cuisine_type'] in cuisines]
+        
+        return all_restaurants[:limit]
+    
+    def _process_boston_records(self, records, seen_restaurants):
+        """Process Boston restaurant records with deduplication"""
+        restaurants = []
+        
+        for item in records:
+            business_name = item.get('businessname', '').strip()
+            if not business_name:
+                continue
+                
+            restaurant_key = (business_name, item.get('address', ''))
+            
+            if restaurant_key in seen_restaurants:
+                continue
+            seen_restaurants.add(restaurant_key)
+            
+            # Use Boston's pass/fail result system
+            grade = item.get('viollevel', 'Unknown')
+            grade_mapping = {
+                'HE_Pass': 'Pass',
+                'HE_Fail': 'Fail',
+                'Conditional': 'Conditional'
+            }
+            
+            restaurant = {
+                'id': f"BOS_{item.get('licstatus', '')}{business_name.replace(' ', '')}",
+                'name': business_name,
+                'address': self._format_boston_address(item),
+                'cuisine_type': item.get('dbaname', 'Not specified'),
+                'grade': grade_mapping.get(grade, grade),
+                'score': 0,  # Boston uses pass/fail system
+                'inspection_date': item.get('issdttm', '').split('T')[0] if item.get('issdttm') else 'N/A',
+                'violations': [item.get('comments', 'No violations recorded')],
+                'boro': f"Boston, MA {item.get('zip', '')}",
+                'phone': item.get('phone', ''),
+                'inspection_type': 'Health Inspection'
+            }
+            
+            restaurants.append(restaurant)
+        
+        return restaurants
+        
+    def _get_boston_restaurants_old(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
+        """Original Boston restaurant fetch method - keeping as backup"""
         try:
+            params = {
+                'resource_id': self.current_api["resource_id"],
+                'limit': min(limit * 15, 5000)
+            }
+            
+            if search_term:
+                params['q'] = search_term
+            
             raw_data = self._make_api_request(self.current_api["base_url"], params)
             
             if not raw_data or 'result' not in raw_data or 'records' not in raw_data['result']:
