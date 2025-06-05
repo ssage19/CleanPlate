@@ -258,6 +258,40 @@ def main():
         elif grading_info.get('type') == 'pass_fail':
             st.caption("Pass/Fail System")
     
+    # Advanced Search Section
+    with st.expander("🔍 Advanced Search Options", expanded=False):
+        st.markdown("**Refine your search with these advanced filters:**")
+        
+        col_search_mode, col_grade_filter = st.columns(2)
+        
+        with col_search_mode:
+            search_mode = st.radio(
+                "Search Mode",
+                ["Contains (partial match)", "Exact words", "Starts with"],
+                help="Choose how to match your search terms"
+            )
+        
+        with col_grade_filter:
+            grading_info = st.session_state.api_client.get_grading_system_info()
+            if grading_info.get('grades'):
+                grade_options = ["All Grades"] + list(grading_info['grades'].keys())
+                grade_filter = st.selectbox(
+                    "Grade Filter",
+                    grade_options,
+                    help="Filter by health inspection grade"
+                )
+                grade_filter = None if grade_filter == "All Grades" else [grade_filter]
+            else:
+                grade_filter = None
+        
+        # Cuisine filter
+        cuisine_filter = st.multiselect(
+            "Cuisine Types",
+            ["Italian", "Chinese", "Mexican", "American", "Japanese", "Thai", "Indian", "Mediterranean", "French", "Korean"],
+            help="Filter by cuisine type (optional)"
+        )
+        cuisine_filter = None if not cuisine_filter else cuisine_filter
+
     # Create a form to enable Enter key submission
     with st.form(key="search_form", clear_on_submit=False):
         col_search_form, col_location_form, col_button_form = st.columns([2, 1, 0.5])
@@ -273,7 +307,7 @@ def main():
         with col_location_form:
             locations = st.session_state.api_client.get_available_locations()
             location_filter = st.selectbox(
-                "Borough",
+                "Borough/Area",
                 ["All"] + locations,
                 key="location_select"
             )
@@ -287,9 +321,21 @@ def main():
         # Show loading spinner while searching
         with st.spinner("🔍 Searching for results..."):
             try:
+                # Apply advanced search filtering
+                processed_search_term = search_term
+                if search_term and search_mode:
+                    if search_mode == "Exact words":
+                        # For exact word matching, wrap in quotes or use exact match logic
+                        processed_search_term = f'"{search_term}"' if search_term else search_term
+                    elif search_mode == "Starts with":
+                        # Add prefix matching indicator
+                        processed_search_term = f"{search_term}*" if search_term else search_term
+                
                 restaurants_df = st.session_state.api_client.get_restaurants(
                     location=location_filter,
-                    search_term=search_term,
+                    search_term=processed_search_term,
+                    grades=grade_filter,
+                    cuisines=cuisine_filter,
                     limit=1000
                 )
                 

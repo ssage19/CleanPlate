@@ -366,7 +366,18 @@ class HealthInspectionAPI:
             where_conditions.append(f"({' OR '.join(grade_conditions)})")
         
         if search_term:
-            where_conditions.append(f"UPPER(dba) LIKE '%{search_term.upper()}%'")
+            # Handle advanced search modes
+            if search_term.startswith('"') and search_term.endswith('"'):
+                # Exact word matching
+                exact_term = search_term.strip('"')
+                where_conditions.append(f"UPPER(dba) = '{exact_term.upper()}'")
+            elif search_term.endswith('*'):
+                # Starts with matching
+                prefix_term = search_term.rstrip('*')
+                where_conditions.append(f"UPPER(dba) LIKE '{prefix_term.upper()}%'")
+            else:
+                # Contains matching (default)
+                where_conditions.append(f"UPPER(dba) LIKE '%{search_term.upper()}%'")
         
         if date_range and len(date_range) == 2:
             start_date = date_range[0].strftime('%Y-%m-%d')
@@ -472,7 +483,18 @@ class HealthInspectionAPI:
                 where_conditions.append(f"({' OR '.join(result_conditions)})")
         
         if search_term:
-            where_conditions.append(f"UPPER(dba_name) LIKE '%{search_term.upper()}%'")
+            # Handle advanced search modes
+            if search_term.startswith('"') and search_term.endswith('"'):
+                # Exact word matching
+                exact_term = search_term.strip('"')
+                where_conditions.append(f"UPPER(dba_name) = '{exact_term.upper()}'")
+            elif search_term.endswith('*'):
+                # Starts with matching
+                prefix_term = search_term.rstrip('*')
+                where_conditions.append(f"UPPER(dba_name) LIKE '{prefix_term.upper()}%'")
+            else:
+                # Contains matching (default)
+                where_conditions.append(f"UPPER(dba_name) LIKE '%{search_term.upper()}%'")
         
         if date_range and len(date_range) == 2:
             start_date = date_range[0].strftime('%Y-%m-%d')
@@ -558,7 +580,18 @@ class HealthInspectionAPI:
         where_conditions = ['score IS NOT NULL']
         
         if search_term:
-            where_conditions.append(f"UPPER(restaurant_name) LIKE '%{search_term.upper()}%'")
+            # Handle advanced search modes
+            if search_term.startswith('"') and search_term.endswith('"'):
+                # Exact word matching
+                exact_term = search_term.strip('"')
+                where_conditions.append(f"UPPER(restaurant_name) = '{exact_term.upper()}'")
+            elif search_term.endswith('*'):
+                # Starts with matching
+                prefix_term = search_term.rstrip('*')
+                where_conditions.append(f"UPPER(restaurant_name) LIKE '{prefix_term.upper()}%'")
+            else:
+                # Contains matching (default)
+                where_conditions.append(f"UPPER(restaurant_name) LIKE '%{search_term.upper()}%'")
         
         if date_range and len(date_range) == 2:
             start_date = date_range[0].strftime('%Y-%m-%d')
