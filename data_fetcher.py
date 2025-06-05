@@ -685,10 +685,10 @@ class HealthInspectionAPI:
         all_restaurants = []
         seen_restaurants = set()
         
-        # Implement Socrata-optimized pagination for massive Seattle dataset extraction
-        # Using technique from Socrata documentation for datasets >1000 records
+        # Implement full processing for massive Seattle dataset to match other cities
+        # Target: 4,000+ restaurants like NYC, Chicago, Austin, Los Angeles
         batch_size = 50000  # Maximum recommended by Socrata
-        max_records = limit * 20  # Extract more records to find unique restaurants
+        max_records = min(400000, limit * 100)  # Process enough records to extract 4,000+ unique restaurants
         
         for offset in range(0, min(max_records, 500000), batch_size):
             params = {
@@ -803,10 +803,10 @@ class HealthInspectionAPI:
                     params['q'] = search_term
             
             try:
-                # Implement Socrata-optimized pagination for massive Boston dataset (838k+ records)
-                # Using advanced pagination technique for large government datasets
+                # Implement full processing for massive Boston dataset (838k+ records)
+                # Target: 4,000+ restaurants like other major cities
                 batch_size = 32000  # Optimal for Boston CKAN API
-                max_records = min(endpoint.get('max_records', 300000), 500000)
+                max_records = min(endpoint.get('max_records', 600000), 800000)  # Process more records to match other cities
                 
                 for offset in range(0, max_records, batch_size):
                     batch_params = params.copy()
@@ -823,8 +823,8 @@ class HealthInspectionAPI:
                         endpoint_restaurants = self._process_boston_records(records, seen_restaurants)
                         all_restaurants.extend(endpoint_restaurants)
                         
-                        # Continue extraction for maximum restaurant coverage
-                        if len(all_restaurants) >= limit * 3:
+                        # Continue extraction to match other cities (4,000+ restaurants)
+                        if len(all_restaurants) >= 4000:
                             break
                     else:
                         break
