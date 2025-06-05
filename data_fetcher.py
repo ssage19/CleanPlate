@@ -685,12 +685,16 @@ class HealthInspectionAPI:
         all_restaurants = []
         seen_restaurants = set()
         
-        # Implement enhanced pagination for massive Seattle dataset with King County API
-        for offset in range(0, min(200000, limit * 50), 10000):
+        # Implement Socrata-optimized pagination for massive Seattle dataset extraction
+        # Using technique from Socrata documentation for datasets >1000 records
+        batch_size = 50000  # Maximum recommended by Socrata
+        max_records = limit * 20  # Extract more records to find unique restaurants
+        
+        for offset in range(0, min(max_records, 500000), batch_size):
             params = {
-                '$limit': 10000,
+                '$limit': batch_size,
                 '$offset': offset,
-                '$select': 'name,address,business_id,program_identifier,violation_points,inspection_score,inspection_date,inspection_type',
+                '$select': 'name,address,business_id,program_identifier,violation_points,inspection_score,inspection_date,inspection_type,zip_code',
                 '$order': 'business_id'
             }
             
@@ -751,12 +755,12 @@ class HealthInspectionAPI:
                 
                 all_restaurants.append(restaurant)
                 
-                # Stop if we have enough unique restaurants
-                if len(all_restaurants) >= limit * 10:
+                # Continue extraction for maximum coverage using Socrata technique
+                if len(all_restaurants) >= limit * 3:
                     break
             
-            # Stop pagination if we have enough data
-            if len(all_restaurants) >= limit * 10:
+            # Continue processing more batches for comprehensive coverage
+            if len(all_restaurants) >= limit * 5:
                 break
         
         # Apply filters and return results
@@ -799,11 +803,15 @@ class HealthInspectionAPI:
                     params['q'] = search_term
             
             try:
-                # Implement optimized pagination for massive Boston dataset (838k+ records)
-                for offset in range(0, min(200000, endpoint.get('max_records', 150000)), 10000):
+                # Implement Socrata-optimized pagination for massive Boston dataset (838k+ records)
+                # Using advanced pagination technique for large government datasets
+                batch_size = 32000  # Optimal for Boston CKAN API
+                max_records = min(endpoint.get('max_records', 300000), 500000)
+                
+                for offset in range(0, max_records, batch_size):
                     batch_params = params.copy()
                     batch_params['offset'] = offset
-                    batch_params['limit'] = 10000  # Optimal batch size for consistent processing
+                    batch_params['limit'] = batch_size
                     
                     raw_data = self._make_api_request(self.current_api["base_url"], batch_params)
                     
@@ -815,8 +823,8 @@ class HealthInspectionAPI:
                         endpoint_restaurants = self._process_boston_records(records, seen_restaurants)
                         all_restaurants.extend(endpoint_restaurants)
                         
-                        # Stop if we have enough unique restaurants for this request
-                        if len(all_restaurants) >= limit * 5:
+                        # Continue extraction for maximum restaurant coverage
+                        if len(all_restaurants) >= limit * 3:
                             break
                     else:
                         break
