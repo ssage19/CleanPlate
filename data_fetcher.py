@@ -738,11 +738,10 @@ class HealthInspectionAPI:
         # Boston uses CKAN API format with direct datastore access
         all_restaurants = []
         
-        # Try multiple Boston government data sources for maximum coverage
+        # Use massive Boston government datasets for maximum coverage
         endpoints_to_try = [
-            {'resource_id': self.current_api["resource_id"], 'name': 'Primary Boston Health Inspections'},
-            {'resource_id': 'ec463b8a-7599-44e8-96c9-537e5bcd3c1b', 'name': 'Boston Food Establishments'},
-            {'resource_id': '30022137-709d-465e-baae-ca155b51927d', 'name': 'Boston Business Licenses'}
+            {'resource_id': self.current_api["resource_id"], 'name': 'Primary Boston Health Inspections', 'limit_multiplier': 200},  # 838k records
+            {'resource_id': '30022137-709d-465e-baae-ca155b51927d', 'name': 'Boston Business Licenses', 'limit_multiplier': 100}  # 251k records
         ]
         
         seen_restaurants = set()
@@ -750,7 +749,7 @@ class HealthInspectionAPI:
         for endpoint in endpoints_to_try:
             params = {
                 'resource_id': endpoint['resource_id'],
-                'limit': min(limit * 40, 20000)  # Higher extraction per endpoint
+                'limit': min(limit * endpoint['limit_multiplier'], 50000)  # Massive extraction from 838k+ records
             }
             
             # Add search parameter if provided
@@ -769,11 +768,26 @@ class HealthInspectionAPI:
                     params['q'] = search_term
             
             try:
-                raw_data = self._make_api_request(self.current_api["base_url"], params)
-                
-                if raw_data and 'result' in raw_data and 'records' in raw_data['result']:
-                    endpoint_restaurants = self._process_boston_records(raw_data['result']['records'], seen_restaurants)
-                    all_restaurants.extend(endpoint_restaurants)
+                # Implement pagination for massive Boston datasets
+                for offset in range(0, min(200000, endpoint.get('max_records', 100000)), 32000):
+                    batch_params = params.copy()
+                    batch_params['offset'] = offset
+                    
+                    raw_data = self._make_api_request(self.current_api["base_url"], batch_params)
+                    
+                    if raw_data and 'result' in raw_data and 'records' in raw_data['result']:
+                        records = raw_data['result']['records']
+                        if not records:  # No more data
+                            break
+                            
+                        endpoint_restaurants = self._process_boston_records(records, seen_restaurants)
+                        all_restaurants.extend(endpoint_restaurants)
+                        
+                        # Stop if we have enough unique restaurants
+                        if len(all_restaurants) >= limit * 10:
+                            break
+                    else:
+                        break
                     
             except Exception as e:
                 print(f"Error fetching from {endpoint['name']}: {e}")
