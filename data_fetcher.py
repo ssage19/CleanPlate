@@ -583,7 +583,7 @@ class HealthInspectionAPI:
     
     def _get_seattle_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Seattle restaurant inspection data"""
-        params = {'$limit': min(limit, 500)}
+        params = {'$limit': min(limit * 20, 10000)}  # Request more records to find more unique restaurants
         
         # Add search filters
         where_conditions = []
@@ -654,7 +654,7 @@ class HealthInspectionAPI:
         # Boston uses CKAN API format with direct datastore access
         params = {
             'resource_id': self.current_api["resource_id"],
-            'limit': min(limit, 5000)  # Increased limit to access more data
+            'limit': min(limit * 50, 25000)  # Much larger limit to find more unique restaurants from inspection records
         }
         
         # Add search parameter if provided
