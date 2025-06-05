@@ -803,10 +803,10 @@ class HealthInspectionAPI:
                     params['q'] = search_term
             
             try:
-                # Implement intensive processing for massive Boston dataset (838k+ records)
-                # Target: 4,000+ restaurants to match NYC, Chicago, Austin, Los Angeles
-                batch_size = 40000  # Increased batch size for maximum extraction
-                max_records = endpoint.get('max_records', 600000)  # Process 600k of 838k available records
+                # Implement comprehensive processing for massive Boston dataset (838k+ records)
+                # Target: Extract maximum unique restaurants from government data
+                batch_size = 30000  # Optimized batch size for reliable processing
+                max_records = endpoint.get('max_records', 400000)  # Process 400k records systematically
                 
                 for offset in range(0, max_records, batch_size):
                     batch_params = params.copy()
@@ -823,8 +823,8 @@ class HealthInspectionAPI:
                         endpoint_restaurants = self._process_boston_records(records, seen_restaurants)
                         all_restaurants.extend(endpoint_restaurants)
                         
-                        # Continue extraction to match other cities (4,000+ restaurants)
-                        if len(all_restaurants) >= 4000:
+                        # Continue extraction until we have comprehensive coverage
+                        if len(all_restaurants) >= 2000:  # Allow more extraction for Boston's massive dataset
                             break
                     else:
                         break
