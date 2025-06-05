@@ -613,7 +613,7 @@ class HealthInspectionAPI:
             seen_restaurants.add(restaurant_key)
             
             # Convert violation points to meaningful grade categories
-            violation_points = self._safe_int(item.get('inspection_score')) or 0
+            violation_points = self._safe_int(item.get('violation_points')) or self._safe_int(item.get('inspection_score')) or 0
             
             if violation_points == 0:
                 grade = "0"
@@ -654,7 +654,7 @@ class HealthInspectionAPI:
         # Boston uses CKAN API format with direct datastore access
         params = {
             'resource_id': self.current_api["resource_id"],
-            'limit': min(limit, 100)  # Smaller limit for better performance
+            'limit': min(limit, 5000)  # Increased limit to access more data
         }
         
         # Add search parameter if provided
