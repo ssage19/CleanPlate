@@ -666,82 +666,97 @@ class HealthInspectionAPI:
         return restaurants[:limit]
     
     def _get_seattle_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
-        """Fetch Seattle restaurant inspection data"""
-        params = {'$limit': min(limit * 20, 10000)}  # Request more records to find more unique restaurants
-        
-        # Add search filters
-        where_conditions = []
-        if search_term:
-            where_conditions.append(f"UPPER(name) LIKE '%{search_term.upper()}%'")
-        
-        if where_conditions:
-            params['$where'] = ' AND '.join(where_conditions)
-        
-        raw_data = self._make_api_request(self.current_api["base_url"], params)
-        
-        if not raw_data:
-            return []
-        
-        restaurants = []
+        """Fetch Seattle restaurant inspection data using enhanced extraction"""
+        all_restaurants = []
         seen_restaurants = set()
         
-        for item in raw_data:
-            business_name = item.get('name', '').strip()
-            if not business_name:
-                continue
-                
-            restaurant_key = (business_name, item.get('address', ''))
-            
-            if restaurant_key in seen_restaurants:
-                continue
-            seen_restaurants.add(restaurant_key)
-            
-            # Convert violation points to meaningful grade categories
-            violation_points = self._safe_int(item.get('violation_points')) or self._safe_int(item.get('inspection_score')) or 0
-            
-            if violation_points == 0:
-                grade = "0"
-            elif violation_points <= 10:
-                grade = "1-10"
-            elif violation_points <= 25:
-                grade = "11-25"
-            elif violation_points <= 50:
-                grade = "26-50"
-            elif violation_points > 50:
-                grade = "51+"
-            else:
-                grade = "Ungraded"
-            
-            restaurant = {
-                'id': f"SEA_{item.get('business_id', '')}{business_name.replace(' ', '')}",
-                'name': business_name,
-                'address': self._format_seattle_address(item),
-                'cuisine_type': item.get('program_identifier', 'Not specified'),
-                'grade': grade,
-                'score': violation_points,
-                'inspection_date': item.get('inspection_date', '').split('T')[0] if item.get('inspection_date') else 'N/A',
-                'violations': [item.get('violation_description', 'No violations recorded')],
-                'boro': f"Seattle, WA {item.get('zip_code', '')}",
-                'phone': '',
-                'inspection_type': item.get('inspection_type', 'Regular Inspection')
+        # Implement pagination for massive Seattle dataset extraction
+        for offset in range(0, min(100000, limit * 100), 5000):
+            params = {
+                '$limit': 5000,
+                '$offset': offset,
+                '$select': 'name,address,business_id,program_identifier,violation_points,inspection_score,inspection_date,inspection_type'
             }
             
-            restaurants.append(restaurant)
+            # Add search filters
+            where_conditions = []
+            if search_term:
+                where_conditions.append(f"UPPER(name) LIKE '%{search_term.upper()}%'")
+            
+            if where_conditions:
+                params['$where'] = ' AND '.join(where_conditions)
+            
+            raw_data = self._make_api_request(self.current_api["base_url"], params)
+            
+            if not raw_data or len(raw_data) == 0:
+                break  # No more data
+            
+            # Process each record in this batch
+            for item in raw_data:
+                business_name = item.get('name', '').strip()
+                if not business_name:
+                    continue
+                    
+                restaurant_key = (business_name, item.get('address', ''))
+                
+                if restaurant_key in seen_restaurants:
+                    continue
+                seen_restaurants.add(restaurant_key)
+                
+                # Convert violation points to meaningful grade categories
+                violation_points = self._safe_int(item.get('violation_points')) or self._safe_int(item.get('inspection_score')) or 0
+                
+                if violation_points == 0:
+                    grade = "0"
+                elif violation_points <= 10:
+                    grade = "1-10"
+                elif violation_points <= 25:
+                    grade = "11-25"
+                elif violation_points <= 50:
+                    grade = "26-50"
+                elif violation_points > 50:
+                    grade = "51+"
+                else:
+                    grade = "Ungraded"
+                
+                restaurant = {
+                    'id': f"SEA_{item.get('business_id', '')}{business_name.replace(' ', '')}",
+                    'name': business_name,
+                    'address': self._format_seattle_address(item),
+                    'cuisine_type': item.get('program_identifier', 'Not specified'),
+                    'grade': grade,
+                    'score': violation_points,
+                    'inspection_date': item.get('inspection_date', '').split('T')[0] if item.get('inspection_date') else 'N/A',
+                    'violations': [item.get('violation_description', 'No violations recorded')],
+                    'boro': f"Seattle, WA {item.get('zip_code', '')}",
+                    'phone': '',
+                    'inspection_type': item.get('inspection_type', 'Regular Inspection')
+                }
+                
+                all_restaurants.append(restaurant)
+                
+                # Stop if we have enough unique restaurants
+                if len(all_restaurants) >= limit * 10:
+                    break
+            
+            # Stop pagination if we have enough data
+            if len(all_restaurants) >= limit * 10:
+                break
         
+        # Apply filters and return results
         if cuisines and "All" not in cuisines:
-            restaurants = [r for r in restaurants if r['cuisine_type'] in cuisines]
+            all_restaurants = [r for r in all_restaurants if r['cuisine_type'] in cuisines]
         
-        return restaurants[:limit]
+        return all_restaurants[:limit]
     
     def _get_boston_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Boston restaurant inspection data"""
         # Boston uses CKAN API format with direct datastore access
         all_restaurants = []
         
-        # Use massive Boston government datasets for maximum coverage
+        # Extract from massive Boston government dataset (838k+ records)
         endpoints_to_try = [
-            {'resource_id': self.current_api["resource_id"], 'name': 'Primary Boston Health Inspections', 'limit_multiplier': 200},  # 838k records
-            {'resource_id': '30022137-709d-465e-baae-ca155b51927d', 'name': 'Boston Business Licenses', 'limit_multiplier': 100}  # 251k records
+            {'resource_id': self.current_api["resource_id"], 'name': 'Primary Boston Health Inspections', 'max_records': 300000}  # 838k records available
         ]
         
         seen_restaurants = set()
@@ -749,7 +764,7 @@ class HealthInspectionAPI:
         for endpoint in endpoints_to_try:
             params = {
                 'resource_id': endpoint['resource_id'],
-                'limit': min(limit * endpoint['limit_multiplier'], 50000)  # Massive extraction from 838k+ records
+                'limit': 32000  # Optimal batch size for Boston API
             }
             
             # Add search parameter if provided
