@@ -179,6 +179,21 @@ class HealthInspectionAPI:
                     'Accept': 'application/json'
                 }
                 
+                # Add King County API authentication for Seattle data
+                if 'kingcounty.gov' in endpoint:
+                    import os
+                    api_key = os.getenv('KING_COUNTY_API_KEY')
+                    app_token = os.getenv('KING_COUNTY_APP_TOKEN')
+                    
+                    if api_key:
+                        headers['X-API-Key'] = api_key
+                    if app_token:
+                        headers['X-App-Token'] = app_token
+                        if params:
+                            params['$$app_token'] = app_token
+                        else:
+                            params = {'$$app_token': app_token}
+                
                 response = requests.get(
                     endpoint, 
                     params=params, 
@@ -670,12 +685,13 @@ class HealthInspectionAPI:
         all_restaurants = []
         seen_restaurants = set()
         
-        # Implement pagination for massive Seattle dataset extraction
-        for offset in range(0, min(100000, limit * 100), 5000):
+        # Implement enhanced pagination for massive Seattle dataset with King County API
+        for offset in range(0, min(200000, limit * 50), 10000):
             params = {
-                '$limit': 5000,
+                '$limit': 10000,
                 '$offset': offset,
-                '$select': 'name,address,business_id,program_identifier,violation_points,inspection_score,inspection_date,inspection_type'
+                '$select': 'name,address,business_id,program_identifier,violation_points,inspection_score,inspection_date,inspection_type',
+                '$order': 'business_id'
             }
             
             # Add search filters
@@ -784,10 +800,10 @@ class HealthInspectionAPI:
             
             try:
                 # Implement optimized pagination for massive Boston dataset (838k+ records)
-                for offset in range(0, min(300000, endpoint.get('max_records', 200000)), 25000):
+                for offset in range(0, min(200000, endpoint.get('max_records', 150000)), 10000):
                     batch_params = params.copy()
                     batch_params['offset'] = offset
-                    batch_params['limit'] = 25000  # Optimal batch size
+                    batch_params['limit'] = 10000  # Optimal batch size for consistent processing
                     
                     raw_data = self._make_api_request(self.current_api["base_url"], batch_params)
                     
