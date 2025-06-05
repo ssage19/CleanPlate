@@ -375,9 +375,9 @@ class HealthInspectionAPI:
         
         where_clause = ' AND '.join(where_conditions)
         
-        # API request parameters - optimized for maximum restaurant extraction
+        # API request parameters - balanced for optimal restaurant extraction
         params = {
-            '$limit': min(limit * 100, 50000),
+            '$limit': min(limit * 60, 30000),
             '$order': 'inspection_date DESC',
             '$where': where_clause,
             '$select': 'camis,dba,boro,building,street,zipcode,phone,cuisine_description,inspection_date,action,violation_code,violation_description,critical_flag,score,grade,grade_date,record_date,inspection_type'
@@ -460,9 +460,9 @@ class HealthInspectionAPI:
         
         where_clause = ' AND '.join(where_conditions)
         
-        # API request parameters - optimized for maximum restaurant extraction
+        # API request parameters - balanced for optimal restaurant extraction
         params = {
-            '$limit': min(limit * 100, 50000),
+            '$limit': min(limit * 60, 30000),
             '$order': 'inspection_date DESC',
             '$where': where_clause,
             '$select': 'license_,dba_name,aka_name,facility_type,risk,address,city,state,zip,inspection_date,inspection_type,results,latitude,longitude'
@@ -528,7 +528,7 @@ class HealthInspectionAPI:
         where_clause = ' AND '.join(where_conditions)
         
         params = {
-            '$limit': min(limit * 100, 50000),
+            '$limit': min(limit * 60, 30000),
             '$order': 'inspection_date DESC',
             '$where': where_clause,
             '$select': 'restaurant_name,address,zip_code,score,inspection_date,process_description,facility_id'
@@ -654,7 +654,7 @@ class HealthInspectionAPI:
         # Boston uses CKAN API format with direct datastore access
         params = {
             'resource_id': self.current_api["resource_id"],
-            'limit': min(limit * 200, 100000)  # Maximum limit to extract all available unique restaurants
+            'limit': min(limit * 60, 30000)  # Balanced limit for optimal restaurant extraction
         }
         
         # Add search parameter if provided
@@ -719,7 +719,7 @@ class HealthInspectionAPI:
     
     def _get_losangeles_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Los Angeles City restaurant inspection data"""
-        params = {'$limit': min(limit * 200, 100000)}
+        params = {'$limit': min(limit * 60, 30000)}
         
         # Add search filters
         where_conditions = []
