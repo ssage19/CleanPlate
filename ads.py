@@ -40,6 +40,9 @@ class AdManager:
             text-align: center;
             position: relative;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+            max-width: 100%;
         ">
             <div style="
                 color: #a0aec0;
@@ -60,15 +63,20 @@ class AdManager:
                 border-radius: 6px;
                 margin-top: 12px;
                 border: 1px dashed rgba(212, 175, 55, 0.3);
+                width: 100%;
+                box-sizing: border-box;
+                flex-direction: column;
+                padding: 10px;
             ">
                 <div style="
                     color: #d4af37;
-                    font-size: 1rem;
+                    font-size: clamp(0.9rem, 2.5vw, 1rem);
                     font-weight: 500;
                     text-align: center;
+                    width: 100%;
                 ">
                     <div style="margin-bottom: 8px;">🍽️ Restaurant Ad Space</div>
-                    <div style="font-size: 0.8rem; color: #a0aec0;">
+                    <div style="font-size: clamp(0.7rem, 2vw, 0.8rem); color: #a0aec0;">
                         Google AdSense integration ready
                     </div>
                 </div>

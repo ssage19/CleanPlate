@@ -24,12 +24,13 @@ init_database()
 
 def main():
     
-    # SINGLE CONSOLIDATED THEME - All styling in one location only
+    # RESPONSIVE DESIGN - Optimized for all devices
     st.markdown("""
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
         
-        /* Main App Background - Sophisticated Restaurant Atmosphere */
+        /* Main App Background - Responsive Restaurant Atmosphere */
         .stApp {
             background: 
                 radial-gradient(ellipse at top left, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
@@ -38,42 +39,110 @@ def main():
             color: #f7fafc !important;
             font-family: 'Inter', sans-serif !important;
             min-height: 100vh !important;
+            width: 100% !important;
+            overflow-x: hidden !important;
         }
         
-        /* Header */
+        /* Responsive Container */
+        .main .block-container {
+            padding: 1rem !important;
+            max-width: none !important;
+            width: 100% !important;
+        }
+        
+        /* Mobile-First Responsive Breakpoints */
+        @media (max-width: 640px) {
+            .stApp {
+                font-size: 14px !important;
+            }
+            
+            .main .block-container {
+                padding: 0.5rem !important;
+            }
+            
+            /* Mobile Header */
+            .main-header {
+                padding: 2rem 1rem !important;
+                margin: -0.5rem -0.5rem 1.5rem -0.5rem !important;
+            }
+            
+            .main-header h1 {
+                font-size: 2rem !important;
+                line-height: 1.2 !important;
+            }
+            
+            .main-header span {
+                font-size: 2.5rem !important;
+                margin-right: 8px !important;
+            }
+            
+            .main-header p {
+                font-size: 0.9rem !important;
+                line-height: 1.4 !important;
+            }
+        }
+        
+        @media (min-width: 641px) and (max-width: 768px) {
+            /* Tablet Styles */
+            .main-header {
+                padding: 3rem 1.5rem !important;
+            }
+            
+            .main-header h1 {
+                font-size: 2.5rem !important;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            /* Desktop Styles */
+            .main .block-container {
+                max-width: 1200px !important;
+                margin: 0 auto !important;
+            }
+        }
+        
+        /* Responsive Header */
         .main-header {
             background: linear-gradient(135deg, rgba(20, 25, 35, 0.95) 0%, rgba(45, 55, 72, 0.9) 100%);
-            padding: 4rem 3rem;
-            margin: -1rem -1rem 3rem -1rem;
+            padding: 3rem 2rem;
+            margin: -1rem -1rem 2rem -1rem;
             border-bottom: 2px solid rgba(212, 175, 55, 0.3);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .main-header h1 {
             color: #ffffff;
-            font-size: 4rem;
+            font-size: clamp(2rem, 5vw, 4rem);
             font-weight: 600;
             margin: 0;
             font-family: 'Playfair Display', serif;
             text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            line-height: 1.2;
+            word-wrap: break-word;
         }
         
         .main-header p {
             color: rgba(212, 175, 55, 0.9);
-            font-size: 0.95rem;
-            margin: 1.5rem 0 0 0;
+            font-size: clamp(0.8rem, 2vw, 0.95rem);
+            margin: 1rem 0 0 0;
             font-weight: 500;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.1em;
             font-family: 'Inter', sans-serif;
             text-transform: uppercase;
+            line-height: 1.4;
         }
         
-        /* Form Controls */
+        /* Responsive Form Controls */
         .stSelectbox > div > div {
             background: rgba(45, 55, 72, 0.9) !important;
             border: 1px solid rgba(212, 175, 55, 0.4) !important;
             border-radius: 8px !important;
             color: #f7fafc !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
         
         .stTextInput > div > div > input {
@@ -82,6 +151,26 @@ def main():
             border-radius: 8px !important;
             color: #f7fafc !important;
             padding: 12px 16px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* Mobile Form Adjustments */
+        @media (max-width: 640px) {
+            .stSelectbox > div > div {
+                font-size: 14px !important;
+            }
+            
+            .stTextInput > div > div > input {
+                padding: 10px 12px !important;
+                font-size: 14px !important;
+            }
+            
+            .stButton > button {
+                width: 100% !important;
+                padding: 10px 16px !important;
+                font-size: 14px !important;
+            }
         }
         
         .stTextInput > div > div > input:focus {
@@ -107,13 +196,28 @@ def main():
             box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4) !important;
         }
         
-        /* Restaurant Cards */
+        /* Responsive Restaurant Cards */
         .stExpander {
             background: rgba(45, 55, 72, 0.9) !important;
             border: 1px solid rgba(212, 175, 55, 0.3) !important;
             border-radius: 12px !important;
-            margin: 2rem 0 !important;
+            margin: 1rem 0 !important;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* Mobile Restaurant Card Adjustments */
+        @media (max-width: 640px) {
+            .stExpander {
+                margin: 0.5rem 0 !important;
+                border-radius: 8px !important;
+            }
+            
+            .stExpander > div:first-child {
+                font-size: 1rem !important;
+                padding: 12px !important;
+            }
         }
         
         .stExpander > div:first-child {
@@ -124,13 +228,23 @@ def main():
             border-bottom: 1px solid rgba(212, 175, 55, 0.3) !important;
         }
         
-        /* Info Sections */
+        /* Responsive Info Sections */
         .info-section {
             background: rgba(45, 55, 72, 0.8);
             border-radius: 8px;
-            padding: 20px;
-            margin: 16px 0;
+            padding: 1rem;
+            margin: 1rem 0;
             border: 1px solid rgba(212, 175, 55, 0.2);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 640px) {
+            .info-section {
+                padding: 0.75rem;
+                margin: 0.5rem 0;
+                border-radius: 6px;
+            }
         }
         
         .section-header {
@@ -188,20 +302,35 @@ def main():
             display: none !important;
         }
         
-        /* Hide top padding from main container */
-        .main .block-container {
-            padding-top: 0rem !important;
-            max-width: 1200px;
-        }
-        
-        /* Ensure no top margin on main container */
-        .main {
-            padding-top: 0rem !important;
-        }
-        
-        /* Remove any top spacing */
+        /* Responsive Layout Adjustments */
         [data-testid="stAppViewContainer"] {
             padding-top: 0rem !important;
+            width: 100% !important;
+        }
+        
+        /* Column Responsiveness */
+        [data-testid="column"] {
+            width: 100% !important;
+            padding: 0 0.25rem !important;
+        }
+        
+        @media (max-width: 640px) {
+            [data-testid="column"] {
+                min-width: 100% !important;
+                padding: 0.25rem 0 !important;
+            }
+            
+            /* Stack columns on mobile */
+            .row-widget {
+                flex-direction: column !important;
+            }
+        }
+        
+        /* Touch-friendly elements */
+        @media (max-width: 768px) {
+            .stButton > button, .stSelectbox, .stTextInput {
+                min-height: 44px !important; /* iOS recommended touch target */
+            }
         }
     </style>
     """, unsafe_allow_html=True)
