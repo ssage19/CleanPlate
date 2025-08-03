@@ -494,14 +494,35 @@ def main():
                     violations = restaurant_data.pop('violations', [])
                     save_restaurant_to_db(restaurant_data, violations)
                 
-                st.subheader(f"Showing {len(restaurants_df)} restaurants")
+
                 
                 # Temporarily disabled sponsored restaurant promotion
                 # ad_manager.display_sponsored_restaurant()
                 
-                # Display restaurants
-                restaurants_df = restaurants_df.sort_values('inspection_date', ascending=False)
+                # Deduplicate restaurants to show only the most recent inspection per establishment
+                latest_inspections = {}
                 for _, restaurant in restaurants_df.iterrows():
+                    name = restaurant.get('name', 'Unknown')
+                    address = restaurant.get('address', '')
+                    restaurant_key = f"{name}|{address}".lower()
+                    
+                    # Keep only the most recent inspection for each restaurant
+                    if restaurant_key not in latest_inspections:
+                        latest_inspections[restaurant_key] = restaurant
+                    else:
+                        # Compare dates and keep the more recent one
+                        current_date = latest_inspections[restaurant_key].get('inspection_date', '')
+                        new_date = restaurant.get('inspection_date', '')
+                        if new_date > current_date:
+                            latest_inspections[restaurant_key] = restaurant
+                
+                # Convert back to DataFrame for display
+                unique_restaurants = list(latest_inspections.values())
+                
+                st.subheader(f"Showing {len(unique_restaurants)} unique restaurants (most recent inspection only)")
+                
+                # Display unique restaurants
+                for restaurant in sorted(unique_restaurants, key=lambda x: x.get('inspection_date', ''), reverse=True):
                     display_restaurant_card(restaurant)
                     
             except Exception as e:
@@ -538,9 +559,7 @@ def display_restaurant_card(restaurant):
             st.markdown(f'<div class="detail-text"><strong>Cuisine:</strong> {restaurant.get("cuisine_type", "Not specified")}</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="detail-text"><strong>Location:</strong> {restaurant.get("boro", "N/A")}</div>', unsafe_allow_html=True)
             
-            # Show number of inspections
-            if len(inspections) > 1:
-                st.markdown(f'<div class="detail-text" style="color: #fbbf24; font-weight: 600;"><strong>Total Inspections:</strong> {len(inspections)}</div>', unsafe_allow_html=True)
+            # Note: Showing most recent inspection only for cleaner interface
         
         with col2:
             grade = latest_inspection.get('grade', 'Not Yet Graded')

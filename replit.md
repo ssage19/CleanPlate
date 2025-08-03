@@ -7,6 +7,7 @@ CleanPlate is a comprehensive restaurant health inspection app built with Stream
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Interface preference: Show only most recent inspection per restaurant to avoid data overwhelm (implemented January 2025).
 
 ## System Architecture
 
