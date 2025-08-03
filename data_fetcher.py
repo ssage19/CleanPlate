@@ -825,153 +825,6 @@ class HealthInspectionAPI:
         
         return all_restaurants[:limit]
     
-    def _get_detroit_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
-        """Fetch Detroit restaurant inspection data using Socrata API"""
-        all_restaurants = []
-        
-        # Build where clause conditions for Detroit API
-        where_conditions = []
-        
-        if location and location != "All":
-            where_conditions.append(f"UPPER(address) LIKE '%{location.upper()}%'")
-        
-        if grades:
-            grade_conditions = []
-            for grade in grades:
-                if grade == "Pass":
-                    grade_conditions.append("inspection_result='Pass'")
-                elif grade == "Conditional":
-                    grade_conditions.append("inspection_result='Conditional Pass'")
-                elif grade == "Fail":
-                    grade_conditions.append("inspection_result='Fail'")
-            if grade_conditions:
-                where_conditions.append(f"({' OR '.join(grade_conditions)})")
-        
-        if search_term:
-            # Handle advanced search modes for Detroit
-            if search_term.startswith('"') and search_term.endswith('"'):
-                exact_term = search_term.strip('"')
-                where_conditions.append(f"UPPER(business_name) = '{exact_term.upper()}'")
-            elif search_term.endswith('*'):
-                prefix_term = search_term.rstrip('*')
-                where_conditions.append(f"UPPER(business_name) LIKE '{prefix_term.upper()}%'")
-            else:
-                where_conditions.append(f"UPPER(business_name) LIKE '%{search_term.upper()}%'")
-        
-        # Apply date range filtering if specified
-        if date_range:
-            start_date, end_date = date_range
-            where_conditions.append(f"inspection_date >= '{start_date}' AND inspection_date <= '{end_date}'")
-        
-        # Build the query parameters
-        params = {
-            '$limit': min(limit, 50000),  # Detroit API supports large limits
-            '$order': 'inspection_date DESC',
-            '$select': 'business_name,address,city,state,zip,inspection_date,inspection_result,violation_type,violation_description'
-        }
-        
-        if where_conditions:
-            params['$where'] = ' AND '.join(where_conditions)
-        
-        try:
-            # Fetch data from Detroit API using pagination for large datasets
-            batch_size = 10000
-            offset = 0
-            seen_restaurants = set()
-            
-            while len(all_restaurants) < limit and offset < 100000:  # Process up to 100k records
-                batch_params = params.copy()
-                batch_params['$limit'] = batch_size
-                batch_params['$offset'] = offset
-                
-                data = self._make_api_request(self.current_api["base_url"], batch_params)
-                
-                if not data:
-                    break
-                
-                # Process Detroit inspection records
-                for item in data:
-                    business_name = item.get('business_name', '')
-                    if not business_name or len(business_name.strip()) < 2:
-                        continue
-                    
-                    # Create unique restaurant identifier
-                    address = item.get('address', '')
-                    restaurant_key = f"{business_name.lower().strip()}|{address.lower()}"
-                    
-                    if restaurant_key in seen_restaurants:
-                        continue
-                    seen_restaurants.add(restaurant_key)
-                    
-                    # Map Detroit inspection results to standard grades
-                    inspection_result = item.get('inspection_result', 'Unknown')
-                    grade_mapping = {
-                        'Pass': 'Pass',
-                        'Conditional Pass': 'Conditional',
-                        'Fail': 'Fail',
-                        'No Entry': 'No Entry',
-                        'Not Inspected': 'Not Inspected'
-                    }
-                    
-                    # Process violations
-                    violations = []
-                    if item.get('violation_description'):
-                        violation_type = item.get('violation_type', '')
-                        violation_desc = item.get('violation_description', '')
-                        if violation_type and violation_desc:
-                            violations.append(f"{violation_type}: {violation_desc}")
-                        elif violation_desc:
-                            violations.append(violation_desc)
-                    
-                    if not violations:
-                        violations = ['No violations recorded']
-                    
-                    # Create restaurant record
-                    restaurant = {
-                        'id': f"DET_{hash(business_name + address) % 100000}",
-                        'name': business_name.strip(),
-                        'address': self._format_detroit_address(item),
-                        'cuisine_type': 'Restaurant',  # Detroit API doesn't specify cuisine types
-                        'grade': grade_mapping.get(inspection_result, inspection_result),
-                        'score': 0,  # Detroit uses pass/fail system
-                        'inspection_date': self._safe_date_extract(item.get('inspection_date', '')),
-                        'violations': violations,
-                        'boro': f"Detroit, MI {item.get('zip', '')}",
-                        'phone': '',  # Not available in Detroit API
-                        'inspection_type': 'Health Inspection'
-                    }
-                    
-                    all_restaurants.append(restaurant)
-                    
-                    if len(all_restaurants) >= limit:
-                        break
-                
-                offset += batch_size
-            
-        except Exception as e:
-            raise Exception(f"Error fetching Detroit restaurant data: {str(e)}")
-        
-        # Apply cuisine filtering if specified
-        if cuisines and cuisines != ["All"]:
-            all_restaurants = [r for r in all_restaurants if r['cuisine_type'] in cuisines]
-        
-        return all_restaurants[:limit]
-    
-    def _format_detroit_address(self, item):
-        """Format Detroit address from API response"""
-        address_parts = []
-        
-        if item.get('address'):
-            address_parts.append(item['address'])
-        if item.get('city'):
-            address_parts.append(item['city'])
-        if item.get('state'):
-            address_parts.append(item['state'])
-        if item.get('zip'):
-            address_parts.append(item['zip'])
-        
-        return ', '.join(address_parts) if address_parts else 'Address not available'
-    
     def _get_boston_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Boston restaurant inspection data"""
         # Boston uses CKAN API format with direct datastore access
@@ -1356,21 +1209,21 @@ class HealthInspectionAPI:
             'where': '1=1',
             'outFields': '*',
             'resultRecordCount': min(limit * 10, 2000),
-            'orderByFields': 'INSPECTION_DATE DESC'
+            'orderByFields': 'Inspection_Date DESC'
         }
         
-        # Add search filters
+        # Add search filters - Detroit uses 'Name' field for restaurant names
         where_conditions = ['1=1']
         if search_term:
             # Handle different search modes
             if search_term.startswith('"') and search_term.endswith('"'):
                 exact_term = search_term.strip('"')
-                where_conditions.append(f"UPPER(FACILITY_NAME) = '{exact_term.upper()}'")
+                where_conditions.append(f"UPPER(Name) = '{exact_term.upper()}'")
             elif search_term.endswith('*'):
                 prefix_term = search_term.rstrip('*')
-                where_conditions.append(f"UPPER(FACILITY_NAME) LIKE '{prefix_term.upper()}%'")
+                where_conditions.append(f"UPPER(Name) LIKE '{prefix_term.upper()}%'")
             else:
-                where_conditions.append(f"UPPER(FACILITY_NAME) LIKE '%{search_term.upper()}%'")
+                where_conditions.append(f"UPPER(Name) LIKE '%{search_term.upper()}%'")
         
         if location and location != "All":
             # Extract ZIP code from location if present
@@ -1400,32 +1253,48 @@ class HealthInspectionAPI:
             
             for feature in raw_data['features']:
                 attrs = feature.get('attributes', {})
-                facility_name = attrs.get('FACILITY_NAME', '').strip()
+                facility_name = attrs.get('Name', '').strip()
                 
                 if not facility_name:
                     continue
                     
-                restaurant_key = (facility_name, attrs.get('ADDRESS', ''))
+                restaurant_key = (facility_name, attrs.get('ObjectId', ''))
                 
                 if restaurant_key in seen_restaurants:
                     continue
                 seen_restaurants.add(restaurant_key)
                 
-                # Get compliance status
-                compliance_status = attrs.get('COMPLIANCE_STATUS', 'Pending')
+                # Map Detroit compliance status
+                compliance = attrs.get('In_Compliance', 'Unknown')
+                if compliance == 'Yes':
+                    grade = 'In Compliance'
+                elif compliance == 'No':  
+                    grade = 'Not In Compliance'
+                else:
+                    grade = 'Pending'
+                
+                # Convert inspection date from timestamp
+                inspection_date = 'N/A'
+                if attrs.get('Inspection_Date'):
+                    try:
+                        import datetime
+                        timestamp = int(attrs['Inspection_Date']) / 1000
+                        inspection_date = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')
+                    except:
+                        inspection_date = 'N/A'
                 
                 restaurant = {
-                    'id': f"DET_{attrs.get('OBJECTID', '')}{facility_name.replace(' ', '')}",
+                    'id': f"DET_{attrs.get('ObjectId', '')}{facility_name.replace(' ', '')}",
                     'name': facility_name,
-                    'address': self._format_detroit_address(attrs),
-                    'cuisine_type': attrs.get('FACILITY_TYPE', 'Restaurant'),
-                    'grade': compliance_status,
+                    'address': f"Detroit, MI",
+                    'cuisine_type': 'Restaurant',
+                    'grade': grade,
                     'score': None,  # Detroit doesn't use numeric scores
-                    'inspection_date': self._safe_date_extract(attrs.get('INSPECTION_DATE')),
+                    'inspection_date': inspection_date,
                     'violations': self._extract_detroit_violations(attrs),
-                    'boro': f"Detroit, MI {attrs.get('ZIP_CODE', '')}",
-                    'phone': attrs.get('PHONE', ''),
-                    'inspection_type': attrs.get('INSPECTION_TYPE', 'Routine Inspection')
+                    'boro': 'Detroit, MI',
+                    'phone': '',
+                    'inspection_type': attrs.get('Inspection_Type', 'Routine Inspection')
                 }
                 
                 restaurants.append(restaurant)
@@ -1516,21 +1385,26 @@ class HealthInspectionAPI:
         """Extract violations from Detroit ArcGIS data"""
         violations = []
         
-        # Check for violation fields in Detroit data
-        violation_fields = ['PRIORITY_VIOLATIONS', 'PRIORITY_FOUNDATION_VIOLATIONS', 'CORE_VIOLATIONS', 'VIOLATIONS']
+        # Check for Detroit-specific violation fields
+        if attrs.get('Priority_Violations') and attrs.get('Priority_Violations') > 0:
+            violations.append(f"Priority Violations: {attrs['Priority_Violations']}")
         
-        for field in violation_fields:
-            if attrs.get(field):
-                violation_text = str(attrs[field]).strip()
-                if violation_text and violation_text.lower() not in ['none', 'null', '0', '']:
-                    violations.append(f"{field.replace('_', ' ').title()}: {violation_text}")
+        if attrs.get('Foundation_Violations') and attrs.get('Foundation_Violations') > 0:
+            violations.append(f"Foundation Violations: {attrs['Foundation_Violations']}")
+            
+        if attrs.get('Core_Violations') and attrs.get('Core_Violations') > 0:
+            violations.append(f"Core Violations: {attrs['Core_Violations']}")
         
-        # If no specific violation fields, check general violation description
-        if not violations and attrs.get('VIOLATION_DESCRIPTION'):
-            violations.append(str(attrs['VIOLATION_DESCRIPTION']))
+        # If no violations found, check compliance status
+        if not violations:
+            compliance = attrs.get('In_Compliance', 'Unknown')
+            if compliance == 'Yes':
+                violations.append("No violations recorded - In compliance")
+            elif compliance == 'No':
+                violations.append("Violations found - Not in compliance")
+            else:
+                violations.append("Compliance status pending")
         
-        return violations if violations else ["No violations recorded"]
+        return violations
     
-    def get_available_jurisdictions(self):
-        """Get list of available jurisdictions - removed non-working APIs"""
-        return ["NYC", "Chicago", "Boston", "Austin", "Seattle", "Detroit", "Los Angeles"]
+
