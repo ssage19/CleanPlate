@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from data_fetcher import HealthInspectionAPI
 from database import init_database, save_restaurant_to_db
 from utils import format_grade_badge, calculate_average_rating
+from ads import ad_manager
 
 # Set page configuration
 st.set_page_config(
@@ -205,6 +206,9 @@ def main():
     </style>
     """, unsafe_allow_html=True)
     
+    # Top Banner Advertisement - Prime Revenue Location
+    ad_manager.display_banner_ad("header")
+    
     # Header with icon
     st.markdown("""
     <div class="main-header">
@@ -215,6 +219,18 @@ def main():
         <p>Peeking behind the kitchen door, so you can dine without doubt. We dish out health inspection scores, making informed choices deliciously easy.</p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Revenue Setup Menu (Admin Access)
+    if st.sidebar.button("💰 Revenue Setup Guide"):
+        st.session_state.show_revenue_guide = True
+    
+    if st.session_state.get('show_revenue_guide', False):
+        from revenue_dashboard import display_revenue_setup_guide
+        display_revenue_setup_guide()
+        if st.button("← Back to App"):
+            st.session_state.show_revenue_guide = False
+            st.rerun()
+        return
     
     # Main interface
     col_juris, col_search, col_location = st.columns([1, 2, 1])
@@ -351,6 +367,9 @@ def main():
                 
                 st.subheader(f"Showing {len(restaurants_df)} restaurants")
                 
+                # Sponsored Restaurant Promotion - Revenue Generator
+                ad_manager.display_sponsored_restaurant()
+                
                 # Display restaurants
                 restaurants_df = restaurants_df.sort_values('inspection_date', ascending=False)
                 for _, restaurant in restaurants_df.iterrows():
@@ -397,6 +416,9 @@ def display_restaurant_card(restaurant):
         with col2:
             grade = latest_inspection.get('grade', 'Not Yet Graded')
             grade_info = st.session_state.api_client.get_grade_info(grade)
+            
+            # Restaurant-specific affiliate ad placement
+            ad_manager.display_restaurant_affiliate_ad(restaurant['name'])
             
             st.markdown(f"""
             <div style="background-color: {grade_info['color']}20; border: 2px solid {grade_info['color']}; 
