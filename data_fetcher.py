@@ -171,12 +171,14 @@ class HealthInspectionAPI:
                 }
             },
             "Dallas": {
-                "base_url": "https://www.dallasopendata.com/resource/dr15-wcct.json",
-                "name": "Dallas, TX",
+                "base_url": "https://www.dallasopendata.com/resource/dri5-wcct.json",
+                "name": "Dallas, TX (Historical Data)",
                 "location_field": "zip_code",
                 "grade_field": "score",
-                "name_field": "restaurant_name",
+                "name_field": "establishment_name",
                 "address_fields": ["address", "city", "state", "zip_code"],
+                "status": "historical_only",
+                "data_note": "Historical data Oct 2016-Jan 2024. Current: inspections.myhealthdepartment.com/dallas",
                 "grading_system": {
                     "type": "score",
                     "grades": {
@@ -192,11 +194,11 @@ class HealthInspectionAPI:
                 }
             },
             "Virginia": {
-                "base_url": "https://ohi-api.code4hr.org/vendors",
+                "base_url": "http://ohi-api.code4hr.org/vendors",
                 "name": "Norfolk, VA",
                 "location_field": "locality",
-                "grade_field": "score_above_70",
-                "name_field": "vendor_name",
+                "grade_field": "score",
+                "name_field": "name",
                 "address_fields": ["address", "city", "locality"],
                 "grading_system": {
                     "type": "pass_fail",
@@ -1379,27 +1381,23 @@ class HealthInspectionAPI:
             return 'N/A'
     
     def _get_dallas_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
-        """Fetch Dallas restaurant inspection data using Socrata API"""
+        """Fetch Dallas restaurant inspection data using corrected Socrata API endpoint"""
         params = {'$limit': min(limit * 120, self._max_records_per_request)}
         
-        # Add search filters
+        # Add search filters using correct field name
         where_conditions = []
         if search_term:
-            # Handle advanced search modes
+            # Handle advanced search modes with correct field name
             if search_term.startswith('"') and search_term.endswith('"'):
-                # Exact word matching
                 exact_term = search_term.strip('"')
-                where_conditions.append(f"UPPER(restaurant_name) = '{exact_term.upper()}'")
+                where_conditions.append(f"UPPER(establishment_name) = '{exact_term.upper()}'")
             elif search_term.endswith('*'):
-                # Starts with matching
                 prefix_term = search_term.rstrip('*')
-                where_conditions.append(f"UPPER(restaurant_name) LIKE '{prefix_term.upper()}%'")
+                where_conditions.append(f"UPPER(establishment_name) LIKE '{prefix_term.upper()}%'")
             else:
-                # Contains matching (default)
-                where_conditions.append(f"UPPER(restaurant_name) LIKE '%{search_term.upper()}%'")
+                where_conditions.append(f"UPPER(establishment_name) LIKE '%{search_term.upper()}%'")
         
         if location and location != "All":
-            # Extract ZIP code from location if present
             if "(" in location and ")" in location:
                 zip_code = location.split("(")[1].split(")")[0]
                 where_conditions.append(f"zip_code = '{zip_code}'")
@@ -1419,11 +1417,11 @@ class HealthInspectionAPI:
             seen_restaurants = set()
             
             for item in raw_data:
-                restaurant_name = item.get('restaurant_name', '').strip()
-                if not restaurant_name:
+                establishment_name = item.get('establishment_name', '').strip()
+                if not establishment_name:
                     continue
                     
-                restaurant_key = (restaurant_name, item.get('address', ''))
+                restaurant_key = (establishment_name, item.get('address', ''))
                 
                 if restaurant_key in seen_restaurants:
                     continue
@@ -1446,17 +1444,17 @@ class HealthInspectionAPI:
                     grade = "Unscored"
                 
                 restaurant = {
-                    'id': f"DAL_{item.get('permit_number', '')}{restaurant_name.replace(' ', '')}",
-                    'name': restaurant_name,
+                    'id': f"DAL_{item.get('permit_number', '')}{establishment_name.replace(' ', '')}",
+                    'name': establishment_name,
                     'address': self._format_dallas_address(item),
-                    'cuisine_type': item.get('restaurant_type', 'Not specified'),
+                    'cuisine_type': item.get('establishment_type', 'Not specified'),
                     'grade': grade,
                     'score': score,
                     'inspection_date': self._safe_date_extract(item.get('inspection_date')),
                     'violations': self._extract_dallas_violations(item),
                     'boro': f"Dallas, TX {item.get('zip_code', '')}",
                     'phone': item.get('phone', ''),
-                    'inspection_type': 'Health Inspection'
+                    'inspection_type': 'Health Inspection (Historical Data)'
                 }
                 
                 restaurants.append(restaurant)
@@ -1468,23 +1466,28 @@ class HealthInspectionAPI:
             return restaurants[:limit]
             
         except Exception as e:
-            print(f"Dallas API error: {e}")
+            print(f"Dallas API error (Historical data): {e}")
             return []
     
     def _get_virginia_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
-        """Fetch Virginia (Norfolk area) restaurant inspection data using Code4HR API"""
-        params = {}
+        """Fetch Virginia (Norfolk area) restaurant inspection data using corrected Code4HR API"""
+        params = {
+            'locality': 'Norfolk',
+            'category': 'Restaurant',
+            'limit': min(limit, 1500)  # API default limit
+        }
         
-        # Add location filter
-        if location and location != "All":
-            params['locality'] = location
-        
-        # Add search filter
+        # Add search filter using correct field name
         if search_term:
-            # Virginia API uses different search parameter
-            params['vendor_name'] = search_term
+            # Use name parameter for restaurant search
+            params['name'] = search_term
+        
+        # Add location filter if specified
+        if location and location != "All" and "Norfolk" not in location:
+            params['locality'] = location.replace(", VA", "")
         
         try:
+            # Make request to Code4HR API
             raw_data = self._make_api_request(self.current_api["base_url"], params)
             
             if not raw_data:
@@ -1494,11 +1497,11 @@ class HealthInspectionAPI:
             seen_restaurants = set()
             
             for item in raw_data:
-                vendor_name = item.get('vendor_name', '').strip()
-                if not vendor_name:
+                name = item.get('name', '').strip()
+                if not name:
                     continue
                     
-                restaurant_key = (vendor_name, item.get('address', ''))
+                restaurant_key = (name, item.get('address', ''))
                 
                 if restaurant_key in seen_restaurants:
                     continue
@@ -1506,23 +1509,23 @@ class HealthInspectionAPI:
                 
                 # Determine grade based on score
                 score = self._safe_int(item.get('score'))
-                score_above_70 = item.get('score_above_70')
                 
-                if score_above_70 == 'true' or (score and score >= 70):
-                    grade = "Pass"
-                elif score_above_70 == 'false' or (score and score < 70):
-                    grade = "Fail"
+                if score is not None:
+                    if score >= 70:
+                        grade = "Pass"
+                    else:
+                        grade = "Fail"
                 else:
                     grade = "Pending"
                 
                 restaurant = {
-                    'id': f"VA_{item.get('vendor_id', '')}{vendor_name.replace(' ', '')}",
-                    'name': vendor_name,
+                    'id': f"VA_{item.get('_id', '')}{name.replace(' ', '')}",
+                    'name': name,
                     'address': self._format_virginia_address(item),
-                    'cuisine_type': item.get('category', 'Not specified'),
+                    'cuisine_type': item.get('category', 'Restaurant'),
                     'grade': grade,
                     'score': score,
-                    'inspection_date': self._safe_date_extract(item.get('inspection_date')),
+                    'inspection_date': self._safe_date_extract(item.get('last_inspection_date')),
                     'violations': self._extract_virginia_violations(item),
                     'boro': f"{item.get('locality', 'Norfolk')}, VA",
                     'phone': item.get('phone', ''),
