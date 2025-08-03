@@ -334,8 +334,8 @@ def main():
     </style>
     """, unsafe_allow_html=True)
     
-    # Top Banner Advertisement - Prime Revenue Location
-    ad_manager.display_banner_ad("header")
+    # Temporarily disabled advertisement display to fix core functionality
+    # ad_manager.display_banner_ad("header")
     
     # Header with icon
     st.markdown("""
@@ -498,8 +498,8 @@ def main():
                 
                 st.subheader(f"Showing {len(restaurants_df)} restaurants")
                 
-                # Sponsored Restaurant Promotion - Revenue Generator
-                ad_manager.display_sponsored_restaurant()
+                # Temporarily disabled sponsored restaurant promotion
+                # ad_manager.display_sponsored_restaurant()
                 
                 # Display restaurants
                 restaurants_df = restaurants_df.sort_values('inspection_date', ascending=False)
@@ -548,8 +548,7 @@ def display_restaurant_card(restaurant):
             grade = latest_inspection.get('grade', 'Not Yet Graded')
             grade_info = st.session_state.api_client.get_grade_info(grade)
             
-            # Restaurant-specific affiliate ad placement
-            ad_manager.display_restaurant_affiliate_ad(restaurant['name'])
+            # Removed embedded buttons as requested - keeping interface clean and simple
             
             st.markdown(f"""
             <div style="background-color: {grade_info['color']}20; border: 2px solid {grade_info['color']}; 
@@ -627,12 +626,15 @@ def display_restaurant_card(restaurant):
             violations = [v for v in latest_inspection['violations'] if v != "No violations recorded"]
             if violations:
                 for i, violation in enumerate(violations[:3]):
-                    st.markdown(f'<div class="detail-text">• {violation}</div>', unsafe_allow_html=True)
+                    # Clean and escape HTML characters in violation text
+                    clean_violation = str(violation).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#x27;')
+                    st.markdown(f'<div class="detail-text">• {clean_violation}</div>', unsafe_allow_html=True)
                 
                 if len(violations) > 3:
                     with st.expander(f"View {len(violations) - 3} more violations from latest inspection"):
                         for violation in violations[3:]:
-                            st.markdown(f'<div class="detail-text">• {violation}</div>', unsafe_allow_html=True)
+                            clean_violation = str(violation).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#x27;')
+                            st.markdown(f'<div class="detail-text">• {clean_violation}</div>', unsafe_allow_html=True)
             else:
                 st.markdown('<div class="detail-text" style="color: #68d391;">✓ No violations recorded</div>', unsafe_allow_html=True)
         else:

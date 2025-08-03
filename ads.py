@@ -86,71 +86,8 @@ class AdManager:
         st.markdown(ad_html, unsafe_allow_html=True)
     
     def display_restaurant_affiliate_ad(self, restaurant_name=None):
-        """Display restaurant-specific affiliate ads"""
-        affiliate_services = [
-            {
-                'name': 'Order on DoorDash',
-                'color': '#ff3008',
-                'description': 'Get delivery from this restaurant',
-                'commission': '$2-5 per order'
-            },
-            {
-                'name': 'Reserve on OpenTable',
-                'color': '#da3743',
-                'description': 'Book a table now',
-                'commission': '$1-3 per reservation'
-            },
-            {
-                'name': 'Rate on Yelp',
-                'color': '#d32323',
-                'description': 'Share your experience',
-                'commission': 'Brand partnership revenue'
-            }
-        ]
-        
-        selected_service = random.choice(affiliate_services)
-        
-        ad_html = f"""
-        <div style="
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(45, 55, 72, 0.9) 100%);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 8px;
-            padding: 12px;
-            margin: 12px 0;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(212, 175, 55, 0.2)'" 
-           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-            <div style="
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            ">
-                <div>
-                    <div style="
-                        color: #ffffff;
-                        font-weight: 600;
-                        font-size: 0.95rem;
-                        margin-bottom: 4px;
-                    ">{selected_service['name']}</div>
-                    <div style="
-                        color: #cbd5e0;
-                        font-size: 0.8rem;
-                    ">{selected_service['description']}</div>
-                </div>
-                <div style="
-                    background: linear-gradient(135deg, {selected_service['color']} 0%, {selected_service['color']}dd 100%);
-                    color: white;
-                    padding: 6px 12px;
-                    border-radius: 5px;
-                    font-weight: 600;
-                    font-size: 0.85rem;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-                ">Order Now</div>
-            </div>
-        </div>
-        """
-        st.markdown(ad_html, unsafe_allow_html=True)
+        """Removed embedded buttons - keeping interface clean and simple as requested"""
+        pass
     
     def display_sponsored_restaurant(self):
         """Display sponsored restaurant promotion"""
