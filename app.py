@@ -26,7 +26,6 @@ def main():
     
     # RESPONSIVE DESIGN - Optimized for all devices
     st.markdown("""
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
         
@@ -373,7 +372,9 @@ def main():
             "Austin": "Austin, TX", 
             "Seattle": "Seattle, WA",
             "Detroit": "Detroit, MI",
-            "Los Angeles": "Los Angeles, CA"
+            "Los Angeles": "Los Angeles, CA",
+            "Dallas": "Dallas, TX",
+            "Virginia": "Norfolk, VA"
         }
         jurisdiction_options = [jurisdiction_names.get(j, j) for j in jurisdictions]
         

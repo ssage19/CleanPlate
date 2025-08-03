@@ -169,6 +169,46 @@ class HealthInspectionAPI:
                     "score_system": True,
                     "score_description": "Letter grade system with numerical scores: Grade reflects overall compliance with LA County health regulations"
                 }
+            },
+            "Dallas": {
+                "base_url": "https://www.dallasopendata.com/resource/dr15-wcct.json",
+                "name": "Dallas, TX",
+                "location_field": "zip_code",
+                "grade_field": "score",
+                "name_field": "restaurant_name",
+                "address_fields": ["address", "city", "state", "zip_code"],
+                "grading_system": {
+                    "type": "score",
+                    "grades": {
+                        "90-100": {"label": "Excellent", "description": "Outstanding - Exceeds Dallas health department standards", "color": "#22c55e", "priority": "low"},
+                        "80-89": {"label": "Good", "description": "Good - Meets most health and safety requirements", "color": "#22c55e", "priority": "low"},
+                        "70-79": {"label": "Satisfactory", "description": "Satisfactory - Minor violations noted but acceptable", "color": "#f59e0b", "priority": "medium"},
+                        "60-69": {"label": "Needs Improvement", "description": "Needs Improvement - Multiple violations requiring attention", "color": "#ef4444", "priority": "high"},
+                        "Below 60": {"label": "Poor", "description": "Poor - Serious violations affecting food safety", "color": "#dc2626", "priority": "high"},
+                        "Unscored": {"label": "Pending", "description": "Recently inspected or awaiting score assignment", "color": "#6b7280", "priority": "medium"}
+                    },
+                    "score_system": True,
+                    "score_description": "Dallas uses a 100-point scoring system: 90-100 (Excellent), 80-89 (Good), 70-79 (Satisfactory), 60-69 (Needs Improvement), Below 60 (Poor)"
+                }
+            },
+            "Virginia": {
+                "base_url": "https://ohi-api.code4hr.org/vendors",
+                "name": "Norfolk, VA",
+                "location_field": "locality",
+                "grade_field": "score_above_70",
+                "name_field": "vendor_name",
+                "address_fields": ["address", "city", "locality"],
+                "grading_system": {
+                    "type": "pass_fail",
+                    "grades": {
+                        "Pass": {"label": "Pass", "description": "Excellent - Meets all Virginia health department standards", "color": "#22c55e", "priority": "low"},
+                        "Fail": {"label": "Fail", "description": "Critical - Violations requiring immediate correction", "color": "#ef4444", "priority": "high"},
+                        "Conditional": {"label": "Conditional", "description": "Good - Minor issues noted, corrective actions required", "color": "#f59e0b", "priority": "medium"},
+                        "Pending": {"label": "Pending", "description": "Recently inspected or awaiting final determination", "color": "#6b7280", "priority": "medium"}
+                    },
+                    "score_system": True,
+                    "score_description": "Virginia uses pass/fail system with numerical scores: Pass (70+), Fail (Below 70), with additional conditional status"
+                }
             }
         }
         
@@ -348,6 +388,19 @@ class HealthInspectionAPI:
                     "Downtown", "Hollywood", "Beverly Hills", "Santa Monica", "West Hollywood",
                     "Pasadena", "Glendale", "Burbank", "Long Beach"
                 ]
+            elif self.current_jurisdiction == "Dallas":
+                # Dallas districts and ZIP code areas
+                locations = [
+                    "Downtown (75201)", "Deep Ellum (75226)", "Uptown (75204)", 
+                    "Oak Lawn (75219)", "Bishop Arts (75208)", "Lower Greenville (75206)",
+                    "Knox/Henderson (75205)", "Lakewood (75214)", "White Rock (75218)"
+                ]
+            elif self.current_jurisdiction == "Virginia":
+                # Norfolk and surrounding Virginia Beach area localities
+                locations = [
+                    "Norfolk", "Virginia Beach", "Chesapeake", "Portsmouth",
+                    "Suffolk", "Hampton", "Newport News"
+                ]
             else:
                 locations = []
             
@@ -392,6 +445,10 @@ class HealthInspectionAPI:
                 all_data = self._get_detroit_restaurants(location, grades, cuisines, search_term, date_range, limit)
             elif self.current_jurisdiction == "Los Angeles":
                 all_data = self._get_losangeles_restaurants(location, grades, cuisines, search_term, date_range, limit)
+            elif self.current_jurisdiction == "Dallas":
+                all_data = self._get_dallas_restaurants(location, grades, cuisines, search_term, date_range, limit)
+            elif self.current_jurisdiction == "Virginia":
+                all_data = self._get_virginia_restaurants(location, grades, cuisines, search_term, date_range, limit)
             else:
                 return pd.DataFrame()
             
@@ -1320,3 +1377,221 @@ class HealthInspectionAPI:
             return date_str[:10] if len(date_str) >= 10 else date_str
         except:
             return 'N/A'
+    
+    def _get_dallas_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
+        """Fetch Dallas restaurant inspection data using Socrata API"""
+        params = {'$limit': min(limit * 120, self._max_records_per_request)}
+        
+        # Add search filters
+        where_conditions = []
+        if search_term:
+            # Handle advanced search modes
+            if search_term.startswith('"') and search_term.endswith('"'):
+                # Exact word matching
+                exact_term = search_term.strip('"')
+                where_conditions.append(f"UPPER(restaurant_name) = '{exact_term.upper()}'")
+            elif search_term.endswith('*'):
+                # Starts with matching
+                prefix_term = search_term.rstrip('*')
+                where_conditions.append(f"UPPER(restaurant_name) LIKE '{prefix_term.upper()}%'")
+            else:
+                # Contains matching (default)
+                where_conditions.append(f"UPPER(restaurant_name) LIKE '%{search_term.upper()}%'")
+        
+        if location and location != "All":
+            # Extract ZIP code from location if present
+            if "(" in location and ")" in location:
+                zip_code = location.split("(")[1].split(")")[0]
+                where_conditions.append(f"zip_code = '{zip_code}'")
+        
+        if where_conditions:
+            params['$where'] = ' AND '.join(where_conditions)
+        
+        params['$order'] = 'inspection_date DESC'
+        
+        try:
+            raw_data = self._make_api_request(self.current_api["base_url"], params)
+            
+            if not raw_data:
+                return []
+            
+            restaurants = []
+            seen_restaurants = set()
+            
+            for item in raw_data:
+                restaurant_name = item.get('restaurant_name', '').strip()
+                if not restaurant_name:
+                    continue
+                    
+                restaurant_key = (restaurant_name, item.get('address', ''))
+                
+                if restaurant_key in seen_restaurants:
+                    continue
+                seen_restaurants.add(restaurant_key)
+                
+                # Convert score to grade category
+                score = self._safe_int(item.get('score'))
+                if score is not None:
+                    if score >= 90:
+                        grade = "90-100"
+                    elif score >= 80:
+                        grade = "80-89"
+                    elif score >= 70:
+                        grade = "70-79"
+                    elif score >= 60:
+                        grade = "60-69"
+                    else:
+                        grade = "Below 60"
+                else:
+                    grade = "Unscored"
+                
+                restaurant = {
+                    'id': f"DAL_{item.get('permit_number', '')}{restaurant_name.replace(' ', '')}",
+                    'name': restaurant_name,
+                    'address': self._format_dallas_address(item),
+                    'cuisine_type': item.get('restaurant_type', 'Not specified'),
+                    'grade': grade,
+                    'score': score,
+                    'inspection_date': self._safe_date_extract(item.get('inspection_date')),
+                    'violations': self._extract_dallas_violations(item),
+                    'boro': f"Dallas, TX {item.get('zip_code', '')}",
+                    'phone': item.get('phone', ''),
+                    'inspection_type': 'Health Inspection'
+                }
+                
+                restaurants.append(restaurant)
+            
+            # Apply cuisine filter if provided
+            if cuisines and "All" not in cuisines:
+                restaurants = [r for r in restaurants if r['cuisine_type'] in cuisines]
+            
+            return restaurants[:limit]
+            
+        except Exception as e:
+            print(f"Dallas API error: {e}")
+            return []
+    
+    def _get_virginia_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
+        """Fetch Virginia (Norfolk area) restaurant inspection data using Code4HR API"""
+        params = {}
+        
+        # Add location filter
+        if location and location != "All":
+            params['locality'] = location
+        
+        # Add search filter
+        if search_term:
+            # Virginia API uses different search parameter
+            params['vendor_name'] = search_term
+        
+        try:
+            raw_data = self._make_api_request(self.current_api["base_url"], params)
+            
+            if not raw_data:
+                return []
+            
+            restaurants = []
+            seen_restaurants = set()
+            
+            for item in raw_data:
+                vendor_name = item.get('vendor_name', '').strip()
+                if not vendor_name:
+                    continue
+                    
+                restaurant_key = (vendor_name, item.get('address', ''))
+                
+                if restaurant_key in seen_restaurants:
+                    continue
+                seen_restaurants.add(restaurant_key)
+                
+                # Determine grade based on score
+                score = self._safe_int(item.get('score'))
+                score_above_70 = item.get('score_above_70')
+                
+                if score_above_70 == 'true' or (score and score >= 70):
+                    grade = "Pass"
+                elif score_above_70 == 'false' or (score and score < 70):
+                    grade = "Fail"
+                else:
+                    grade = "Pending"
+                
+                restaurant = {
+                    'id': f"VA_{item.get('vendor_id', '')}{vendor_name.replace(' ', '')}",
+                    'name': vendor_name,
+                    'address': self._format_virginia_address(item),
+                    'cuisine_type': item.get('category', 'Not specified'),
+                    'grade': grade,
+                    'score': score,
+                    'inspection_date': self._safe_date_extract(item.get('inspection_date')),
+                    'violations': self._extract_virginia_violations(item),
+                    'boro': f"{item.get('locality', 'Norfolk')}, VA",
+                    'phone': item.get('phone', ''),
+                    'inspection_type': 'Health Inspection'
+                }
+                
+                restaurants.append(restaurant)
+            
+            # Apply cuisine filter if provided
+            if cuisines and "All" not in cuisines:
+                restaurants = [r for r in restaurants if r['cuisine_type'] in cuisines]
+            
+            return restaurants[:limit]
+            
+        except Exception as e:
+            print(f"Virginia API error: {e}")
+            return []
+    
+    def _format_dallas_address(self, item):
+        """Format Dallas restaurant address from API data"""
+        address = item.get('address', '')
+        city = item.get('city', 'Dallas')
+        state = item.get('state', 'TX')
+        zip_code = item.get('zip_code', '')
+        
+        address_parts = [part for part in [address, city, state, zip_code] if part]
+        return ', '.join(address_parts) if address_parts else 'Address not available'
+    
+    def _format_virginia_address(self, item):
+        """Format Virginia restaurant address from API data"""
+        address = item.get('address', '')
+        city = item.get('city', '')
+        locality = item.get('locality', 'Norfolk')
+        state = 'VA'
+        
+        address_parts = [part for part in [address, city or locality, state] if part]
+        return ', '.join(address_parts) if address_parts else 'Address not available'
+    
+    def _extract_dallas_violations(self, item):
+        """Extract violation information from Dallas API response"""
+        violations = []
+        
+        # Check for violation description
+        violation_desc = item.get('violation_description', '')
+        if violation_desc and violation_desc.strip():
+            violations.append(violation_desc.strip())
+        
+        # Check for temperature violations
+        if item.get('temperature_violation') == 'Y':
+            violations.append("Temperature violation found")
+        
+        # Check for critical violations
+        if item.get('critical_violation') == 'Y':
+            violations.append("Critical violation found")
+        
+        return violations if violations else ["No violations recorded"]
+    
+    def _extract_virginia_violations(self, item):
+        """Extract violation information from Virginia API response"""
+        violations = []
+        
+        # Check for violation description
+        violation_desc = item.get('violation_description', '')
+        if violation_desc and violation_desc.strip():
+            violations.append(violation_desc.strip())
+        
+        # Check for inspection notes
+        notes = item.get('inspection_notes', '')
+        if notes and notes.strip():
+            violations.append(f"Notes: {notes.strip()}")
+        
+        return violations if violations else ["No violations recorded"]
