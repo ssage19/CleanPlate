@@ -589,14 +589,13 @@ def display_restaurant_card(restaurant):
                 timeline_color = "#fbbf24" if i == 0 else "#9ca3af"
                 timeline_icon = "🔸" if i == 0 else "🔹"
                 
-                st.markdown(f"""
-                <div style="border-left: 3px solid {timeline_color}; padding: 12px 0 12px 20px; margin: 8px 0; 
-                           background: rgba(45, 55, 72, 0.5); border-radius: 0 8px 8px 0;">
+                # Clean HTML structure to prevent display issues
+                timeline_html = f"""
+                <div style="border-left: 3px solid {timeline_color}; padding: 12px 0 12px 20px; margin: 8px 0; background: rgba(45, 55, 72, 0.5); border-radius: 0 8px 8px 0;">
                     <div style="display: flex; align-items: center; margin-bottom: 8px;">
                         <span style="margin-right: 8px;">{timeline_icon}</span>
                         <span style="color: {timeline_color}; font-weight: 600; font-size: 1rem;">{formatted_date}</span>
-                        <span style="margin-left: auto; color: {grade_info['color']}; font-weight: 700; 
-                                   background: {grade_info['color']}20; padding: 4px 12px; border-radius: 16px; font-size: 0.9rem;">
+                        <span style="margin-left: auto; color: {grade_info['color']}; font-weight: 700; background: {grade_info['color']}20; padding: 4px 12px; border-radius: 16px; font-size: 0.9rem;">
                             {grade_info['label']}
                         </span>
                     </div>
@@ -605,7 +604,8 @@ def display_restaurant_card(restaurant):
                         {f"<br><strong>Score:</strong> {score}" if score else ""}
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
+                """
+                st.markdown(timeline_html, unsafe_allow_html=True)
             
             if len(inspections) > 5:
                 st.markdown(f'<div class="detail-text" style="text-align: center; color: #9ca3af; font-style: italic;">... and {len(inspections) - 5} more inspections</div>', unsafe_allow_html=True)
