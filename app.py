@@ -567,10 +567,9 @@ def display_restaurant_card(restaurant):
         
         st.markdown('</div>', unsafe_allow_html=True)
         
-        # Inspection History Timeline
+        # Inspection History Timeline - Using native Streamlit components
         if len(inspections) > 1:
-            st.markdown('<div class="info-section">', unsafe_allow_html=True)
-            st.markdown('<h4 class="section-header">📋 Inspection History Timeline</h4>', unsafe_allow_html=True)
+            st.subheader("📋 Inspection History Timeline")
             
             for i, inspection in enumerate(inspections[:5]):  # Show up to 5 most recent
                 inspection_date = inspection.get("inspection_date", "Date not available")
@@ -585,32 +584,40 @@ def display_restaurant_card(restaurant):
                 score = inspection.get('score')
                 inspection_type = inspection.get('inspection_type', 'Regular Inspection')
                 
-                # Timeline entry
-                timeline_color = "#fbbf24" if i == 0 else "#9ca3af"
+                # Use native Streamlit components instead of raw HTML
                 timeline_icon = "🔸" if i == 0 else "🔹"
                 
-                # Clean HTML structure to prevent display issues
-                timeline_html = f"""
-                <div style="border-left: 3px solid {timeline_color}; padding: 12px 0 12px 20px; margin: 8px 0; background: rgba(45, 55, 72, 0.5); border-radius: 0 8px 8px 0;">
-                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                        <span style="margin-right: 8px;">{timeline_icon}</span>
-                        <span style="color: {timeline_color}; font-weight: 600; font-size: 1rem;">{formatted_date}</span>
-                        <span style="margin-left: auto; color: {grade_info['color']}; font-weight: 700; background: {grade_info['color']}20; padding: 4px 12px; border-radius: 16px; font-size: 0.9rem;">
-                            {grade_info['label']}
-                        </span>
-                    </div>
-                    <div style="color: #e2e8f0; font-size: 0.9rem;">
-                        <strong>Type:</strong> {inspection_type}
-                        {f"<br><strong>Score:</strong> {score}" if score else ""}
-                    </div>
-                </div>
-                """
-                st.markdown(timeline_html, unsafe_allow_html=True)
+                # Create timeline entry using columns
+                col_icon, col_content = st.columns([0.1, 0.9])
+                
+                with col_icon:
+                    st.write(timeline_icon)
+                
+                with col_content:
+                    # Date and grade in same row
+                    date_col, grade_col = st.columns([0.7, 0.3])
+                    
+                    with date_col:
+                        st.write(f"**{formatted_date}**")
+                        st.caption(f"Type: {inspection_type}" + (f" | Score: {score}" if score else ""))
+                    
+                    with grade_col:
+                        # Display grade badge using native Streamlit
+                        st.markdown(f"""
+                        <div style="background: {grade_info['color']}20; border: 1px solid {grade_info['color']}; 
+                                   border-radius: 5px; padding: 5px 10px; text-align: center;">
+                            <span style="color: {grade_info['color']}; font-weight: bold; font-size: 0.9rem;">
+                                {grade_info['label']}
+                            </span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                
+                # Add separator between entries
+                if i < min(len(inspections) - 1, 4):
+                    st.markdown("---")
             
             if len(inspections) > 5:
-                st.markdown(f'<div class="detail-text" style="text-align: center; color: #9ca3af; font-style: italic;">... and {len(inspections) - 5} more inspections</div>', unsafe_allow_html=True)
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+                st.caption(f"... and {len(inspections) - 5} more inspections")
         
         # Latest Inspection Details
         st.markdown('<div class="info-section">', unsafe_allow_html=True)
