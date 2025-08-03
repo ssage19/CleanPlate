@@ -348,6 +348,9 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
+    # Display header ad for revenue generation
+    ad_manager.display_banner_ad("header")
+    
     # Revenue Setup Menu (Admin Access)
     if st.sidebar.button("💰 Revenue Setup Guide"):
         st.session_state.show_revenue_guide = True
@@ -496,8 +499,8 @@ def main():
                 
 
                 
-                # Temporarily disabled sponsored restaurant promotion
-                # ad_manager.display_sponsored_restaurant()
+                # Display sponsored restaurant ads for revenue generation
+                ad_manager.display_sponsored_restaurant()
                 
                 # Deduplicate restaurants to show only the most recent inspection per establishment
                 latest_inspections = {}
