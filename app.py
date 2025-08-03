@@ -243,6 +243,7 @@ def main():
             "Boston": "Boston, MA",
             "Austin": "Austin, TX", 
             "Seattle": "Seattle, WA",
+            "Detroit": "Detroit, MI",
             "Los Angeles": "Los Angeles, CA"
         }
         jurisdiction_options = [jurisdiction_names.get(j, j) for j in jurisdictions]

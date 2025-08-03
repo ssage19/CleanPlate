@@ -131,6 +131,26 @@ class HealthInspectionAPI:
                     "score_description": "Violation point system: Points deducted for infractions (0 = perfect, lower scores = better performance)"
                 }
             },
+            "Detroit": {
+                "base_url": "https://data.detroitmi.gov/resource/kpnp-cx36.json",
+                "name": "Detroit, MI",
+                "location_field": "address",
+                "grade_field": "inspection_result",
+                "name_field": "business_name",
+                "address_fields": ["address", "city", "state", "zip"],
+                "grading_system": {
+                    "type": "pass_fail",
+                    "grades": {
+                        "Pass": {"label": "Pass", "description": "Excellent - Meets all health and safety requirements", "color": "#22c55e", "priority": "low"},
+                        "Conditional Pass": {"label": "Conditional", "description": "Good - Minor issues noted, corrective actions required", "color": "#f59e0b", "priority": "medium"},
+                        "Fail": {"label": "Fail", "description": "Critical - Serious violations requiring immediate attention", "color": "#ef4444", "priority": "high"},
+                        "No Entry": {"label": "No Entry", "description": "Inspection attempted but access denied", "color": "#6b7280", "priority": "medium"},
+                        "Not Inspected": {"label": "Not Inspected", "description": "Scheduled but not yet completed", "color": "#6b7280", "priority": "medium"}
+                    },
+                    "score_system": False,
+                    "score_description": "Detroit uses pass/fail system with conditional status for minor violations"
+                }
+            },
             "Los Angeles": {
                 "base_url": "https://data.lacity.org/resource/29fd-3paw.json",
                 "name": "Los Angeles, CA",
@@ -316,6 +336,12 @@ class HealthInspectionAPI:
                     "Capitol Hill", "Ballard", "Fremont", "Queen Anne", "Belltown",
                     "University District", "Georgetown", "Pioneer Square", "SoDo"
                 ]
+            elif self.current_jurisdiction == "Detroit":
+                # Detroit districts and neighborhoods
+                locations = [
+                    "Downtown", "Midtown", "Eastern Market", "Corktown", "Riverfront",
+                    "New Center", "Belle Isle", "Southwest", "Westside"
+                ]
             elif self.current_jurisdiction == "Los Angeles":
                 # Los Angeles districts
                 locations = [
@@ -362,6 +388,8 @@ class HealthInspectionAPI:
                 all_data = self._get_austin_restaurants(location, grades, cuisines, search_term, date_range, limit)
             elif self.current_jurisdiction == "Seattle":
                 all_data = self._get_seattle_restaurants(location, grades, cuisines, search_term, date_range, limit)
+            elif self.current_jurisdiction == "Detroit":
+                all_data = self._get_detroit_restaurants(location, grades, cuisines, search_term, date_range, limit)
             elif self.current_jurisdiction == "Los Angeles":
                 all_data = self._get_losangeles_restaurants(location, grades, cuisines, search_term, date_range, limit)
             else:
@@ -768,6 +796,153 @@ class HealthInspectionAPI:
             all_restaurants = [r for r in all_restaurants if r['cuisine_type'] in cuisines]
         
         return all_restaurants[:limit]
+    
+    def _get_detroit_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
+        """Fetch Detroit restaurant inspection data using Socrata API"""
+        all_restaurants = []
+        
+        # Build where clause conditions for Detroit API
+        where_conditions = []
+        
+        if location and location != "All":
+            where_conditions.append(f"UPPER(address) LIKE '%{location.upper()}%'")
+        
+        if grades:
+            grade_conditions = []
+            for grade in grades:
+                if grade == "Pass":
+                    grade_conditions.append("inspection_result='Pass'")
+                elif grade == "Conditional":
+                    grade_conditions.append("inspection_result='Conditional Pass'")
+                elif grade == "Fail":
+                    grade_conditions.append("inspection_result='Fail'")
+            if grade_conditions:
+                where_conditions.append(f"({' OR '.join(grade_conditions)})")
+        
+        if search_term:
+            # Handle advanced search modes for Detroit
+            if search_term.startswith('"') and search_term.endswith('"'):
+                exact_term = search_term.strip('"')
+                where_conditions.append(f"UPPER(business_name) = '{exact_term.upper()}'")
+            elif search_term.endswith('*'):
+                prefix_term = search_term.rstrip('*')
+                where_conditions.append(f"UPPER(business_name) LIKE '{prefix_term.upper()}%'")
+            else:
+                where_conditions.append(f"UPPER(business_name) LIKE '%{search_term.upper()}%'")
+        
+        # Apply date range filtering if specified
+        if date_range:
+            start_date, end_date = date_range
+            where_conditions.append(f"inspection_date >= '{start_date}' AND inspection_date <= '{end_date}'")
+        
+        # Build the query parameters
+        params = {
+            '$limit': min(limit, 50000),  # Detroit API supports large limits
+            '$order': 'inspection_date DESC',
+            '$select': 'business_name,address,city,state,zip,inspection_date,inspection_result,violation_type,violation_description'
+        }
+        
+        if where_conditions:
+            params['$where'] = ' AND '.join(where_conditions)
+        
+        try:
+            # Fetch data from Detroit API using pagination for large datasets
+            batch_size = 10000
+            offset = 0
+            seen_restaurants = set()
+            
+            while len(all_restaurants) < limit and offset < 100000:  # Process up to 100k records
+                batch_params = params.copy()
+                batch_params['$limit'] = batch_size
+                batch_params['$offset'] = offset
+                
+                data = self._make_api_request(self.current_api["base_url"], batch_params)
+                
+                if not data:
+                    break
+                
+                # Process Detroit inspection records
+                for item in data:
+                    business_name = item.get('business_name', '')
+                    if not business_name or len(business_name.strip()) < 2:
+                        continue
+                    
+                    # Create unique restaurant identifier
+                    address = item.get('address', '')
+                    restaurant_key = f"{business_name.lower().strip()}|{address.lower()}"
+                    
+                    if restaurant_key in seen_restaurants:
+                        continue
+                    seen_restaurants.add(restaurant_key)
+                    
+                    # Map Detroit inspection results to standard grades
+                    inspection_result = item.get('inspection_result', 'Unknown')
+                    grade_mapping = {
+                        'Pass': 'Pass',
+                        'Conditional Pass': 'Conditional',
+                        'Fail': 'Fail',
+                        'No Entry': 'No Entry',
+                        'Not Inspected': 'Not Inspected'
+                    }
+                    
+                    # Process violations
+                    violations = []
+                    if item.get('violation_description'):
+                        violation_type = item.get('violation_type', '')
+                        violation_desc = item.get('violation_description', '')
+                        if violation_type and violation_desc:
+                            violations.append(f"{violation_type}: {violation_desc}")
+                        elif violation_desc:
+                            violations.append(violation_desc)
+                    
+                    if not violations:
+                        violations = ['No violations recorded']
+                    
+                    # Create restaurant record
+                    restaurant = {
+                        'id': f"DET_{hash(business_name + address) % 100000}",
+                        'name': business_name.strip(),
+                        'address': self._format_detroit_address(item),
+                        'cuisine_type': 'Restaurant',  # Detroit API doesn't specify cuisine types
+                        'grade': grade_mapping.get(inspection_result, inspection_result),
+                        'score': 0,  # Detroit uses pass/fail system
+                        'inspection_date': self._safe_date_extract(item.get('inspection_date', '')),
+                        'violations': violations,
+                        'boro': f"Detroit, MI {item.get('zip', '')}",
+                        'phone': '',  # Not available in Detroit API
+                        'inspection_type': 'Health Inspection'
+                    }
+                    
+                    all_restaurants.append(restaurant)
+                    
+                    if len(all_restaurants) >= limit:
+                        break
+                
+                offset += batch_size
+            
+        except Exception as e:
+            raise Exception(f"Error fetching Detroit restaurant data: {str(e)}")
+        
+        # Apply cuisine filtering if specified
+        if cuisines and cuisines != ["All"]:
+            all_restaurants = [r for r in all_restaurants if r['cuisine_type'] in cuisines]
+        
+        return all_restaurants[:limit]
+    
+    def _format_detroit_address(self, item):
+        """Format Detroit address from API response"""
+        address_parts = []
+        
+        if item.get('address'):
+            address_parts.append(item['address'])
+        if item.get('city'):
+            address_parts.append(item['city'])
+        if item.get('state'):
+            address_parts.append(item['state'])
+        if item.get('zip'):
+            address_parts.append(item['zip'])
+        
+        return ', '.join(address_parts) if address_parts else 'Address not available'
     
     def _get_boston_restaurants(self, location=None, grades=None, cuisines=None, search_term=None, date_range=None, limit=500):
         """Fetch Boston restaurant inspection data"""
