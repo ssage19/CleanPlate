@@ -32,34 +32,45 @@ class AdManager:
         """Display banner advertisement"""
         ad_html = f"""
         <div style="
-            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-            border: 2px solid rgba(212, 175, 55, 0.3);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
             text-align: center;
             position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         ">
             <div style="
-                color: #e2e8f0;
-                font-size: 0.8rem;
+                color: #a0aec0;
+                font-size: 0.7rem;
                 position: absolute;
-                top: 5px;
-                left: 10px;
+                top: 3px;
+                left: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             ">Advertisement</div>
             
             <div id="ad-{position}" style="
-                min-height: 90px;
+                min-height: 80px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: rgba(45, 55, 72, 0.5);
-                border-radius: 8px;
-                margin-top: 15px;
+                background: rgba(26, 32, 44, 0.6);
+                border-radius: 6px;
+                margin-top: 12px;
+                border: 1px dashed rgba(212, 175, 55, 0.3);
             ">
-                <!-- Google AdSense code will go here -->
-                <div style="color: #a0aec0; font-size: 0.9rem;">
-                    Ad Space - Revenue Generating Zone
+                <div style="
+                    color: #d4af37;
+                    font-size: 1rem;
+                    font-weight: 500;
+                    text-align: center;
+                ">
+                    <div style="margin-bottom: 8px;">🍽️ Restaurant Ad Space</div>
+                    <div style="font-size: 0.8rem; color: #a0aec0;">
+                        Google AdSense integration ready
+                    </div>
                 </div>
             </div>
         </div>
@@ -93,14 +104,15 @@ class AdManager:
         
         ad_html = f"""
         <div style="
-            background: linear-gradient(135deg, {selected_service['color']}15 0%, {selected_service['color']}10 100%);
-            border: 1px solid {selected_service['color']}40;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(45, 55, 72, 0.9) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
             cursor: pointer;
-            transition: transform 0.2s;
-        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            transition: all 0.2s ease;
+        " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(212, 175, 55, 0.2)'" 
+           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
             <div style="
                 display: flex;
                 align-items: center;
@@ -110,22 +122,23 @@ class AdManager:
                     <div style="
                         color: #ffffff;
                         font-weight: 600;
-                        font-size: 1rem;
-                        margin-bottom: 5px;
+                        font-size: 0.95rem;
+                        margin-bottom: 4px;
                     ">{selected_service['name']}</div>
                     <div style="
-                        color: #e2e8f0;
-                        font-size: 0.85rem;
+                        color: #cbd5e0;
+                        font-size: 0.8rem;
                     ">{selected_service['description']}</div>
                 </div>
                 <div style="
-                    background: {selected_service['color']};
+                    background: linear-gradient(135deg, {selected_service['color']} 0%, {selected_service['color']}dd 100%);
                     color: white;
-                    padding: 8px 16px;
-                    border-radius: 6px;
+                    padding: 6px 12px;
+                    border-radius: 5px;
                     font-weight: 600;
-                    font-size: 0.9rem;
-                ">Click Here</div>
+                    font-size: 0.85rem;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                ">Order Now</div>
             </div>
         </div>
         """
@@ -135,32 +148,45 @@ class AdManager:
         """Display sponsored restaurant promotion"""
         sponsored_html = """
         <div style="
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%);
-            border: 2px solid rgba(212, 175, 55, 0.4);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(45, 55, 72, 0.95) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 10px;
+            padding: 16px;
+            margin: 16px 0;
+            position: relative;
+            overflow: hidden;
         ">
             <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: linear-gradient(90deg, #d4af37 0%, #f6d55c 100%);
+            "></div>
+            
+            <div style="
                 color: #d4af37;
-                font-size: 0.8rem;
-                font-weight: 600;
-                margin-bottom: 10px;
-            ">🌟 SPONSORED RESTAURANT</div>
+                font-size: 0.75rem;
+                font-weight: 700;
+                margin-bottom: 8px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            ">✨ SPONSORED</div>
             
             <div style="
                 color: #ffffff;
-                font-size: 1.1rem;
+                font-size: 1rem;
                 font-weight: 600;
-                margin-bottom: 8px;
-            ">Premium Restaurant Spotlight</div>
+                margin-bottom: 6px;
+            ">Featured Restaurant Partnership</div>
             
             <div style="
-                color: #e2e8f0;
-                font-size: 0.9rem;
+                color: #cbd5e0;
+                font-size: 0.85rem;
                 line-height: 1.4;
-            ">Grade A establishments can promote their health inspection excellence here.<br>
-            <strong>Contact us for sponsored placement opportunities.</strong></div>
+            ">Grade A restaurants can showcase their health inspection excellence.<br>
+            <span style="color: #d4af37; font-weight: 500;">Premium placement available</span></div>
         </div>
         """
         st.markdown(sponsored_html, unsafe_allow_html=True)
