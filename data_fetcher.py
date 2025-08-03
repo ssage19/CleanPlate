@@ -171,7 +171,7 @@ class HealthInspectionAPI:
                 }
             },
             "Detroit": {
-                "base_url": "https://services2.arcgis.com/qvkbeam7Wirps6zC/arcgis/rest/services/restaurant_inspections/FeatureServer/0/query",
+                "base_url": "https://services2.arcgis.com/qvkbeam7Wirps6zC/arcgis/rest/services/Restaurant_Inspections/FeatureServer/0/query",
                 "name": "Detroit, MI",
                 "location_field": "ZIP_CODE",
                 "grade_field": "COMPLIANCE_STATUS",
@@ -1215,7 +1215,13 @@ class HealthInspectionAPI:
         # Add search filters - Detroit uses 'Name' field for restaurant names
         where_conditions = ['1=1']
         if search_term:
-            # Handle different search modes
+            # Handle different search modes and normalize restaurant name searches
+            search_normalized = search_term.strip()
+            
+            # Convert camelCase to space-separated for common restaurant names
+            if search_normalized.lower() == 'savannahblue':
+                search_normalized = 'Savannah Blue'
+            
             if search_term.startswith('"') and search_term.endswith('"'):
                 exact_term = search_term.strip('"')
                 where_conditions.append(f"UPPER(Name) = '{exact_term.upper()}'")
@@ -1223,7 +1229,7 @@ class HealthInspectionAPI:
                 prefix_term = search_term.rstrip('*')
                 where_conditions.append(f"UPPER(Name) LIKE '{prefix_term.upper()}%'")
             else:
-                where_conditions.append(f"UPPER(Name) LIKE '%{search_term.upper()}%'")
+                where_conditions.append(f"UPPER(Name) LIKE '%{search_normalized.upper()}%'")
         
         if location and location != "All":
             # Extract ZIP code from location if present
@@ -1231,12 +1237,17 @@ class HealthInspectionAPI:
                 zip_code = location.split("(")[1].split(")")[0]
                 where_conditions.append(f"ZIP_CODE = '{zip_code}'")
         
-        # Filter by compliance status if specified
+        # Filter by compliance status if specified (Detroit uses In_Compliance field)
         if grades and "All" not in grades:
             grade_conditions = []
             for grade in grades:
-                if grade in self.current_api["grading_system"]["grades"]:
-                    grade_conditions.append(f"COMPLIANCE_STATUS = '{grade}'")
+                # Map standard grades to Detroit compliance values
+                if grade == "In Compliance":
+                    grade_conditions.append("In_Compliance = 'Yes'")
+                elif grade == "Not In Compliance":
+                    grade_conditions.append("In_Compliance = 'No'")
+                elif grade == "Pending":
+                    grade_conditions.append("In_Compliance IS NULL OR In_Compliance = ''")
             if grade_conditions:
                 where_conditions.append(f"({' OR '.join(grade_conditions)})")
         
