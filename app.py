@@ -5,6 +5,7 @@ from data_fetcher import HealthInspectionAPI
 from database import init_database, save_restaurant_to_db
 from utils import format_grade_badge, calculate_average_rating
 from ads import ad_manager
+from delivery_affiliates import delivery_affiliate_manager
 
 # Set page configuration
 st.set_page_config(
@@ -442,11 +443,21 @@ def main():
     if st.sidebar.button("💰 Revenue Setup Guide"):
         st.session_state.show_revenue_guide = True
     
+    if st.sidebar.button("🚗 Delivery Affiliates Setup"):
+        st.session_state.show_delivery_guide = True
+    
     if st.session_state.get('show_revenue_guide', False):
         from revenue_dashboard import display_revenue_setup_guide
         display_revenue_setup_guide()
         if st.button("← Back to App"):
             st.session_state.show_revenue_guide = False
+            st.rerun()
+        return
+    
+    if st.session_state.get('show_delivery_guide', False):
+        delivery_affiliate_manager.display_affiliate_setup_guide()
+        if st.button("← Back to App"):
+            st.session_state.show_delivery_guide = False
             st.rerun()
         return
     
@@ -655,7 +666,11 @@ def display_restaurant_card(restaurant):
             grade = latest_inspection.get('grade', 'Not Yet Graded')
             grade_info = st.session_state.api_client.get_grade_info(grade)
             
-            # Removed embedded buttons as requested - keeping interface clean and simple
+            # Add delivery affiliate buttons for revenue generation
+            delivery_affiliate_manager.display_delivery_buttons(
+                restaurant_name=restaurant['name'],
+                restaurant_address=restaurant.get('address', '')
+            )
             
             st.markdown(f"""
             <div style="background-color: {grade_info['color']}20; border: 2px solid {grade_info['color']}; 
