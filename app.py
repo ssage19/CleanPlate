@@ -19,6 +19,17 @@ if 'api_client' not in st.session_state:
     st.session_state.api_client = HealthInspectionAPI()
     st.session_state.current_jurisdiction = "NYC"
 
+# Initialize logo
+if 'logo_base64' not in st.session_state:
+    import base64
+    try:
+        with open('attached_assets/Clean Plate_1754314259976.png', 'rb') as f:
+            logo_data = f.read()
+            st.session_state.logo_base64 = base64.b64encode(logo_data).decode()
+    except FileNotFoundError:
+        # Fallback to emoji if logo file not found
+        st.session_state.logo_base64 = ""
+
 # Initialize database on startup
 init_database()
 
@@ -407,11 +418,17 @@ def main():
     # Temporarily disabled advertisement display to fix core functionality
     # ad_manager.display_banner_ad("header")
     
-    # Header with icon
-    st.markdown("""
+    # Header with custom logo
+    logo_base64 = st.session_state.get('logo_base64', '')
+    if logo_base64:
+        logo_html = f'<img src="data:image/png;base64,{logo_base64}" style="width: 72px; height: 72px; vertical-align: middle; margin-right: 16px; border-radius: 50%;" alt="CleanPlate Logo" />'
+    else:
+        logo_html = '<span style="font-size: 72px; vertical-align: middle; margin-right: 16px;">🍽️</span>'
+    
+    st.markdown(f"""
     <div class="main-header">
         <h1>
-            <span style="font-size: 72px; vertical-align: middle; margin-right: 16px;">🍽️</span>
+            {logo_html}
             CleanPlate
         </h1>
         <p>Peeking behind the kitchen door, so you can dine without doubt. We dish out health inspection scores, making informed choices deliciously easy.</p>
