@@ -48,9 +48,8 @@ def main():
         <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png">
         <link rel="apple-touch-icon" href="/static/icon-192.png">
         
-        <!-- Google AdSense Header Code -->
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3394301342758377"
-             crossorigin="anonymous"></script>
+        <!-- Google AdSense Meta Tag for Account Verification -->
+        <meta name="google-adsense-account" content="ca-pub-8384381342878857">
     </head>
     
     <script>

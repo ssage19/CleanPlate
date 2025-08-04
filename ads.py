@@ -66,19 +66,24 @@ class AdManager:
                 box-sizing: border-box;
                 padding: 10px;
             ">
-                <!-- Google AdSense Code -->
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3394301342758377"
-                     crossorigin="anonymous"></script>
-                <!-- CleanPlate Banner Ad -->
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-3394301342758377"
-                     data-ad-slot="1234567890"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
+                <!-- Google AdSense Placeholder -->
+                <div style="
+                    color: #d4af37;
+                    font-size: 1rem;
+                    font-weight: 500;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 200px;
+                    border: 2px dashed rgba(212, 175, 55, 0.3);
+                    border-radius: 6px;
+                    background: rgba(212, 175, 55, 0.05);
+                ">
+                    🏆 Premium Ad Space<br>
+                    <span style="font-size: 0.8rem; color: #a0aec0; margin-top: 8px;">
+                        Google AdSense account verified
+                    </span>
+                </div>
             </div>
         </div>
         """
