@@ -24,7 +24,7 @@ init_database()
 
 def main():
     
-    # Add PWA meta tags and functionality
+    # Add PWA meta tags and Google AdSense
     st.markdown("""
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -35,6 +35,10 @@ def main():
         <link rel="manifest" href="/static/manifest.json">
         <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png">
         <link rel="apple-touch-icon" href="/static/icon-192.png">
+        
+        <!-- Google AdSense Header Code -->
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3394301342758377"
+             crossorigin="anonymous"></script>
     </head>
     
     <script>

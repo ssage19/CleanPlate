@@ -1,28 +1,33 @@
 {
   "name": "CleanPlate - Restaurant Health Inspections",
   "short_name": "CleanPlate",
-  "description": "Restaurant health inspection tracker across major US cities",
+  "description": "Restaurant health inspection tracker covering major US cities",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a202c",
   "theme_color": "#d4af37",
   "orientation": "portrait-primary",
-  "scope": "/",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/static/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable any"
     },
     {
-      "src": "icon-512.png", 
+      "src": "/static/icon-512.png", 
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable any"
     }
   ],
-  "categories": ["food", "health", "utilities"],
-  "lang": "en-US",
-  "dir": "ltr"
+  "categories": ["food", "health", "lifestyle"],
+  "screenshots": [
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ]
 }
