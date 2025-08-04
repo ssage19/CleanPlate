@@ -36,35 +36,8 @@ init_database()
 
 def main():
     
-    # Handle special routes for SEO and crawlers
-    query_params = st.query_params
-    
-    # Serve robots.txt
-    if 'robots.txt' in query_params or query_params.get('path') == 'robots.txt':
-        st.text("""User-agent: *
-Allow: /
-
-User-agent: Googlebot
-Allow: /
-
-User-agent: AdsBot-Google
-Allow: /
-
-Sitemap: https://cleanplateus.com/sitemap.xml""")
-        return
-    
-    # Serve sitemap.xml  
-    if 'sitemap.xml' in query_params or query_params.get('path') == 'sitemap.xml':
-        st.text("""<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://cleanplateus.com/</loc>
-    <lastmod>2025-01-24</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-</urlset>""")
-        return
+    # Handle special routes for SEO and crawlers (simplified approach)
+    # Remove complex routing that might interfere with normal page loading
     
     # Add PWA meta tags and Google AdSense with better SEO
     st.markdown("""

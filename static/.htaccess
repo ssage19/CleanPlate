@@ -1,0 +1,22 @@
+# Force HTTPS
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Set proper content types
+<Files "robots.txt">
+    Header set Content-Type "text/plain"
+</Files>
+
+<Files "sitemap.xml">
+    Header set Content-Type "application/xml"
+</Files>
+
+# Allow search engine crawlers
+<Files "robots.txt">
+    Allow from all
+</Files>
+
+<Files "sitemap.xml">
+    Allow from all
+</Files>
