@@ -45,14 +45,13 @@ def main():
     <meta name="keywords" content="restaurant health inspection, food safety, health grades, restaurant violations, food delivery">
     <meta name="robots" content="index, follow">
     <meta name="author" content="CleanPlate">
-    <meta name="google-adsense-account" content="ca-pub-3394301342758377">
+    
+    <!-- Google AdSense Verification Meta Tag -->
+    <meta name="google-adsense-account" content="ca-pub-8384381342878857">
     
     <!-- Google AdSense Header Code - Critical for verification -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3394301342758377"
          crossorigin="anonymous"></script>
-    
-    <!-- Explicit AdSense verification meta tag -->
-    <meta name="google-site-verification" content="AdSense-verification-pending">
     
     <!-- PWA Configuration -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
