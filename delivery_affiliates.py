@@ -100,105 +100,26 @@ class DeliveryAffiliateManager:
     def display_delivery_buttons(self, restaurant_name: str, restaurant_address: str = ""):
         """Display affiliate delivery buttons for a restaurant"""
         
-        st.markdown("""
-        <div class="delivery-section" style="
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(45, 55, 72, 0.8) 100%);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 8px;
-            padding: 16px;
-            margin: 12px 0;
-        ">
-            <div style="
-                color: #d4af37;
-                font-size: 0.9rem;
-                font-weight: 600;
-                margin-bottom: 12px;
-                text-align: center;
-            ">🍽️ Order Food Online & Support CleanPlate</div>
-        """, unsafe_allow_html=True)
+        # Use Streamlit columns instead of complex HTML to avoid rendering issues
+        st.markdown("**🍽️ Order Food Online & Support CleanPlate**", unsafe_allow_html=False)
         
-        # Create three columns for delivery buttons
+        # Create three columns for delivery buttons using native Streamlit
         col1, col2, col3 = st.columns(3)
         
         with col1:
             doordash_link = self.generate_affiliate_link("doordash", restaurant_name, restaurant_address)
-            st.markdown(f"""
-            <a href="{doordash_link}" target="_blank" style="text-decoration: none;">
-                <div style="
-                    background: linear-gradient(135deg, #ff3008 0%, #cc2607 100%);
-                    color: white;
-                    padding: 12px 8px;
-                    border-radius: 6px;
-                    text-align: center;
-                    font-weight: 600;
-                    font-size: 0.85rem;
-                    cursor: pointer;
-                    transition: transform 0.2s;
-                    margin-bottom: 8px;
-                    box-shadow: 0 2px 8px rgba(255, 48, 8, 0.3);
-                ">
-                    🚗 DoorDash
-                </div>
-            </a>
-            """, unsafe_allow_html=True)
+            st.link_button("🚗 DoorDash", doordash_link, use_container_width=True)
         
         with col2:
             ubereats_link = self.generate_affiliate_link("ubereats", restaurant_name, restaurant_address)
-            st.markdown(f"""
-            <a href="{ubereats_link}" target="_blank" style="text-decoration: none;">
-                <div style="
-                    background: linear-gradient(135deg, #06c167 0%, #05a355 100%);
-                    color: white;
-                    padding: 12px 8px;
-                    border-radius: 6px;
-                    text-align: center;
-                    font-weight: 600;
-                    font-size: 0.85rem;
-                    cursor: pointer;
-                    transition: transform 0.2s;
-                    margin-bottom: 8px;
-                    box-shadow: 0 2px 8px rgba(6, 193, 103, 0.3);
-                ">
-                    🛵 Uber Eats
-                </div>
-            </a>
-            """, unsafe_allow_html=True)
+            st.link_button("🛵 Uber Eats", ubereats_link, use_container_width=True)
         
         with col3:
             grubhub_link = self.generate_affiliate_link("grubhub", restaurant_name, restaurant_address)
-            st.markdown(f"""
-            <a href="{grubhub_link}" target="_blank" style="text-decoration: none;">
-                <div style="
-                    background: linear-gradient(135deg, #ff8000 0%, #cc6600 100%);
-                    color: white;
-                    padding: 12px 8px;
-                    border-radius: 6px;
-                    text-align: center;
-                    font-weight: 600;
-                    font-size: 0.85rem;
-                    cursor: pointer;
-                    transition: transform 0.2s;
-                    margin-bottom: 8px;
-                    box-shadow: 0 2px 8px rgba(255, 128, 0, 0.3);
-                ">
-                    🍔 Grubhub
-                </div>
-            </a>
-            """, unsafe_allow_html=True)
+            st.link_button("🍔 Grubhub", grubhub_link, use_container_width=True)
         
-        # Revenue disclaimer
-        st.markdown("""
-            <div style="
-                color: #a0aec0;
-                font-size: 0.75rem;
-                text-align: center;
-                margin-top: 8px;
-                line-height: 1.3;
-            ">
-                CleanPlate earns commission from food orders • Helps keep our health inspection data free
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        # Revenue disclaimer using simple markdown
+        st.caption("CleanPlate earns commission from food orders • Helps keep our health inspection data free")
     
     def get_revenue_potential(self) -> Dict[str, str]:
         """Return revenue potential information for delivery affiliates"""
