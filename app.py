@@ -24,6 +24,72 @@ init_database()
 
 def main():
     
+    # Add PWA meta tags and functionality
+    st.markdown("""
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="CleanPlate">
+        <meta name="theme-color" content="#d4af37">
+        <link rel="manifest" href="/static/manifest.json">
+        <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png">
+        <link rel="apple-touch-icon" href="/static/icon-192.png">
+    </head>
+    
+    <script>
+        // Register service worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/static/service-worker.js')
+                .then(function(registration) {
+                    console.log('ServiceWorker registration successful');
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+        
+        // Add install prompt for PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show custom install button
+            const installButton = document.createElement('button');
+            installButton.textContent = '📱 Install CleanPlate App';
+            installButton.style.cssText = `
+                position: fixed; 
+                bottom: 20px; 
+                right: 20px; 
+                background: #d4af37; 
+                color: #1a202c; 
+                border: none; 
+                padding: 12px 20px; 
+                border-radius: 25px; 
+                font-weight: bold; 
+                cursor: pointer; 
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+            `;
+            
+            installButton.addEventListener('click', () => {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                        installButton.remove();
+                    }
+                    deferredPrompt = null;
+                });
+            });
+            
+            document.body.appendChild(installButton);
+        });
+    </script>
+    """, unsafe_allow_html=True)
+    
     # RESPONSIVE DESIGN - Optimized for all devices
     st.markdown("""
     <style>
