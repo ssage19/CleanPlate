@@ -58,10 +58,12 @@ def main():
     <meta name="theme-color" content="#d4af37">
     <link rel="manifest" href="/static/manifest.json">
     
-    <!-- CleanPlate Logo Favicon -->
-    <link rel="icon" type="image/png" href="/static/favicon.png">
-    <link rel="shortcut icon" type="image/png" href="/static/favicon.png">
-    <link rel="apple-touch-icon" href="/static/icon-192.png">
+    <!-- CleanPlate Logo Favicon - Force Cache Refresh -->
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico?v=2">
+    <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico?v=2">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon.png?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/icon-192.png?v=2">
     
     <!-- Structured Data for Better Crawling -->
     <script type="application/ld+json">
