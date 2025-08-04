@@ -7,10 +7,10 @@ from utils import format_grade_badge, calculate_average_rating
 from ads import ad_manager
 from delivery_affiliates import delivery_affiliate_manager
 
-# Set page configuration with CleanPlate logo
+# Set page configuration
 st.set_page_config(
     page_title="CleanPlate - Restaurant Health Inspections",
-    page_icon="attached_assets/Clean Plate_1754314259976.png",
+    page_icon="🍽️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -36,47 +36,22 @@ init_database()
 
 def main():
     
-    # Handle special routes for SEO and crawlers (simplified approach)
-    # Remove complex routing that might interfere with normal page loading
-    
-    # Add comprehensive meta tags and Google AdSense integration
+    # Add PWA meta tags and Google AdSense
     st.markdown("""
-    <meta name="description" content="CleanPlate - Find restaurant health inspection grades and violations for NYC, Chicago, Austin, Boston, Seattle, Los Angeles, and Detroit. Order food online safely.">
-    <meta name="keywords" content="restaurant health inspection, food safety, health grades, restaurant violations, food delivery">
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="CleanPlate">
-    
-    <!-- Google AdSense Verification Meta Tag -->
-    <meta name="google-adsense-account" content="ca-pub-8384381342878857">
-    
-    <!-- Google AdSense Header Code - Critical for verification -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3394301342758377"
-         crossorigin="anonymous"></script>
-    
-    <!-- PWA Configuration -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#d4af37">
-    <link rel="manifest" href="/static/manifest.json">
-    
-    <!-- CleanPlate Logo Favicon - Force Cache Refresh -->
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico?v=2">
-    <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico?v=2">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon.png?v=2">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon.png?v=2">
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/icon-192.png?v=2">
-    
-    <!-- Structured Data for Better Crawling -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "CleanPlate",
-        "description": "Restaurant health inspection tracker for major US cities",
-        "url": "https://cleanplateus.com",
-        "applicationCategory": "HealthApplication",
-        "operatingSystem": "Web Browser"
-    }
-    </script>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="CleanPlate">
+        <meta name="theme-color" content="#d4af37">
+        <link rel="manifest" href="/static/manifest.json">
+        <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png">
+        <link rel="apple-touch-icon" href="/static/icon-192.png">
+        
+        <!-- Google AdSense Header Code -->
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3394301342758377"
+             crossorigin="anonymous"></script>
+    </head>
     
     <script>
         // Register service worker for PWA functionality
