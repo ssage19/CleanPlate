@@ -586,8 +586,8 @@ def main():
                 
 
                 
-                # Display sponsored restaurant ads for revenue generation
-                ad_manager.display_sponsored_restaurant()
+                # Temporarily disabled sponsored restaurant display to fix HTML rendering issue
+                # ad_manager.display_sponsored_restaurant()
                 
                 # Deduplicate restaurants to show only the most recent inspection per establishment
                 latest_inspections = {}
