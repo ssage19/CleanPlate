@@ -383,27 +383,7 @@ def main():
     # Display header ad for revenue generation
     ad_manager.display_banner_ad("header")
     
-    # Revenue Setup Menu (Admin Access)
-    if st.sidebar.button("💰 Revenue Setup Guide"):
-        st.session_state.show_revenue_guide = True
-    
-    if st.sidebar.button("🚗 Delivery Affiliates Setup"):
-        st.session_state.show_delivery_guide = True
-    
-    if st.session_state.get('show_revenue_guide', False):
-        from revenue_dashboard import display_revenue_setup_guide
-        display_revenue_setup_guide()
-        if st.button("← Back to App"):
-            st.session_state.show_revenue_guide = False
-            st.rerun()
-        return
-    
-    if st.session_state.get('show_delivery_guide', False):
-        delivery_affiliate_manager.display_affiliate_setup_guide()
-        if st.button("← Back to App"):
-            st.session_state.show_delivery_guide = False
-            st.rerun()
-        return
+
     
     # Main interface
     col_juris, col_search, col_location = st.columns([1, 2, 1])
