@@ -654,77 +654,32 @@ def display_restaurant_card(restaurant):
     grade = restaurant.get('grade', 'Not Yet Graded')
     grade_info = st.session_state.api_client.get_grade_info(grade)
     
-    # Prominent restaurant name header
-    st.markdown(f"""
-    <div style="
-        background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(45, 55, 72, 0.95) 100%);
-        border: 2px solid rgba(212, 175, 55, 0.3);
-        border-radius: 12px;
-        padding: 20px;
-        margin: 16px 0;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    ">
-        <div style="
-            color: #ffffff;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-align: center;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        ">{restaurant_name}</div>
-        
-        <div style="
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        ">
-            <div style="
-                background-color: {grade_info['color']}20;
-                border: 2px solid {grade_info['color']};
-                border-radius: 8px;
-                padding: 8px 16px;
-                text-align: center;
-            ">
-                <div style="font-size: 1.2rem; font-weight: 700; color: {grade_info['color']};">
-                    {grade_info['label']}
-                </div>
-                <div style="font-size: 0.8rem; color: #a0aec0;">
-                    {grade_info['description']}
-                </div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Create prominent restaurant header using native Streamlit components
+    st.markdown(f"# {restaurant_name}")
+    
+    # Display grade in a clean way
+    grade_label = grade_info['label']
+    grade_desc = grade_info['description']
+    
+    col_grade, col_spacer = st.columns([1, 2])
+    with col_grade:
+        if grade_label == 'A':
+            st.success(f"Grade: {grade_label} - {grade_desc}")
+        elif grade_label == 'B':
+            st.warning(f"Grade: {grade_label} - {grade_desc}")
+        elif grade_label == 'C':
+            st.error(f"Grade: {grade_label} - {grade_desc}")
+        else:
+            st.info(f"Grade: {grade_label} - {grade_desc}")
 
     with st.expander("📋 Restaurant Details & Order Food", expanded=True):
-        # Restaurant Info Section
-        st.markdown('<div class="info-section">', unsafe_allow_html=True)
         
         col1, col2 = st.columns([2, 1])
         with col1:
-            st.markdown(f"""
-            <div style="
-                background: rgba(45, 55, 72, 0.3);
-                border-radius: 8px;
-                padding: 16px;
-                margin-bottom: 16px;
-            ">
-                <div style="color: #d4af37; font-size: 1.1rem; font-weight: 600; margin-bottom: 12px;">
-                    📍 Restaurant Information
-                </div>
-                <div style="color: #ffffff; font-size: 1rem; margin-bottom: 8px;">
-                    <strong>Address:</strong> {restaurant.get("address", "N/A")}
-                </div>
-                <div style="color: #ffffff; font-size: 1rem; margin-bottom: 8px;">
-                    <strong>Cuisine:</strong> {restaurant.get("cuisine_type", "Not specified")}
-                </div>
-                <div style="color: #ffffff; font-size: 1rem;">
-                    <strong>Location:</strong> {restaurant.get("boro", "N/A")}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.subheader("📍 Restaurant Information")
+            st.write(f"**Address:** {restaurant.get('address', 'N/A')}")
+            st.write(f"**Cuisine:** {restaurant.get('cuisine_type', 'Not specified')}")
+            st.write(f"**Location:** {restaurant.get('boro', 'N/A')}")
         
         with col2:
             # Add delivery affiliate buttons for revenue generation
@@ -732,8 +687,6 @@ def display_restaurant_card(restaurant):
                 restaurant_name=restaurant['name'],
                 restaurant_address=restaurant.get('address', '')
             )
-        
-        st.markdown('</div>', unsafe_allow_html=True)
         
         # Inspection History Timeline - Using native Streamlit components
         if len(inspections) > 1:
@@ -788,34 +741,28 @@ def display_restaurant_card(restaurant):
                 st.caption(f"... and {len(inspections) - 5} more inspections")
         
         # Latest Inspection Details
-        st.markdown('<div class="info-section">', unsafe_allow_html=True)
         latest_date = latest_inspection.get("inspection_date", "Date not available")
         if latest_date and latest_date != "Date not available":
             from utils import format_inspection_date
             formatted_latest_date = format_inspection_date(latest_date)
-            st.markdown(f'<h4 class="section-header">🔍 Latest Inspection - {formatted_latest_date}</h4>', unsafe_allow_html=True)
+            st.subheader(f"🔍 Latest Inspection - {formatted_latest_date}")
         else:
-            st.markdown('<h4 class="section-header">🔍 Latest Inspection Results</h4>', unsafe_allow_html=True)
+            st.subheader("🔍 Latest Inspection Results")
         
         if 'violations' in latest_inspection and latest_inspection['violations']:
             violations = [v for v in latest_inspection['violations'] if v != "No violations recorded"]
             if violations:
                 for i, violation in enumerate(violations[:3]):
-                    # Clean and escape HTML characters in violation text
-                    clean_violation = str(violation).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#x27;')
-                    st.markdown(f'<div class="detail-text">• {clean_violation}</div>', unsafe_allow_html=True)
+                    st.write(f"• {violation}")
                 
                 if len(violations) > 3:
                     with st.expander(f"View {len(violations) - 3} more violations from latest inspection"):
                         for violation in violations[3:]:
-                            clean_violation = str(violation).replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#x27;')
-                            st.markdown(f'<div class="detail-text">• {clean_violation}</div>', unsafe_allow_html=True)
+                            st.write(f"• {violation}")
             else:
-                st.markdown('<div class="detail-text" style="color: #68d391;">✓ No violations recorded</div>', unsafe_allow_html=True)
+                st.success("✓ No violations recorded")
         else:
-            st.markdown('<div class="detail-text" style="color: #68d391;">✓ No violations recorded</div>', unsafe_allow_html=True)
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+            st.success("✓ No violations recorded")
 
 if __name__ == "__main__":
     main()
