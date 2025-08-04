@@ -39,35 +39,38 @@ def main():
     # Handle special routes for SEO and crawlers (simplified approach)
     # Remove complex routing that might interfere with normal page loading
     
-    # Add PWA meta tags and Google AdSense with better SEO
+    # Add comprehensive meta tags and Google AdSense integration
     st.markdown("""
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="CleanPlate">
-        <meta name="theme-color" content="#d4af37">
-        
-        <!-- SEO Meta Tags -->
-        <meta name="description" content="CleanPlate - Find restaurant health inspection grades and violations for NYC, Chicago, Austin, Boston, Seattle, Los Angeles, and Detroit. Order food online safely.">
-        <meta name="keywords" content="restaurant health inspection, food safety, health grades, restaurant violations, food delivery">
-        <meta name="robots" content="index, follow">
-        <meta name="author" content="CleanPlate">
-        
-        <!-- Open Graph Meta Tags -->
-        <meta property="og:title" content="CleanPlate - Restaurant Health Inspections">
-        <meta property="og:description" content="Check restaurant health inspection grades and order food safely from verified restaurants">
-        <meta property="og:type" content="website">
-        <meta property="og:url" content="https://cleanplateus.com">
-        
-        <link rel="manifest" href="/static/manifest.json">
-        <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png">
-        <link rel="apple-touch-icon" href="/static/icon-192.png">
-        
-        <!-- Google AdSense Header Code -->
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3394301342758377"
-             crossorigin="anonymous"></script>
-    </head>
+    <meta name="description" content="CleanPlate - Find restaurant health inspection grades and violations for NYC, Chicago, Austin, Boston, Seattle, Los Angeles, and Detroit. Order food online safely.">
+    <meta name="keywords" content="restaurant health inspection, food safety, health grades, restaurant violations, food delivery">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="CleanPlate">
+    <meta name="google-adsense-account" content="ca-pub-3394301342758377">
+    
+    <!-- Google AdSense Header Code - Critical for verification -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3394301342758377"
+         crossorigin="anonymous"></script>
+    
+    <!-- Explicit AdSense verification meta tag -->
+    <meta name="google-site-verification" content="AdSense-verification-pending">
+    
+    <!-- PWA Configuration -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#d4af37">
+    <link rel="manifest" href="/static/manifest.json">
+    
+    <!-- Structured Data for Better Crawling -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "CleanPlate",
+        "description": "Restaurant health inspection tracker for major US cities",
+        "url": "https://cleanplateus.com",
+        "applicationCategory": "HealthApplication",
+        "operatingSystem": "Web Browser"
+    }
+    </script>
     
     <script>
         // Register service worker for PWA functionality
