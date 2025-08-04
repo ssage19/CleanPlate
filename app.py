@@ -649,43 +649,89 @@ def display_restaurant_card(restaurant):
     # Latest inspection for main display
     latest_inspection = inspections[0] if inspections else {}
     
-    with st.expander(f"{restaurant['name']}", expanded=True):
+    # Create more prominent restaurant header
+    restaurant_name = restaurant['name']
+    grade = restaurant.get('grade', 'Not Yet Graded')
+    grade_info = st.session_state.api_client.get_grade_info(grade)
+    
+    # Prominent restaurant name header
+    st.markdown(f"""
+    <div style="
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(45, 55, 72, 0.95) 100%);
+        border: 2px solid rgba(212, 175, 55, 0.3);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 16px 0;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    ">
+        <div style="
+            color: #ffffff;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        ">{restaurant_name}</div>
+        
+        <div style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        ">
+            <div style="
+                background-color: {grade_info['color']}20;
+                border: 2px solid {grade_info['color']};
+                border-radius: 8px;
+                padding: 8px 16px;
+                text-align: center;
+            ">
+                <div style="font-size: 1.2rem; font-weight: 700; color: {grade_info['color']};">
+                    {grade_info['label']}
+                </div>
+                <div style="font-size: 0.8rem; color: #a0aec0;">
+                    {grade_info['description']}
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    with st.expander("📋 Restaurant Details & Order Food", expanded=True):
         # Restaurant Info Section
         st.markdown('<div class="info-section">', unsafe_allow_html=True)
-        st.markdown('<h4 class="section-header">Restaurant Details</h4>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([2, 1])
         with col1:
-            st.markdown(f'<div class="detail-text"><strong>Address:</strong> {restaurant.get("address", "N/A")}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="detail-text"><strong>Cuisine:</strong> {restaurant.get("cuisine_type", "Not specified")}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="detail-text"><strong>Location:</strong> {restaurant.get("boro", "N/A")}</div>', unsafe_allow_html=True)
-            
-            # Note: Showing most recent inspection only for cleaner interface
+            st.markdown(f"""
+            <div style="
+                background: rgba(45, 55, 72, 0.3);
+                border-radius: 8px;
+                padding: 16px;
+                margin-bottom: 16px;
+            ">
+                <div style="color: #d4af37; font-size: 1.1rem; font-weight: 600; margin-bottom: 12px;">
+                    📍 Restaurant Information
+                </div>
+                <div style="color: #ffffff; font-size: 1rem; margin-bottom: 8px;">
+                    <strong>Address:</strong> {restaurant.get("address", "N/A")}
+                </div>
+                <div style="color: #ffffff; font-size: 1rem; margin-bottom: 8px;">
+                    <strong>Cuisine:</strong> {restaurant.get("cuisine_type", "Not specified")}
+                </div>
+                <div style="color: #ffffff; font-size: 1rem;">
+                    <strong>Location:</strong> {restaurant.get("boro", "N/A")}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
         
         with col2:
-            grade = latest_inspection.get('grade', 'Not Yet Graded')
-            grade_info = st.session_state.api_client.get_grade_info(grade)
-            
             # Add delivery affiliate buttons for revenue generation
             delivery_affiliate_manager.display_delivery_buttons(
                 restaurant_name=restaurant['name'],
                 restaurant_address=restaurant.get('address', '')
             )
-            
-            st.markdown(f"""
-            <div style="background-color: {grade_info['color']}20; border: 2px solid {grade_info['color']}; 
-                        border-radius: 8px; padding: 16px; text-align: center;">
-                <div style="font-size: 1.5rem; font-weight: 700; color: {grade_info['color']};">
-                    {grade_info['label']}
-                </div>
-                <div style="font-size: 0.9rem; color: #a0aec0; margin-top: 4px;">
-                    {grade_info['description']}
-                </div>
-                <div style="font-size: 0.8rem; color: #68d391; margin-top: 8px;">
-                    Latest Grade
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
         
         st.markdown('</div>', unsafe_allow_html=True)
         
