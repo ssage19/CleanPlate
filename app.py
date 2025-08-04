@@ -37,10 +37,10 @@ init_database()
 def main():
     
     # Handle special routes for SEO and crawlers
-    query_params = st.experimental_get_query_params()
+    query_params = st.query_params
     
     # Serve robots.txt
-    if 'robots.txt' in query_params or st.experimental_get_query_params().get('path') == ['robots.txt']:
+    if 'robots.txt' in query_params or query_params.get('path') == 'robots.txt':
         st.text("""User-agent: *
 Allow: /
 
@@ -54,7 +54,7 @@ Sitemap: https://cleanplateus.com/sitemap.xml""")
         return
     
     # Serve sitemap.xml  
-    if 'sitemap.xml' in query_params or st.experimental_get_query_params().get('path') == ['sitemap.xml']:
+    if 'sitemap.xml' in query_params or query_params.get('path') == 'sitemap.xml':
         st.text("""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
