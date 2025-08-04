@@ -36,7 +36,37 @@ init_database()
 
 def main():
     
-    # Add PWA meta tags and Google AdSense
+    # Handle special routes for SEO and crawlers
+    query_params = st.experimental_get_query_params()
+    
+    # Serve robots.txt
+    if 'robots.txt' in query_params or st.experimental_get_query_params().get('path') == ['robots.txt']:
+        st.text("""User-agent: *
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
+Sitemap: https://cleanplateus.com/sitemap.xml""")
+        return
+    
+    # Serve sitemap.xml  
+    if 'sitemap.xml' in query_params or st.experimental_get_query_params().get('path') == ['sitemap.xml']:
+        st.text("""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://cleanplateus.com/</loc>
+    <lastmod>2025-01-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>""")
+        return
+    
+    # Add PWA meta tags and Google AdSense with better SEO
     st.markdown("""
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -44,6 +74,19 @@ def main():
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="CleanPlate">
         <meta name="theme-color" content="#d4af37">
+        
+        <!-- SEO Meta Tags -->
+        <meta name="description" content="CleanPlate - Find restaurant health inspection grades and violations for NYC, Chicago, Austin, Boston, Seattle, Los Angeles, and Detroit. Order food online safely.">
+        <meta name="keywords" content="restaurant health inspection, food safety, health grades, restaurant violations, food delivery">
+        <meta name="robots" content="index, follow">
+        <meta name="author" content="CleanPlate">
+        
+        <!-- Open Graph Meta Tags -->
+        <meta property="og:title" content="CleanPlate - Restaurant Health Inspections">
+        <meta property="og:description" content="Check restaurant health inspection grades and order food safely from verified restaurants">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://cleanplateus.com">
+        
         <link rel="manifest" href="/static/manifest.json">
         <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png">
         <link rel="apple-touch-icon" href="/static/icon-192.png">
