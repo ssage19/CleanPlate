@@ -421,9 +421,9 @@ def main():
     # Header with custom logo
     logo_base64 = st.session_state.get('logo_base64', '')
     if logo_base64:
-        logo_html = f'<img src="data:image/png;base64,{logo_base64}" style="width: 72px; height: 72px; vertical-align: middle; margin-right: 16px; border-radius: 50%;" alt="CleanPlate Logo" />'
+        logo_html = f'<img src="data:image/png;base64,{logo_base64}" style="width: 90px; height: 90px; vertical-align: middle; margin-right: 16px; border-radius: 50%;" alt="CleanPlate Logo" />'
     else:
-        logo_html = '<span style="font-size: 72px; vertical-align: middle; margin-right: 16px;">🍽️</span>'
+        logo_html = '<span style="font-size: 90px; vertical-align: middle; margin-right: 16px;">🍽️</span>'
     
     st.markdown(f"""
     <div class="main-header">
