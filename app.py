@@ -7,10 +7,10 @@ from utils import format_grade_badge, calculate_average_rating
 from ads import ad_manager
 from delivery_affiliates import delivery_affiliate_manager
 
-# Set page configuration
+# Set page configuration with CleanPlate logo
 st.set_page_config(
     page_title="CleanPlate - Restaurant Health Inspections",
-    page_icon="🍽️",
+    page_icon="attached_assets/Clean Plate_1754314259976.png",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -57,6 +57,11 @@ def main():
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#d4af37">
     <link rel="manifest" href="/static/manifest.json">
+    
+    <!-- CleanPlate Logo Favicon -->
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <link rel="shortcut icon" type="image/png" href="/static/favicon.png">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
     
     <!-- Structured Data for Better Crawling -->
     <script type="application/ld+json">
