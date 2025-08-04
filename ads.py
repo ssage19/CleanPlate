@@ -29,65 +29,13 @@ class AdManager:
         }
     
     def display_banner_ad(self, position="top"):
-        """Display Google AdSense banner advertisement"""
-        ad_html = """
-        <div style="
-            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 8px;
-            padding: 15px;
-            margin: 15px 0;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            box-sizing: border-box;
-            max-width: 100%;
-        ">
-            <div style="
-                color: #a0aec0;
-                font-size: 0.7rem;
-                position: absolute;
-                top: 3px;
-                left: 8px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            ">Advertisement</div>
+        """Display clean ad placeholder using native Streamlit components"""
+        # Use native Streamlit container for clean display
+        with st.container():
+            st.caption("ADVERTISEMENT")
             
-            <div id="ad-""" + position + """" style="
-                min-height: 280px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: rgba(26, 32, 44, 0.6);
-                border-radius: 6px;
-                margin-top: 12px;
-                width: 100%;
-                box-sizing: border-box;
-                padding: 10px;
-            ">
-                <!-- Google AdSense Placeholder -->
-                <div style="
-                    color: #d4af37;
-                    font-size: 1rem;
-                    font-weight: 500;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    height: 200px;
-                    border: 2px dashed rgba(212, 175, 55, 0.3);
-                    border-radius: 6px;
-                    background: rgba(212, 175, 55, 0.05);
-                ">
-                    🏆 Premium Ad Space<br>
-                    <span style="font-size: 0.8rem; color: #a0aec0; margin-top: 8px;">
-                        Google AdSense account verified
-                    </span>
-                </div>
-            </div>
-        </div>
-        """
-        st.markdown(ad_html, unsafe_allow_html=True)
+            # Create clean ad placeholder using Streamlit info box
+            st.info("🏆 Premium Ad Space - Google AdSense account verified")
     
     def display_restaurant_affiliate_ad(self, restaurant_name=None):
         """Removed embedded buttons - keeping interface clean and simple as requested"""
