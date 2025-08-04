@@ -36,36 +36,18 @@ init_database()
 
 def main():
     
-    # Add Google AdSense verification and PWA meta tags to document head
-    st.components.v1.html("""
-    <script>
-        // Add Google AdSense meta tag to document head
-        if (!document.querySelector('meta[name="google-adsense-account"]')) {
-            var adsenseMeta = document.createElement('meta');
-            adsenseMeta.name = 'google-adsense-account';
-            adsenseMeta.content = 'ca-pub-8384381342878857';
-            document.head.appendChild(adsenseMeta);
+    # Add Google AdSense verification meta tag using Streamlit's built-in method
+    st.html("""
+    <meta name="google-adsense-account" content="ca-pub-8384381342878857">
+    <style>
+        meta[name="google-adsense-account"] {
+            display: none !important;
+            visibility: hidden !important;
+            position: absolute !important;
+            left: -9999px !important;
         }
-        
-        // Add PWA meta tags to document head
-        var metaTags = [
-            {name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'},
-            {name: 'apple-mobile-web-app-capable', content: 'yes'},
-            {name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent'},
-            {name: 'apple-mobile-web-app-title', content: 'CleanPlate'},
-            {name: 'theme-color', content: '#d4af37'}
-        ];
-        
-        metaTags.forEach(function(tag) {
-            if (!document.querySelector('meta[name="' + tag.name + '"]')) {
-                var meta = document.createElement('meta');
-                meta.name = tag.name;
-                meta.content = tag.content;
-                document.head.appendChild(meta);
-            }
-        });
-    </script>
-    """, height=0)
+    </style>
+    """)
 
     
     # RESPONSIVE DESIGN - Optimized for all devices
